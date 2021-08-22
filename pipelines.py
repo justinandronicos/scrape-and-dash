@@ -1,3 +1,4 @@
+# from sqlalchemy.sql.expression import and_
 from items import BrandItem, ProductItem, RankedProductItem
 
 # from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -69,6 +70,8 @@ class StoreBrandsPipeline(object):
                 except:
                     session.rollback()
                     raise
+                finally:
+                    session.close()
 
             else:
                 logging.log(logging.INFO, f"Duplicate brand item found: {item['name']}")
@@ -208,20 +211,21 @@ class StoreRankedProductsPipeline(object):
                 session.query(product_table).filter_by(code=item["code"]).first().id
             )
         except Exception:
-            print(
-                f"ranked_table: {ranked_product_table}\t ranked_product: {ranked_product}\t prod_table: {product_table}"
-            )
+            print(f"Could not find ranked product: {item['code']}")
 
         # check whether the product already exists in db
         existing_product = (
             session.query(ranked_product_table)
-            .filter_by(product_id=ranked_product.product_id)
+            .filter(
+                (ranked_product_table.product_id == ranked_product.product_id)
+                & (ranked_product_table.category == ranked_product.category)
+            )
             .first()
         )
         if existing_product is not None:  # the current product exists
             logging.log(
                 logging.INFO,
-                f"Duplicate ranked product item found with code: {item['code']}",
+                f"Duplicate ranked product item found with code: {item['code']} and category: {item['category']}",
             )
             session.close()
 
@@ -231,6 +235,124 @@ class StoreRankedProductsPipeline(object):
                 session.commit()
 
             except Exception:
+                session.rollback()
+                raise
+
+            finally:
+                session.close()
+
+        return item
+
+
+class StorePricesPipeline(object):
+    def __init__(self):
+        """Initializes database connection and sessionmaker
+        Creates tables
+        """
+        engine = db_connect()
+        create_table(engine)
+        self.Session = sessionmaker(bind=engine)
+
+    def process_item(self, item: ProductItem, spider: Spider) -> ProductItem:
+        """Save prices in the database
+        - If product does not exist yet in current price > saves in current price table
+        - Else if exists and current price timestamp past threshold (>1day?) then update current price table and move old current price to historical prices table
+        This method is called for every Product Item pipeline component
+        """
+        session = self.Session()
+
+        current_price_table, price_object, product_table = (
+            (NLCurrentPrice, NLCurrentPrice(), NLProduct)
+            if spider.name == "nl_products"
+            else (FFCurrentPrice, FFCurrentPrice(), FFProduct)
+            if spider.name == "ff_products"
+            else (None, None, None)
+        )
+
+        try:
+            price_object.product_id = (
+                session.query(product_table).filter_by(code=item["code"]).first().id
+            )
+        except Exception:
+            print(f"Could not find product: {item['code']}\t {item['name']}")
+
+        price_object.time_stamp = datetime.now().isoformat(timespec="seconds")
+        price_object.retail_price = item["retail_price"]
+        price_object.on_sale = item["on_sale"]
+        price_object.current_price = item["current_price"]
+        price_object.in_stock = item["in_stock"]
+
+        # check whether the price exists in current price table
+        existing_price_obj = (
+            session.query(current_price_table)
+            .filter_by(product_id=price_object.product_id)
+            .first()
+        )
+        if existing_price_obj is not None:
+            # Check if current price is over 24hours old
+            # insertion_date = datetime.fromisoformat(existing_price_obj.time_stamp)
+            time_between_insertion = datetime.now() - existing_price_obj.time_stamp
+            if time_between_insertion.days > 1:
+                historical_price = (
+                    NLHistoricalPrice()
+                    if spider.name == "nl_products"
+                    else FFHistoricalPrice()
+                    if spider.name == "ff_products"
+                    else None
+                )
+
+                # for historical, existing in zip(historical_price, existing_price_obj):
+                #     setattr(historical_price, historical, existing)
+
+                historical_price.product_id = existing_price_obj.product_id
+                historical_price.time_stamp = existing_price_obj.time_stamp
+                historical_price.retail_price = existing_price_obj.retail_price
+                historical_price.on_sale = existing_price_obj.on_sale
+                historical_price.current_price = existing_price_obj.current_price
+                historical_price.in_stock = existing_price_obj.in_stock
+
+                # session.query(current_price_table).filter(
+                #     product_id=existing_price_obj.product_id
+                # ).update(
+                #     dict(
+                #         time_stamp=price_object.time_stamp,
+                #         retail_price=price_object.retail_price,
+                #         on_sale=price_object.on_sale,
+                #         current_price=price_object.current_price,
+                #         in_stock=price_object.in_stock,
+                #     )
+                # )
+
+                existing_price_obj.product_id = price_object.product_id
+                existing_price_obj.time_stamp = price_object.time_stamp
+                existing_price_obj.retail_price = price_object.retail_price
+                existing_price_obj.on_sale = price_object.on_sale
+                existing_price_obj.current_price = price_object.current_price
+                existing_price_obj.in_stock = price_object.in_stock
+
+                try:
+                    session.add(historical_price)
+                    session.commit()
+
+                except:
+                    session.rollback()
+                    raise
+
+                finally:
+                    session.close()
+
+            else:
+                logging.log(
+                    logging.INFO,
+                    f"Update for product_id {price_object.product_id} less than 24hours old, not update was made.",
+                )
+
+        else:
+            try:
+                session.add(price_object)
+                session.commit()
+
+            except:
                 session.rollback()
                 raise
 

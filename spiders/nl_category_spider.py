@@ -34,18 +34,16 @@ class NLCategorySpider(Spider):
     name = cfg["nl_CategorySpider"]["name"]
     allowed_domains = cfg["nl_CategorySpider"]["allowed_domains"]
 
-    custom_settings = {
-        "ITEM_PIPELINES": {
-            "pipelines.StoreRankedProductsPipeline": 100,
-        }
-    }
+    custom_settings = {"ITEM_PIPELINES": {"pipelines.StoreRankedProductsPipeline": 100}}
 
-    configure_logging(install_root_handler=False)
-    logging.basicConfig(
-        filename="nl_ranked_product_log.txt",
-        format="%(levelname)s: %(message)s",
-        level=logging.ERROR,
-    )
+    # configure_logging(install_root_handler=False)
+    # logging.basicConfig(
+    #     filename="nl_ranked_product_log.txt",
+    #     format="%(levelname)s: %(message)s",
+    #     level=logging.ERROR,
+    # )
+
+    logging.getLogger("scrapy").propagate = False
 
     def start_requests(self) -> Iterator[Request]:
         best_selling_url_dict = best_selling_url_builder("nl")
@@ -97,25 +95,24 @@ class NLCategorySpider(Spider):
             ranked_product["ranking"] = ranking
             ranked_product["filter"] = filter
 
+            if filter == "best_selling":
+                # > best_selling_pipeline
+                if category not in selling_list.keys():
+                    selling_list[category] = [ranked_product]
+
+                else:
+                    selling_list[category].append(ranked_product)
+
+            elif filter == "highest_rated":
+                # > highest_rated_pipeline
+                if category not in rated_list.keys():
+                    rated_list[category] = [ranked_product]
+                else:
+                    rated_list[category].append(ranked_product)
+
             yield ranked_product
 
-            # if filter == "best_selling":
-            #     # > best_selling_pipeline
-            #     if category not in selling_list.keys():
-            #         selling_list[category] = [ranked_product]
 
-            #     else:
-            #         selling_list[category].append(ranked_product)
-
-            # elif filter == "highest_rated":
-            #     # > highest_rated_pipeline
-            #     if category not in rated_list.keys():
-            #         rated_list[category] = [ranked_product]
-            #     else:
-            #         rated_list[category].append(ranked_product)
-
-
-# configure_logging()
 # configure_logging()
 
 # process = CrawlerProcess()
@@ -125,13 +122,16 @@ class NLCategorySpider(Spider):
 
 # print(f"Best Sellers: {selling_list} \n\n")
 # print(f"Highest Rated: {rated_list}")
-# print(f"Num selling: {len(selling_list)}. \n")
-# print(f"Num Rated: {len(rated_list)} \n")
-# print(f"Total results: {num_results} \n")
+print(f"Num selling: {len(selling_list)}. \n")
+print(f"Num Rated: {len(rated_list)} \n")
+print(f"Total results: {num_results} \n")
 
-# for key in selling_list.keys():
-#     print(f"Category: {key}\t Entries: {len(selling_list[key])} \n")
+for key in selling_list.keys():
+    print(f"Category: {key}\t Entries: {len(selling_list[key])} \n")
 
-# print("Rated list \n")
-# for key in rated_list.keys():
-#     print(f"Category: {key}\t Entries: {len(rated_list[key])} \n")
+print("Rated list \n")
+for key in rated_list.keys():
+    print(f"Category: {key}\t Entries: {len(rated_list[key])} \n")
+
+print(f"Selling:\t{sum(len(v) for v in selling_list.values())}\n")
+print(f"Rated:\t{sum(len(v) for v in selling_list.values())}\n")

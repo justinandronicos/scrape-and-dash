@@ -59,11 +59,11 @@ class FFBrandSpider(Spider):
             yield brand_item
 
 
-from scrapy.crawler import CrawlerProcess
+# from scrapy.crawler import CrawlerProcess
 
-process = CrawlerProcess()
-# Run spiders sequentially
-process.crawl(FFBrandSpider)
-process.start()  # the script will block here until all crawling jobs are finished
+# process = CrawlerProcess()
+# # Run spiders sequentially
+# process.crawl(FFBrandSpider)
+# process.start()  # the script will block here until all crawling jobs are finished
 
 # print(f"\nNum = {len(brands_links)}\n")

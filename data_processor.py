@@ -16,6 +16,7 @@ from models import (
 import logging
 import hashlib
 import scrapy
+from datetime import datetime
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -23,6 +24,8 @@ cfg = yaml.safe_load(open("config.yaml"))
 # Scrape wholesome with:
 # brand_nodes = response.xpath("//div[@class = 'content']//a/p[@class='label']")
 # brands_list = brand_nodes.xpath("./text()").extract()
+
+# TODO: Rename to utilities.py and move wm functions to seperate wm module
 
 
 def prod_url_builder(website: str, offset: int = None, page_number: str = None) -> str:
@@ -317,6 +320,117 @@ def wm_products_pipeline(product_list: List[ProductItem]) -> None:
                 session.close()
 
 
+def wm_price_pipeline(product_list: List[ProductItem]) -> None:
+    """Save wm prices in the database
+    - If product does not exist yet in current price > saves in current price table
+    - Else if exists and current price timestamp past threshold (>1day?) then update current price table and move old current price to historical prices table
+    Args:
+        products_list (List): List of ProductItems parsed from wm product csv
+    """
+
+    logging.basicConfig(
+        filename="logs/wm_price_log.txt",
+        format="%(levelname)s: %(message)s",
+        level=logging.INFO,
+    )
+
+    engine = db_connect()
+    create_table(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    current_price_table, product_table = (
+        WMCurrentPrice,
+        WMProduct,
+    )
+
+    for product in product_list:
+        price_object = WMCurrentPrice()
+        try:
+            price_object.product_id = (
+                session.query(product_table).filter_by(code=product["code"]).first().id
+            )
+        except Exception:
+            print(f"Could not find product: {product['code']}\t {product['name']}")
+
+        price_object.time_stamp = datetime.now().isoformat(timespec="seconds")
+        price_object.retail_price = product["retail_price"]
+        price_object.on_sale = product["on_sale"]
+        price_object.current_price = product["current_price"]
+        price_object.in_stock = product["in_stock"]
+
+        # check whether the price exists in current price table
+        existing_price_obj = (
+            session.query(current_price_table)
+            .filter_by(product_id=price_object.product_id)
+            .first()
+        )
+        if existing_price_obj is not None:
+            # Check if current price is over 24hours old
+            # insertion_date = datetime.fromisoformat(existing_price_obj.time_stamp)
+            time_between_insertion = datetime.now() - existing_price_obj.time_stamp
+            if time_between_insertion.days > 1:
+                historical_price = WMHistoricalPrice()
+
+                # for historical, existing in zip(historical_price, existing_price_obj):
+                #     setattr(historical_price, historical, existing)
+
+                historical_price.product_id = existing_price_obj.product_id
+                historical_price.time_stamp = existing_price_obj.time_stamp
+                historical_price.retail_price = existing_price_obj.retail_price
+                historical_price.on_sale = existing_price_obj.on_sale
+                historical_price.current_price = existing_price_obj.current_price
+                historical_price.in_stock = existing_price_obj.in_stock
+
+                # session.query(current_price_table).filter(
+                #     product_id=existing_price_obj.product_id
+                # ).update(
+                #     dict(
+                #         time_stamp=price_object.time_stamp,
+                #         retail_price=price_object.retail_price,
+                #         on_sale=price_object.on_sale,
+                #         current_price=price_object.current_price,
+                #         in_stock=price_object.in_stock,
+                #     )
+                # )
+
+                existing_price_obj.product_id = price_object.product_id
+                existing_price_obj.time_stamp = price_object.time_stamp
+                existing_price_obj.retail_price = price_object.retail_price
+                existing_price_obj.on_sale = price_object.on_sale
+                existing_price_obj.current_price = price_object.current_price
+                existing_price_obj.in_stock = price_object.in_stock
+
+                try:
+                    session.add(historical_price)
+                    session.commit()
+
+                except:
+                    session.rollback()
+                    raise
+
+                finally:
+                    session.close()
+
+            else:
+                logging.log(
+                    logging.INFO,
+                    f"Update for product_id {price_object.product_id} less than 24hours old, not update was made.",
+                )
+
+        else:
+            try:
+                session.add(price_object)
+                session.commit()
+
+            except:
+                session.rollback()
+                raise
+
+            finally:
+                session.close()
+
+
 # import tracemalloc
 
 
@@ -333,6 +447,7 @@ def main():
 
     wm_brands_pipeline(brands)
     wm_products_pipeline(products)
+    wm_price_pipeline(products)
 
     # snapshot = tracemalloc.take_snapshot()
     # top_stats = snapshot.statistics("lineno")

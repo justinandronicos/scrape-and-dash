@@ -48,3 +48,12 @@ class RankedProductItem(Item):
 class BrandItem(Item):
     name = Field()
     url = Field()
+
+
+# class ProductPriceItem(Item):
+#     product_id = Field()
+#     time_stamp = Field()
+#     retail_price = Field()
+#     on_sale = Field()
+#     current_price = Field()
+#     in_stock = Field()

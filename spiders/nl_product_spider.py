@@ -53,6 +53,7 @@ class NLProductSpider(Spider):
     custom_settings = {
         "ITEM_PIPELINES": {
             "pipelines.StoreProductsPipeline": 100,
+            "pipelines.StorePricesPipeline": 200,
         }
     }
 
@@ -79,7 +80,6 @@ class NLProductSpider(Spider):
         global count
         global empty_count
         global skipped_brands
-        global products_prices
         global extra_variant_count
         global product_list
 
@@ -111,12 +111,11 @@ class NLProductSpider(Spider):
                 product_result["matrix_options"].replace("&quot;", '"')
             )
 
-            variant_count = 0
+            variant_count = 1
 
             # letters = list(string.ascii_uppercase)
             for product_variant in variant_list:
-                if variant_count > 0:
-                    extra_variant_count += 1
+                extra_variant_count = len(variant_list) - 1
                 try:
                     id = uid + "/" + str(variant_count)
                     variant_label = product_variant["label"]
@@ -165,7 +164,6 @@ class NLProductSpider(Spider):
                 product["in_stock"] = in_stock
                 product["product_url"] = product_url
 
-                products_prices[id] = product
                 product_list.append(product)
 
                 yield product
@@ -258,12 +256,12 @@ class NLProductSpider(Spider):
         #     )  # Return a call to the function "parse"
 
 
-from scrapy.crawler import CrawlerProcess
+# from scrapy.crawler import CrawlerProcess
 
-process = CrawlerProcess()
-# Run spiders sequentially
-process.crawl(NLProductSpider)
-process.start()  # the script will block here until all crawling jobs are finished
+# process = CrawlerProcess()
+# # Run spiders sequentially
+# process.crawl(NLProductSpider)
+# process.start()  # the script will block here until all crawling jobs are finished
 print(f"\n Num products= {len(product_list)}\n")
 
 

@@ -57,6 +57,7 @@ class FFProductSpider(Spider):
     custom_settings = {
         "ITEM_PIPELINES": {
             "pipelines.StoreProductsPipeline": 100,
+            "pipelines.StorePricesPipeline": 200,
         }
     }
 
@@ -201,12 +202,12 @@ class FFProductSpider(Spider):
             )  # Return a call to the function "parse"
 
 
-from scrapy.crawler import CrawlerProcess
+# from scrapy.crawler import CrawlerProcess
 
-process = CrawlerProcess()
-# Run spiders sequentially
-process.crawl(FFProductSpider)
-process.start()  # the script will block here until all crawling jobs are finished
+# process = CrawlerProcess()
+# # Run spiders sequentially
+# process.crawl(FFProductSpider)
+# process.start()  # the script will block here until all crawling jobs are finished
 print(f"\n Num products= {len(product_list)}\n")
 
 # # Run spiders sequentially
