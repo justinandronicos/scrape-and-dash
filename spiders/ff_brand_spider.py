@@ -1,4 +1,4 @@
-from yaml import safe_load
+import yaml
 from scrapy.http import response
 from scrapy import Spider
 from typing import Iterator
@@ -7,7 +7,7 @@ import logging
 from scrapy.utils.log import configure_logging
 
 # load config file
-cfg = safe_load(open("config.yaml"))
+cfg = yaml.safe_load(open("config.yaml"))
 
 # # Dictionary of brands with corresponding links as values
 # brands_links = {}

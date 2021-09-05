@@ -1,32 +1,184 @@
 # from sqlalchemy.sql.expression import and_
 from items import BrandItem, ProductItem, RankedProductItem
+from psycopg2.extras import Json
+import yaml
 
 # from sqlalchemy.ext.declarative import DeclarativeMeta
 from scrapy import Spider
 from sqlalchemy.orm import sessionmaker
-from scrapy.exceptions import DropItem
 import logging
 from datetime import datetime
 from models import (
+    BrandUrlDict,
     create_table,
     db_connect,
     NLBrand,
     FFBrand,
+    GMBrand,
     WMBrand,
     NLProduct,
     FFProduct,
+    GMProduct,
     WMProduct,
     NLCurrentPrice,
     FFCurrentPrice,
+    GMCurrentPrice,
     WMCurrentPrice,
     NLHistoricalPrice,
     FFHistoricalPrice,
+    GMHistoricalPrice,
     WMHistoricalPrice,
     NLBestSelling,
     FFBestSelling,
     NLHighestRated,
     FFHighestRated,
 )
+
+cfg = yaml.safe_load(open("config.yaml"))
+
+# Currently used for GM to add to brands table and brandurldict table
+class StoreBrandUrlDictPipeline(object):
+    def __init__(self):
+        """Initializes database connection and sessionmaker
+        Creates tables
+        """
+        engine = db_connect()
+        create_table(engine)
+        self.Session = sessionmaker(bind=engine)
+
+    def process_item(self, item: dict, spider: Spider) -> dict[str, str]:
+        """Save brands/urls dict in the database"""
+        session = self.Session()
+        dict_table = BrandUrlDict
+        website_names = cfg["website_names"]
+        website_name = (
+            website_names["nl"]
+            if spider.name == "nl_brands"
+            else website_names["ff"]
+            if spider.name == "ff_brands"
+            else website_names["gm"]
+            if spider.name == "gm_brands"
+            else None
+        )
+
+        existing_dict = (
+            session.query(dict_table).filter_by(website=website_name).first()
+        )
+        if existing_dict is not None:
+            existing_dict.data = item
+        else:
+            brand_url_dict = BrandUrlDict()
+            brand_url_dict.website = website_name
+            if len(item) is not None:
+                brand_url_dict.data = item
+            else:
+                print("EMPTY DIC")
+            session.add(brand_url_dict)
+
+        """Also save brand and urls in database"""
+
+        (base_url,) = cfg["gm_BrandSpider"]["allowed_domains"]
+        for brand_name, url in item.items():
+            brand_table, brand = (GMBrand, GMBrand())
+            brand.name = brand_name
+            brand.url = base_url + url
+
+            # check whether the brand exists
+            existing_brand = (
+                session.query(brand_table).filter_by(name=brand.name).first()
+            )
+            if existing_brand is not None:
+                # Check if url needs to be updated
+                if existing_brand.url != brand.url:
+                    logging.log(
+                        logging.INFO,
+                        f"Updating url for duplicate brand item: {brand.name }",
+                    )
+                    try:
+                        existing_brand.url = brand.url
+                    except Exception:
+                        session.rollback()
+                        raise
+
+                else:
+                    logging.log(
+                        logging.INFO, f"Duplicate brand item found: {brand.name}"
+                    )
+            else:
+                try:
+                    session.add(brand)
+
+                except Exception:
+                    session.rollback()
+                    raise
+
+        session.commit()
+        session.close()
+        return item
+
+
+# class StoreBrandsFromProductsPipeline(Object):
+#     def __init__(self):
+#         """Initializes database connection and sessionmaker
+#         Creates tables
+#         """
+#         engine = db_connect()
+#         create_table(engine)
+#         self.Session = sessionmaker(bind=engine)
+
+#     def process_item(self, item: ProductItem, spider: Spider) -> ProductItem:
+#         """Save NL/FF Brands in the database
+#         This method is called for NL and FF Brand Items
+#         """
+#         session = self.Session()
+
+#         brand_table, brand = (
+#             (NLBrand, NLBrand())
+#             if spider.name == "nl_brands"
+#             else (FFBrand, FFBrand())
+#             if spider.name == "ff_brands"
+#             else (GMBrand, GMBrand())
+#             if spider.name == "gm_brands"
+#             else (None, None)
+#         )
+
+#         brand.name = item["brand"]
+#         brand.url = item["url"]
+
+#         # check whether the brand exists
+#         existing_brand = session.query(brand_table).filter_by(name=brand.name).first()
+#         if existing_brand is not None:
+#             # Check if url needs to be updated
+#             if existing_brand.url != brand.url:
+#                 logging.log(
+#                     logging.INFO,
+#                     f"Updating url for duplicate brand item: {item['name']}",
+#                 )
+#                 try:
+#                     existing_brand.url = brand.url
+#                     session.commit()
+#                 except:
+#                     session.rollback()
+#                     raise
+#                 finally:
+#                     session.close()
+
+#             else:
+#                 logging.log(logging.INFO, f"Duplicate brand item found: {item['name']}")
+#                 session.close()
+#         else:
+#             try:
+#                 session.add(brand)
+#                 session.commit()
+
+#             except:
+#                 session.rollback()
+#                 raise
+
+#             finally:
+#                 session.close()
+
+#         return item
 
 
 class StoreBrandsPipeline(object):
@@ -49,7 +201,9 @@ class StoreBrandsPipeline(object):
             if spider.name == "nl_brands"
             else (FFBrand, FFBrand())
             if spider.name == "ff_brands"
-            else (WMBrand, WMBrand())
+            else (GMBrand, GMBrand())
+            if spider.name == "gm_brands"
+            else (None, None)
         )
 
         brand.name = item["name"]
@@ -113,7 +267,9 @@ class StoreProductsPipeline(object):
             if spider.name == "nl_products"
             else (FFProduct, FFProduct(), FFBrand)
             if spider.name == "ff_products"
-            else (WMProduct, WMProduct(), WMBrand)
+            else (GMProduct, GMProduct(), GMBrand)
+            if spider.name == "gm_products"
+            else (None, None, None)
         )
 
         product.code = item["code"]
@@ -266,6 +422,8 @@ class StorePricesPipeline(object):
             if spider.name == "nl_products"
             else (FFCurrentPrice, FFCurrentPrice(), FFProduct)
             if spider.name == "ff_products"
+            else (GMCurrentPrice, GMCurrentPrice(), GMProduct)
+            if spider.name == "gm_products"
             else (None, None, None)
         )
 

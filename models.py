@@ -11,8 +11,10 @@ from sqlalchemy import (
     Date,
     Sequence,
     LargeBinary,
+    JSON,
 )
 from sqlalchemy.sql.expression import null, true
+from sqlalchemy.sql.schema import PrimaryKeyConstraint
 from yaml import safe_load
 
 cfg = safe_load(open("config.yaml"))
@@ -42,6 +44,7 @@ class NLBrand(Base):
     url = Column("url", String(150))
     wm_id = Column(Integer, ForeignKey("wm_brand.id"), nullable=True)
     ff_id = Column(Integer, ForeignKey("ff_brand.id"), nullable=True)
+    gm_id = Column(Integer, ForeignKey("gm_brand.id"), nullable=True)
     products = relationship(
         "NLProduct", backref="nl_brand"
     )  # One brand to many products
@@ -54,8 +57,22 @@ class FFBrand(Base):
     url = Column("url", String(150))
     wm_id = Column(Integer, ForeignKey("wm_brand.id"), nullable=True)
     nl_id = Column(Integer, ForeignKey("nl_brand.id"), nullable=True)
+    gm_id = Column(Integer, ForeignKey("gm_brand.id"), nullable=True)
     products = relationship(
         "FFProduct", backref="ff_brand"
+    )  # One brand to many products
+
+
+class GMBrand(Base):
+    __tablename__ = "gm_brand"
+    id = Column(Integer, primary_key=True)
+    name = Column("name", String(60))
+    url = Column("url", String(150))
+    nl_id = Column(Integer, ForeignKey("nl_brand.id"), nullable=True)
+    ff_id = Column(Integer, ForeignKey("ff_brand.id"), nullable=True)
+    wm_id = Column(Integer, ForeignKey("wm_brand.id"), nullable=True)
+    products = relationship(
+        "GMProduct", backref="gm_brand"
     )  # One brand to many products
 
 
@@ -66,6 +83,7 @@ class WMBrand(Base):
     url = Column("url", String(150))
     nl_id = Column(Integer, ForeignKey("nl_brand.id"), nullable=True)
     ff_id = Column(Integer, ForeignKey("ff_brand.id"), nullable=True)
+    gm_id = Column(Integer, ForeignKey("gm_brand.id"), nullable=True)
     products = relationship(
         "WMProduct", backref="wm_brand"
     )  # One brand to many products
@@ -102,6 +120,22 @@ class FFProduct(Base):
     wm_id = Column(Integer, ForeignKey("wm_product.id"), nullable=True)
     historical_prices = relationship(
         "FFHistoricalPrice", backref="ff_product"
+    )  # One product to many historical prices
+
+
+class GMProduct(Base):
+    __tablename__ = "gm_product"
+    id = Column(Integer, primary_key=True)
+    code = Column("code", String(30), unique=True)
+    name = Column("name", String(150))
+    brand_id = Column(Integer, ForeignKey("gm_brand.id"))  # Many products to one brand
+    variant = Column("variant", String(60))
+    url = Column("url", String(200))
+    nl_id = Column(Integer, ForeignKey("nl_product.id"), nullable=True)
+    ff_id = Column(Integer, ForeignKey("ff_product.id"), nullable=True)
+    wm_id = Column(Integer, ForeignKey("wm_product.id"), nullable=True)
+    historical_prices = relationship(
+        "GMHistoricalPrice", backref="gm_product"
     )  # One product to many historical prices
 
 
@@ -145,6 +179,17 @@ class FFCurrentPrice(Base):
     in_stock = Column("in_stock", Boolean)
 
 
+class GMCurrentPrice(Base):
+    __tablename__ = "gm_current_price"
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey("gm_product.id"))
+    time_stamp = Column("time_stamp", DateTime)
+    retail_price = Column("retail_price", Numeric(scale=2, asdecimal=True))
+    on_sale = Column("on_sale", Boolean)
+    current_price = Column("current_price", Numeric(scale=2, asdecimal=True))
+    in_stock = Column("in_stock", Boolean)
+
+
 class WMCurrentPrice(Base):
     __tablename__ = "wm_current_price"
     id = Column(Integer, primary_key=True)
@@ -174,6 +219,17 @@ class FFHistoricalPrice(Base):
     __tablename__ = "ff_historical_price"
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey("ff_product.id"))
+    time_stamp = Column("time_stamp", DateTime)
+    retail_price = Column("retail_price", Numeric(scale=2, asdecimal=True))
+    on_sale = Column("on_sale", Boolean)
+    current_price = Column("current_price", Numeric(scale=2, asdecimal=True))
+    in_stock = Column("in_stock", Boolean)
+
+
+class GMHistoricalPrice(Base):
+    __tablename__ = "gm_historical_price"
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey("gm_product.id"))
     time_stamp = Column("time_stamp", DateTime)
     retail_price = Column("retail_price", Numeric(scale=2, asdecimal=True))
     on_sale = Column("on_sale", Boolean)
@@ -241,6 +297,13 @@ class WMPriceFile(Base):
     hash = Column("hash", LargeBinary(16), unique=True)
     total_products = Column(Integer)
     time_stamp = Column("time_stamp", DateTime)
+
+
+class BrandUrlDict(Base):
+    __tablename__ = "brand_url_dict"
+    id = Column(Integer, primary_key=True)
+    website = Column("website", String(30))
+    data = Column(JSON)
 
 
 # engine = create_engine(cfg["db_connection_string"], echo=True)
