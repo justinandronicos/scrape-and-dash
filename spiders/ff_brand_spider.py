@@ -1,7 +1,7 @@
+from typing import Iterator
 import yaml
 from scrapy.http import response
 from scrapy import Spider
-from typing import Iterator
 from items import BrandItem
 import logging
 from scrapy.utils.log import configure_logging

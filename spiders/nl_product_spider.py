@@ -12,7 +12,7 @@ from scrapy.utils.log import configure_logging
 from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
-from data_processor import prod_url_builder
+from utilities import prod_url_builder
 from items import ProductItem
 
 # load config file

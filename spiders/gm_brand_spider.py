@@ -19,7 +19,7 @@ cfg = yaml.safe_load(open("config.yaml"))
 brands_links = {}
 
 
-class FFBrandSpider(Spider):
+class GMBrandSpider(Spider):
     # @classmethod
     # def from_crawler(cls, crawler):
     #     settings = crawler.settings
@@ -67,13 +67,13 @@ class FFBrandSpider(Spider):
         yield brands_links
 
 
-from scrapy.crawler import CrawlerProcess
+# from scrapy.crawler import CrawlerProcess
 
-process = CrawlerProcess()
-# Run spiders sequentially
-process.crawl(FFBrandSpider)
-process.start()  # the script will block here until all crawling jobs are finished
-print(len(brands_links))
+# process = CrawlerProcess()
+# # Run spiders sequentially
+# process.crawlGMBrandSpider)
+# process.start()  # the script will block here until all crawling jobs are finished
+# print(len(brands_links))
 # dict_name = cfg["gm_BrandSpider"]["name"]
 # r.hmset(dict_name, brands_links)
 # new_data = {key.decode(): val.decode() for key, val in r.hgetall(dict_name).items()}

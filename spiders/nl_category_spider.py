@@ -10,7 +10,7 @@ from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 
 from items import RankedProductItem
-from data_processor import best_selling_url_builder, highest_rated_url_builder
+from utilities import best_selling_url_builder, highest_rated_url_builder
 
 import logging
 from scrapy.utils.log import configure_logging

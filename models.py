@@ -103,6 +103,7 @@ class NLProduct(Base):
     url = Column("url", String(200))
     ff_id = Column(Integer, ForeignKey("ff_product.id"), nullable=True)
     wm_id = Column(Integer, ForeignKey("wm_product.id"), nullable=True)
+    gm_id = Column(Integer, ForeignKey("gm_product.id"), nullable=True)
     historical_prices = relationship(
         "NLHistoricalPrice", backref="nl_product"
     )  # One product to many historical prices
@@ -118,6 +119,7 @@ class FFProduct(Base):
     url = Column("url", String(200))
     nl_id = Column(Integer, ForeignKey("nl_product.id"), nullable=True)
     wm_id = Column(Integer, ForeignKey("wm_product.id"), nullable=True)
+    gm_id = Column(Integer, ForeignKey("gm_product.id"), nullable=True)
     historical_prices = relationship(
         "FFHistoricalPrice", backref="ff_product"
     )  # One product to many historical prices
@@ -149,6 +151,7 @@ class WMProduct(Base):
     url = Column("url", String(200))
     nl_id = Column(Integer, ForeignKey("nl_product.id"), nullable=True)
     ff_id = Column(Integer, ForeignKey("ff_product.id"), nullable=True)
+    gm_id = Column(Integer, ForeignKey("gm_product.id"), nullable=True)
     historical_prices = relationship(
         "WMHistoricalPrice", backref="wm_product"
     )  # One product to many historical prices
@@ -291,8 +294,8 @@ class FFHighestRated(Base):
 
 
 # TODO: Implement hash check for wm file in data processor, normalise wm_product table to use time_stamp from this table?
-class WMPriceFile(Base):
-    __tablename__ = "wm_price_file"
+class WMPriceFileInfo(Base):
+    __tablename__ = "wm_price_file_info"
     id = Column(Integer, primary_key=True)
     hash = Column("hash", LargeBinary(16), unique=True)
     total_products = Column(Integer)
@@ -306,5 +309,5 @@ class BrandUrlDict(Base):
     data = Column(JSON)
 
 
-# engine = create_engine(cfg["db_connection_string"], echo=True)
-# Base.metadata.create_all(engine)
+engine = create_engine(cfg["db_connection_string"], echo=True)
+Base.metadata.create_all(engine)

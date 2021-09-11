@@ -15,7 +15,7 @@ from scrapy.loader import ItemLoader
 from decimal import Decimal
 
 from items import ProductItem
-from data_processor import prod_url_builder
+from utilities import prod_url_builder
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))

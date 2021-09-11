@@ -36,6 +36,7 @@ from models import (
 
 cfg = yaml.safe_load(open("config.yaml"))
 
+# TODO: Modify pipilines for nl/ff to do this as well and seperate gm pipeline below
 # Currently used for GM to add to brands table and brandurldict table
 class StoreBrandUrlDictPipeline(object):
     def __init__(self):
@@ -456,6 +457,8 @@ class StorePricesPipeline(object):
                     if spider.name == "nl_products"
                     else FFHistoricalPrice()
                     if spider.name == "ff_products"
+                    else GMHistoricalPrice()
+                    if spider.name == "gm_products"
                     else None
                 )
 

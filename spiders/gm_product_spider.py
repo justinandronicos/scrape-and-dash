@@ -17,7 +17,7 @@ from scrapy.loader import ItemLoader
 from decimal import Decimal
 
 from items import ProductItem
-from data_processor import prod_url_builder
+from utilities import prod_url_builder
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -188,20 +188,13 @@ class GMProductSpider(Spider):
             #     )  # Return a call to the function "parse"
 
 
-from scrapy.crawler import CrawlerProcess
+# from scrapy.crawler import CrawlerProcess
 
-process = CrawlerProcess()
-# Run spiders sequentially
-process.crawl(GMProductSpider)
-process.start()  # the script will block here until all crawling jobs are finished
-print(f"\n Num products= {len(product_list)}\n")
-
+# process = CrawlerProcess()
 # # Run spiders sequentially
-# @defer.inlineCallbacks
-# def crawl():
-#     yield runner.crawl(FFBrandSpider)
-#     yield runner.crawl(FFProductSpider)
-#     reactor.stop()
+# process.crawl(GMProductSpider)
+# process.start()  # the script will block here until all crawling jobs are finished
+# print(f"\n Num products= {len(product_list)}\n")
 
 # crawl()
 # reactor.run()  # the script will block here until the last crawl call is finished

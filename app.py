@@ -4,7 +4,9 @@ from spiders.nl_brand_spider import NLBrandSpider
 from spiders.ff_product_spider import FFProductSpider
 from spiders.nl_category_spider import NLCategorySpider
 from spiders.ff_category_spider import FFCategorySpider
-import data_processor
+from spiders.gm_product_spider import GMProductSpider
+from spiders.gm_brand_spider import GMBrandSpider
+import wm_parser
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
@@ -52,7 +54,7 @@ def main():
     #     crawl()
     #     reactor.run()
 
-    data_processor.main()
+    wm_parser.main()
     process = CrawlerProcess()
     # Run spiders sequentially
     process.crawl(NLBrandSpider)
@@ -61,6 +63,8 @@ def main():
     process.crawl(FFProductSpider)
     process.crawl(NLCategorySpider)
     process.crawl(FFCategorySpider)
+    process.crawl(GMBrandSpider)
+    process.crawl(GMProductSpider)
     process.start()  # the script will block here until all crawling jobs are finished
     # wm_brands, wm_products = wm_file_parser()
 
