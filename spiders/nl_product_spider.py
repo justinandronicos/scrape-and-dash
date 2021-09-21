@@ -12,8 +12,9 @@ from scrapy.utils.log import configure_logging
 from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
-from utilities import prod_url_builder
-from items import ProductItem
+from utilities import prod_url_builder, get_session
+from items import ProductItem, BrandItem
+from models import BrandUrlDict
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -52,8 +53,9 @@ class NLProductSpider(Spider):
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "pipelines.StoreProductsPipeline": 100,
-            "pipelines.StorePricesPipeline": 200,
+            "pipelines.StoreBrandsPipeline": 100,
+            "pipelines.StoreProductsPipeline": 200,
+            "pipelines.StorePricesPipeline": 300,
         }
     }
 
@@ -67,16 +69,28 @@ class NLProductSpider(Spider):
     logging.getLogger("scrapy").propagate = False
 
     def start_requests(self) -> Iterator[Request]:
+        session = get_session()
+        website_name = cfg["website_names"]["nl"]
+        brand_url_dict: dict = (
+            session.query(BrandUrlDict).filter_by(website=website_name).first().data
+        )
+        brand_set: set = set()
         api_url = prod_url_builder(website="nl", page_number=1)
         yield Request(
             url=api_url,
             callback=self.parse,
-            meta={"total_results": 0, "max_results": 500, "page_number": 1},
+            meta={
+                "total_results": 0,
+                "max_results": 500,
+                "page_number": 1,
+                "brand_url_dict": brand_url_dict,
+                "brand_set": brand_set,
+            },
         )
 
     def parse(
         self, response: response
-    ) -> Union[Iterator[ProductItem], Iterator[Request]]:
+    ) -> Union[Iterator[BrandItem], Iterator[ProductItem], Iterator[Request]]:
         global count
         global empty_count
         global skipped_brands
@@ -86,6 +100,8 @@ class NLProductSpider(Spider):
         total_results = response.meta.get("total_results")
         current_page = response.meta.get("page_number")
         max_results = response.meta.get("max_results")
+        brand_url_dict = response.meta.get("brand_url_dict")
+        brand_set = response.meta.get("brand_set")
 
         print("procesing:" + response.url)
 
@@ -110,6 +126,17 @@ class NLProductSpider(Spider):
             variant_list = json.loads(
                 product_result["matrix_options"].replace("&quot;", '"')
             )
+            # Check if brand has been added to brand_table
+            if brand not in brand_set:
+                brand_set.add(brand)
+                brand_item = BrandItem()
+                brand_item["name"] = brand
+                try:
+                    brand_item["url"] = brand_url_dict[brand]
+                except KeyError:
+                    brand_item["url"] = None
+
+                yield brand_item
 
             variant_count = 1
 
@@ -165,6 +192,8 @@ class NLProductSpider(Spider):
                 product["product_url"] = product_url
 
                 product_list.append(product)
+
+                # products_prices[id] = product
 
                 yield product
 
@@ -235,6 +264,8 @@ class NLProductSpider(Spider):
                     "total_results": total_results,
                     "max_results": max_results,
                     "page_number": new_page,
+                    "brand_url_dict": brand_url_dict,
+                    "brand_set": brand_set,
                 },
             )
 

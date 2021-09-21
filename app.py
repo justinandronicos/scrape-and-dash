@@ -11,6 +11,7 @@ from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 from scrapy.crawler import CrawlerProcess
+import logging
 
 # Nested dictionary of form {id: {brand, product_name, variant, retail_price, on_sale, current_price, in_stock, product_url}}
 # Access product prices with wm_products_prices[product_id]
@@ -36,36 +37,39 @@ ff_products_prices = {}
 
 
 def main():
-    #     # configure_logging()
-    #     # runner = CrawlerRunner()
-
-    #     @defer.inlineCallbacks
-    #     def crawl():
-    #         for runner, spider in runner_list:
-    #             yield runner.crawl(spider)
-    #             # yield runner.crawl(NLBrandSpider)
-    #             # yield runner.crawl(NLProductSpider)
-    #             # yield runner.crawl(NLProductSpider)
-    #             # yield runner.crawl(FFProductSpider)
-    #             # yield runner.crawl(NLCategorySpider)
-    #             # yield runner.crawl(FFCategorySpider)
-    #         reactor.stop()
-
-    #     crawl()
-    #     reactor.run()
-
+    # configure_logging()
+    logging.getLogger("scrapy").propagate = False
     wm_parser.main()
-    process = CrawlerProcess()
-    # Run spiders sequentially
-    process.crawl(NLBrandSpider)
-    process.crawl(FFBrandSpider)
-    process.crawl(NLProductSpider)
-    process.crawl(FFProductSpider)
-    process.crawl(NLCategorySpider)
-    process.crawl(FFCategorySpider)
-    process.crawl(GMBrandSpider)
-    process.crawl(GMProductSpider)
-    process.start()  # the script will block here until all crawling jobs are finished
+
+    runner = CrawlerRunner()
+
+    @defer.inlineCallbacks
+    def crawl():
+        yield runner.crawl(NLBrandSpider)
+        yield runner.crawl(NLProductSpider)
+        yield runner.crawl(FFBrandSpider)
+        yield runner.crawl(FFProductSpider)
+        yield runner.crawl(GMBrandSpider)
+        yield runner.crawl(GMProductSpider)
+        yield runner.crawl(NLCategorySpider)
+        yield runner.crawl(FFCategorySpider)
+        reactor.stop()
+
+    crawl()
+    reactor.run()  # the script will block here until the last crawl call is finished
+
+    # wm_parser.main()
+    # process = CrawlerProcess()
+    # # Run spiders simultaneously
+    # process.crawl(NLBrandSpider)
+    # process.crawl(FFBrandSpider)
+    # process.crawl(NLProductSpider)
+    # process.crawl(FFProductSpider)
+    # process.crawl(NLCategorySpider)
+    # process.crawl(FFCategorySpider)
+    # process.crawl(GMBrandSpider)
+    # process.crawl(GMProductSpider)
+    # process.start()  # the script will block here until all crawling jobs are finished
     # wm_brands, wm_products = wm_file_parser()
 
     # nl_products_prices = nl_product_spider.products_prices
@@ -80,7 +84,7 @@ def main():
     # print("ff products: " + str(len(ff_products_prices)))
 
     # print("\n\nfinito\n\n")
-    # print("nl brands: " + str(len(nl_brands)))
+    # print("nl brands: " + str(len(nl_brands)))c
 
     # print("\n\nfinito\n\n")
     # print("ff brands: " + str(len(ff_brands)))
@@ -118,7 +122,14 @@ def main():
 
 
 if __name__ == "__main__":
+    handler = logging.FileHandler("logs/sqlalchemy_log.txt")
+    handler.setLevel(logging.DEBUG)
+    logging.getLogger("sqlalchemy").addHandler(handler)
+    import time
+
+    start_time = time.time()
     main()
+    print("\n\n--- %s seconds ---" % (time.time() - start_time))
 
     # print(nl_products_prices.keys())
 

@@ -6,7 +6,7 @@ from scrapy.http import response
 import logging
 from scrapy.utils.log import configure_logging
 from sqlalchemy.orm import sessionmaker
-from models import db_connect, BrandUrlDict
+from models import BrandUrlDict
 
 
 # from twisted.internet import reactor, defer
@@ -16,8 +16,8 @@ from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
 
-from items import ProductItem
-from utilities import prod_url_builder
+from items import BrandItem, ProductItem
+from utilities import get_session
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -59,8 +59,9 @@ class GMProductSpider(Spider):
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "pipelines.StoreProductsPipeline": 100,
-            "pipelines.StorePricesPipeline": 200,
+            "pipelines.StoreBrandsPipeline": 100,
+            "pipelines.StoreProductsPipeline": 200,
+            "pipelines.StorePricesPipeline": 300,
         }
     }
 
@@ -74,9 +75,7 @@ class GMProductSpider(Spider):
     # )
 
     def start_requests(self) -> Iterator[Request]:
-        engine = db_connect()
-        Session = sessionmaker(bind=engine)
-        session = Session()
+        session = get_session()
         website_name = cfg["website_names"]["gm"]
         brand_url_dict = (
             session.query(BrandUrlDict).filter_by(website=website_name).first().data
@@ -89,12 +88,12 @@ class GMProductSpider(Spider):
             yield Request(
                 url=api_url,
                 callback=self.parse,
-                meta={"brand": brand, "total_results": 0},
+                meta={"brand": brand, "brand_url": brand_url, "total_results": 0},
             )
 
     def parse(
         self, response: response
-    ) -> Union[Iterator[ProductItem], Iterator[Request]]:
+    ) -> Union[Iterator[BrandItem], Iterator[ProductItem]]:
         global count
         global empty_count
         global skipped_brands
@@ -103,6 +102,7 @@ class GMProductSpider(Spider):
 
         total_results = response.meta.get("total_results")
         brand = response.meta.get("brand")
+        brand_url = response.meta.get("brand_url")
 
         print("procesing:" + response.url)
         text_data = response.body.decode("utf8")
@@ -166,8 +166,13 @@ class GMProductSpider(Spider):
 
                 product_list.append(product)
 
+                brand_item = BrandItem()
+                brand_item["name"] = brand
+                brand_item["url"] = brand_url
+
                 # products_prices[id] = product
 
+                yield brand_item
                 yield product
 
             # # If more results left, crawl the next batch of 500 results

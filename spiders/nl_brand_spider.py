@@ -9,8 +9,8 @@ from scrapy.utils.log import configure_logging
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
 
-# # Dictionary of brands with corresponding links as values
-# brands_links = {}
+# Dictionary of brands with corresponding links as values
+brands_links = {}
 
 
 class NLBrandSpider(Spider):
@@ -28,7 +28,7 @@ class NLBrandSpider(Spider):
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "pipelines.StoreBrandsPipeline": 100,
+            "pipelines.StoreBrandUrlDictPipeline": 100,
         }
     }
 
@@ -39,7 +39,7 @@ class NLBrandSpider(Spider):
         level=logging.ERROR,
     )
 
-    def parse(self, response: response) -> Iterator[BrandItem]:
+    def parse(self, response: response) -> Iterator[dict[str, str]]:
 
         print("procesing:" + response.url)
 
@@ -52,11 +52,12 @@ class NLBrandSpider(Spider):
         (base_url,) = cfg["nl_BrandSpider"]["allowed_domains"]
 
         for i, brand in enumerate(brands_list):
-            brand_item = BrandItem()
-            brand_item["name"] = brand.strip()
-            brand_item["url"] = base_url + links_list[i]
-            # brands_links[brand] = links_list[i]
-            yield brand_item
+            # brand_item = BrandItem()
+            # brand_item["name"] = brand.strip()
+            # brand_item["url"] = base_url + links_list[i]
+            brands_links[brand.strip()] = base_url + links_list[i]
+            # yield brand_item
+        yield brands_links
 
 
 # from scrapy.crawler import CrawlerProcess

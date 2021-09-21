@@ -9,8 +9,8 @@ from scrapy.utils.log import configure_logging
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
 
-# # Dictionary of brands with corresponding links as values
-# brands_links = {}
+# Dictionary of brands with corresponding links as values
+brands_links = {}
 
 
 class FFBrandSpider(Spider):
@@ -25,7 +25,7 @@ class FFBrandSpider(Spider):
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "pipelines.StoreBrandsPipeline": 100,
+            "pipelines.StoreBrandUrlDictPipeline": 100,
         }
     }
 
@@ -39,7 +39,7 @@ class FFBrandSpider(Spider):
     logging.getLogger("scrapy").propagate = False
 
     # Returns dictonary of (brand:link) pairs with only brands that match brands_dict
-    def parse(self, response: response) -> Iterator[BrandItem]:
+    def parse(self, response: response) -> Iterator[dict[str, str]]:
         print("procesing:" + response.url)
 
         brand_nodes = response.xpath(cfg["ff_BrandSpider"]["brand_nodes_xpath"])
@@ -52,11 +52,12 @@ class FFBrandSpider(Spider):
         ).getall()
 
         for i, brand in enumerate(brands_list):
-            brand_item = BrandItem()
-            brand_item["name"] = brand.strip()
-            brand_item["url"] = links_list[i]
-            # brands_links[brand] = links_list[i]
-            yield brand_item
+            # brand_item = BrandItem()
+            # brand_item["name"] = brand.strip()
+            # brand_item["url"] = links_list[i]
+            brands_links[brand.strip()] = links_list[i]
+            # yield brand_item
+        yield brands_links
 
 
 # from scrapy.crawler import CrawlerProcess

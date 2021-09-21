@@ -31,7 +31,7 @@ def db_connect():
 
 
 def create_table(engine):
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine, checkfirst=True)
 
 
 """Brand Tables"""
@@ -309,5 +309,5 @@ class BrandUrlDict(Base):
     data = Column(JSON)
 
 
-engine = create_engine(cfg["db_connection_string"], echo=True)
-Base.metadata.create_all(engine)
+# engine = create_engine(cfg["db_connection_string"], echo=True)
+# Base.metadata.create_all(engine, checkfirst=True)

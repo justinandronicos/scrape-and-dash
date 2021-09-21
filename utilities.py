@@ -129,13 +129,13 @@ def get_hash(fpath: BinaryIO) -> bytes:
 
 
 def get_session():
-    """Initializes database connection and sessionmaker, Creates tables
+    """Initializes database connection and sessionmaker
 
     Returns:
         Session: Session object for database
     """
     engine = db_connect()
-    create_table(engine)
+    # create_table(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
     return session

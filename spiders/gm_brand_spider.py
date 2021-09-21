@@ -15,7 +15,7 @@ from scrapy.utils.log import configure_logging
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
 
-# # Dictionary of brands with corresponding links as values
+# Dictionary of brands with corresponding links as values
 brands_links = {}
 
 
@@ -59,10 +59,10 @@ class GMBrandSpider(Spider):
         (base_url,) = cfg["gm_BrandSpider"]["allowed_domains"]
 
         for i, brand in enumerate(brands_list):
-            brand_item = BrandItem()
-            brand_item["name"] = brand.strip()
-            brand_item["url"] = base_url + links_list[i]
-            brands_links[brand] = links_list[i]
+            # brand_item = BrandItem()
+            # brand_item["name"] = brand.strip()
+            # brand_item["url"] = base_url + links_list[i]
+            brands_links[brand.strip()] = base_url + links_list[i]
             # yield brand_item
         yield brands_links
 

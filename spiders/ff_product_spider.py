@@ -14,8 +14,9 @@ from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
 
-from items import ProductItem
-from utilities import prod_url_builder
+from items import ProductItem, BrandItem
+from utilities import prod_url_builder, get_session
+from models import BrandUrlDict
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -56,8 +57,9 @@ class FFProductSpider(Spider):
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "pipelines.StoreProductsPipeline": 100,
-            "pipelines.StorePricesPipeline": 200,
+            "pipelines.StoreBrandsPipeline": 100,
+            "pipelines.StoreProductsPipeline": 200,
+            "pipelines.StorePricesPipeline": 300,
         }
     }
 
@@ -71,16 +73,28 @@ class FFProductSpider(Spider):
     # )
 
     def start_requests(self) -> Iterator[Request]:
+        session = get_session()
+        website_name = cfg["website_names"]["ff"]
+        brand_url_dict: dict = (
+            session.query(BrandUrlDict).filter_by(website=website_name).first().data
+        )
+        brand_set: set = set()
         api_url = prod_url_builder(website="ff", offset=0)
         yield Request(
             url=api_url,
             callback=self.parse,
-            meta={"total_results": 0, "max_results": 500, "offset": 0},
+            meta={
+                "total_results": 0,
+                "max_results": 500,
+                "offset": 0,
+                "brand_url_dict": brand_url_dict,
+                "brand_set": brand_set,
+            },
         )
 
     def parse(
         self, response: response
-    ) -> Union[Iterator[ProductItem], Iterator[Request]]:
+    ) -> Union[Iterator[BrandItem], Iterator[ProductItem], Iterator[Request]]:
         global count
         global empty_count
         global skipped_brands
@@ -90,6 +104,8 @@ class FFProductSpider(Spider):
         current_offset = response.meta.get("offset")
         max_results = response.meta.get("max_results")
         site_url = response.url[: response.url.rfind("data")]
+        brand_url_dict = response.meta.get("brand_url_dict")
+        brand_set = response.meta.get("brand_set")
 
         print("procesing:" + response.url)
         text_data = response.body.decode("utf8")
@@ -133,6 +149,18 @@ class FFProductSpider(Spider):
                 print(product_result)
 
             variant_label = ""
+
+            # Check if brand has been added to brand_table
+            if brand not in brand_set:
+                brand_set.add(brand)
+                brand_item = BrandItem()
+                brand_item["name"] = brand
+                try:
+                    brand_item["url"] = brand_url_dict[brand]
+                except KeyError:
+                    brand_item["url"] = None
+
+                yield brand_item
 
             product = ProductItem()
 
@@ -198,6 +226,8 @@ class FFProductSpider(Spider):
                     "total_results": total_results,
                     "max_results": max_results,
                     "offset": new_offset,
+                    "brand_url_dict": brand_url_dict,
+                    "brand_set": brand_set,
                 },
             )  # Return a call to the function "parse"
 
