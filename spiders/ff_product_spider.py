@@ -124,8 +124,9 @@ class FFProductSpider(Spider):
         #     return
 
         prod_list.append(json_data)
+        results_list = json_data["products"]
 
-        for product_result in json_data["products"]:
+        for product_result in results_list:
             try:
                 # brand is single key dictionary with brand_key: Brand
                 brand = list(product_result["brand"].values())[0]
@@ -180,40 +181,8 @@ class FFProductSpider(Spider):
 
             yield product
 
-            # products_prices[id] = {
-            #     "brand": brand,
-            #     "product_name": brand + " " + product_name + " - " + label_size,
-            #     "size": label_size,
-            #     "retail_price": retail_price,
-            #     "on_sale": on_sale,
-            #     "current_price": current_price,
-            #     "in_stock": in_stock,
-            #     "product_url": product_url,
-            # }
-
-            # if brand not in products_prices.keys():
-            #     products_prices[brand] = {
-            #         product_name: (
-            #             id,
-            #             retail_price,
-            #             on_sale,
-            #             current_price,
-            #             in_stock,
-            #             product_url,
-            #         )
-            #     }
-            # else:
-            #     products_prices[brand][product_name] = (
-            #         id,
-            #         retail_price,
-            #         on_sale,
-            #         current_price,
-            #         in_stock,
-            #         product_url,
-            #     )
-
         # If more results left, crawl the next batch of 500 results
-        results_left = total_results - (current_offset + len(json_data["products"]))
+        results_left = total_results - (current_offset + len(results_list))
         if results_left > 0:
             count += 1  # Check all extra pages have been scraped
             new_offset = current_offset + max_results

@@ -295,6 +295,9 @@ class FFHighestRated(Base):
 
 # TODO: Implement hash check for wm file in data processor, normalise wm_product table to use time_stamp from this table?
 class WMPriceFileInfo(Base):
+    """Table containing wm price file related information to only update wm
+    tables when the file has been updated"""
+
     __tablename__ = "wm_price_file_info"
     id = Column(Integer, primary_key=True)
     hash = Column("hash", LargeBinary(16), unique=True)
@@ -303,6 +306,9 @@ class WMPriceFileInfo(Base):
 
 
 class BrandUrlDict(Base):
+    """Table containing Json of brand:url key value pairs
+    Used by product spiders to store brands"""
+
     __tablename__ = "brand_url_dict"
     id = Column(Integer, primary_key=True)
     website = Column("website", String(30))

@@ -12,7 +12,6 @@ import logging
 from datetime import datetime
 from models import (
     BrandUrlDict,
-    create_table,
     db_connect,
     NLBrand,
     FFBrand,
@@ -230,90 +229,6 @@ class StoreProductsPipeline(object):
         return item
 
 
-class StoreRankedProductsPipeline(object):
-    def __init__(self):
-        """
-        Initializes database connection and sessionmaker
-        """
-        engine = db_connect()
-        # create_table(engine)
-        self.Session = sessionmaker(bind=engine)
-        self.cases = {
-            ("nl_categories", "best_selling"): (
-                NLBestSelling,
-                NLProduct,
-            ),
-            ("nl_categories", "highest_rated"): (
-                NLHighestRated,
-                NLProduct,
-            ),
-            ("ff_categories", "best_selling"): (
-                FFBestSelling,
-                FFProduct,
-            ),
-            ("ff_categories", "highest_rated"): (
-                FFHighestRated,
-                FFProduct,
-            ),
-        }
-
-    def process_item(
-        self, item: RankedProductItem, spider: Spider
-    ) -> RankedProductItem:
-        """Save ranked products (best selling, highest rated) in the database
-        This method is called for every RankedProduct Item pipeline component
-        """
-
-        session = self.Session()
-
-        filter = item["filter"]
-
-        ranked_product_table, product_table = self.cases[(spider.name, filter)]
-        ranked_product = ranked_product_table()
-
-        ranked_product.category = item["category"]
-        ranked_product.ranking = item["ranking"]
-        ranked_product.time_stamp = datetime.now().isoformat(timespec="seconds")
-
-        try:
-            ranked_product.product_id = (
-                session.query(product_table).filter_by(code=item["code"]).first().id
-            )
-        except Exception:
-            print(f"Could not find ranked product: {item['code']}")
-            session.close()
-
-        # check whether the product already exists in db
-        existing_product = (
-            session.query(ranked_product_table)
-            .filter(
-                (ranked_product_table.product_id == ranked_product.product_id)
-                & (ranked_product_table.category == ranked_product.category)
-            )
-            .first()
-        )
-        if existing_product is not None:  # the current product exists
-            logging.log(
-                logging.INFO,
-                f"Duplicate ranked product item found with code: {item['code']} and category: {item['category']}",
-            )
-            session.close()
-
-        else:
-            try:
-                session.add(ranked_product)
-                session.commit()
-
-            except Exception:
-                session.rollback()
-                raise
-
-            finally:
-                session.close()
-
-        return item
-
-
 class StorePricesPipeline(object):
     def __init__(self):
         """Initializes database connection and sessionmaker"""
@@ -425,8 +340,9 @@ class StorePricesPipeline(object):
             else:
                 logging.log(
                     logging.INFO,
-                    f"Update for product_id {price_object.product_id} less than 24hours old, not update was made.",
+                    f"Update for product_id {price_object.product_id} less than 24hours old, no update was made.",
                 )
+                session.close()
 
         else:
             try:
@@ -443,65 +359,105 @@ class StorePricesPipeline(object):
         return item
 
 
-# class StoreBrandsFromProductsPipeline(Object):
-#     def __init__(self):
-#         """Initializes database connection and sessionmaker
-#         Creates tables
-#         """
-#         engine = db_connect()
-#         create_table(engine)
-#         self.Session = sessionmaker(bind=engine)
+class StoreRankedProductsPipeline(object):
+    def __init__(self):
+        """
+        Initializes database connection and sessionmaker
+        """
+        engine = db_connect()
+        # create_table(engine)
+        self.Session = sessionmaker(bind=engine)
+        self.cases = {
+            ("nl_categories", "best_selling"): (
+                NLBestSelling,
+                NLProduct,
+            ),
+            ("nl_categories", "highest_rated"): (
+                NLHighestRated,
+                NLProduct,
+            ),
+            ("ff_categories", "best_selling"): (
+                FFBestSelling,
+                FFProduct,
+            ),
+            ("ff_categories", "highest_rated"): (
+                FFHighestRated,
+                FFProduct,
+            ),
+        }
 
-#     def process_item(self, item: ProductItem, spider: Spider) -> ProductItem:
-#         """Save NL/FF Brands in the database
-#         This method is called for NL and FF Brand Items
-#         """
-#         session = self.Session()
+    def process_item(
+        self, item: RankedProductItem, spider: Spider
+    ) -> RankedProductItem:
+        """Save ranked products (best selling, highest rated) in the database
+        This method is called for every RankedProduct Item pipeline component
+        List of highest ranking and highest rating are updated if > 24 hours since last update (timestamp), old items still kept in table
+        """
 
-#         brand_table, brand = (
-#             (NLBrand, NLBrand())
-#             if spider.name == "nl_brands"
-#             else (FFBrand, FFBrand())
-#             if spider.name == "ff_brands"
-#             else (GMBrand, GMBrand())
-#             if spider.name == "gm_brands"
-#             else (None, None)
-#         )
+        session = self.Session()
 
-#         brand.name = item["brand"]
-#         brand.url = item["url"]
+        filter = item["filter"]
 
-#         # check whether the brand exists
-#         existing_brand = session.query(brand_table).filter_by(name=brand.name).first()
-#         if existing_brand is not None:
-#             # Check if url needs to be updated
-#             if existing_brand.url != brand.url:
-#                 logging.log(
-#                     logging.INFO,
-#                     f"Updating url for duplicate brand item: {item['name']}",
-#                 )
-#                 try:
-#                     existing_brand.url = brand.url
-#                     session.commit()
-#                 except:
-#                     session.rollback()
-#                     raise
-#                 finally:
-#                     session.close()
+        ranked_product_table, product_table = self.cases[(spider.name, filter)]
+        ranked_product = ranked_product_table()
 
-#             else:
-#                 logging.log(logging.INFO, f"Duplicate brand item found: {item['name']}")
-#                 session.close()
-#         else:
-#             try:
-#                 session.add(brand)
-#                 session.commit()
+        ranked_product.category = item["category"]
+        ranked_product.ranking = item["ranking"]
+        ranked_product.time_stamp = datetime.now().isoformat(timespec="seconds")
 
-#             except:
-#                 session.rollback()
-#                 raise
+        try:
+            ranked_product.product_id = (
+                session.query(product_table).filter_by(code=item["code"]).first().id
+            )
+        except Exception:
+            print(f"Could not find ranked product: {item['code']}")
+            session.close()
 
-#             finally:
-#                 session.close()
+        # check whether the product already exists in db
+        existing_product = (
+            session.query(ranked_product_table)
+            .filter(
+                (ranked_product_table.product_id == ranked_product.product_id)
+                & (ranked_product_table.category == ranked_product.category)
+            )
+            .first()
+        )
+        if existing_product is not None:  # the current product exists
+            time_between_insertion = datetime.now() - existing_product.time_stamp
+            # Check if current ranking is over 24hours old
+            if time_between_insertion.days > 1:
+                try:
+                    session.add(ranked_product)
+                    session.commit()
 
-#         return item
+                except Exception:
+                    session.rollback()
+                    raise
+
+                finally:
+                    session.close()
+
+            else:
+                logging.log(
+                    logging.INFO,
+                    f"Duplicate ranked product with code {item['code']} and category: {item['category']} less than 24hours old, no update was made.",
+                )
+                # logging.log(
+                #     logging.INFO,
+                #     f"Duplicate ranked product item found with code: {item['code']} and category: {item['category']}",
+                # )
+                session.close()
+
+        else:
+            try:
+                session.add(ranked_product)
+                session.commit()
+
+            except Exception:
+                session.rollback()
+                raise
+
+            finally:
+                session.close()
+
+        return item

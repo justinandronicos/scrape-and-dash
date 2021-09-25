@@ -17,7 +17,7 @@ from scrapy.loader import ItemLoader
 from decimal import Decimal
 
 from items import BrandItem, ProductItem
-from utilities import get_session
+from utilities import get_session, prod_url_builder
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -65,7 +65,8 @@ class GMProductSpider(Spider):
         }
     }
 
-    logging.getLogger("scrapy").propagate = False
+    def __init__(self):
+        logging.getLogger("scrapy").propagate = False
 
     # configure_logging(install_root_handler=False)
     # logging.basicConfig(
@@ -77,14 +78,15 @@ class GMProductSpider(Spider):
     def start_requests(self) -> Iterator[Request]:
         session = get_session()
         website_name = cfg["website_names"]["gm"]
-        brand_url_dict = (
+        brand_url_dict: dict = (
             session.query(BrandUrlDict).filter_by(website=website_name).first().data
         )
         # brand_url_dict = json.loads(brand_url_json.data)
         for brand, brand_url in brand_url_dict.items():
-            api_url = (
-                "https://" + self.allowed_domains[0] + brand_url + "/products.json"
-            )
+            api_url = prod_url_builder(website="gm", brand_url=brand_url)
+            # api_url = (
+            #     "https://" + self.allowed_domains[0] + brand_url + "/products.json"
+            # )
             yield Request(
                 url=api_url,
                 callback=self.parse,
@@ -104,17 +106,17 @@ class GMProductSpider(Spider):
         brand = response.meta.get("brand")
         brand_url = response.meta.get("brand_url")
 
-        print("procesing:" + response.url)
+        print("procesing: " + response.url)
         text_data = response.body.decode("utf8")
         json_string = text_data
         json_data = json.loads(json_string)
-        results = json_data["products"]
+        results_list = json_data["products"]
 
-        total_results += len(results)
+        total_results += len(results_list)
 
         prod_list.append(json_data)
 
-        for product_result in results:
+        for product_result in results_list:
             variant_list = product_result["variants"]
             variant_count = 1
             for product_variant in variant_list:
@@ -174,23 +176,6 @@ class GMProductSpider(Spider):
 
                 yield brand_item
                 yield product
-
-            # # If more results left, crawl the next batch of 500 results
-            # results_left = total_results - (current_offset + len(json_data["products"]))
-            # if results_left > 0:
-            #     count += 1  # Check all extra pages have been scraped
-            #     new_offset = current_offset + max_results
-            #     next_url = prod_url_builder(website="gm", offset=new_offset)
-            #     print("Found url: {}".format(next_url))  # Write a debug statement
-            #     yield Request(
-            #         url=next_url,
-            #         callback=self.parse,
-            #         meta={
-            #             "total_results": total_results,
-            #             "max_results": max_results,
-            #             "offset": new_offset,
-            #         },
-            #     )  # Return a call to the function "parse"
 
 
 # from scrapy.crawler import CrawlerProcess

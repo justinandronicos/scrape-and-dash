@@ -65,7 +65,7 @@ class NLProductSpider(Spider):
     #     format="%(levelname)s: %(message)s",
     #     level=logging.ERROR,
     # )
-
+    configure_logging(install_root_handler=False)
     logging.getLogger("scrapy").propagate = False
 
     def start_requests(self) -> Iterator[Request]:
@@ -117,8 +117,9 @@ class NLProductSpider(Spider):
         #     return
 
         prod_list.append(json_data)
+        results_list = json_data["results"]
 
-        for product_result in json_data["results"]:
+        for product_result in results_list:
             uid = product_result["uid"]
             brand = product_result["brand"]
             product_name = product_result["name"].replace("&amp;", "&")
@@ -126,17 +127,6 @@ class NLProductSpider(Spider):
             variant_list = json.loads(
                 product_result["matrix_options"].replace("&quot;", '"')
             )
-            # Check if brand has been added to brand_table
-            if brand not in brand_set:
-                brand_set.add(brand)
-                brand_item = BrandItem()
-                brand_item["name"] = brand
-                try:
-                    brand_item["url"] = brand_url_dict[brand]
-                except KeyError:
-                    brand_item["url"] = None
-
-                yield brand_item
 
             variant_count = 1
 
@@ -194,62 +184,24 @@ class NLProductSpider(Spider):
                 product_list.append(product)
 
                 # products_prices[id] = product
+            # Check if brand has been added to brand_table
+            if brand not in brand_set:
+                brand_set.add(brand)
+                brand_item = BrandItem()
+                brand_item["name"] = brand
+                try:
+                    brand_item["url"] = brand_url_dict[brand]
+                except KeyError:
+                    brand_item["url"] = None
+
+                yield brand_item
 
                 yield product
 
-            # products_prices[id] = {
-            #     "brand": brand,
-            #     "product_name": brand + " " + product_name + " - " + label_size,
-            #     "size": label_size,
-            #     "retail_price": retail_price,
-            #     "on_sale": on_sale,
-            #     "current_price": current_price,
-            #     "in_stock": in_stock,
-            #     "product_url": product_url,
-            # }
-
-            # if brand not in products_prices.keys():
-            #     products_prices[brand] = {
-            #         id: {
-            #             "product_name": brand
-            #             + " "
-            #             + product_name
-            #             + " - "
-            #             + label_size,
-            #             "retail_price": retail_price,
-            #             "on_sale": on_sale,
-            #             "current_price": current_price,
-            #             "in_stock": in_stock,
-            #             "product_url": product_url,
-            #         }
-            #     }
-            # else:
-            #     products_prices[brand][id] = {
-            #         "product_name": brand + " " + product_name + " - " + label_size,
-            #         "retail_price": retail_price,
-            #         "on_sale": on_sale,
-            #         "current_price": current_price,
-            #         "in_stock": in_stock,
-            #         "product_url": product_url,
-            #     }
-
-            #     brand = product_result["brand"]
-            #     id = product_result["uid"]
-            #     product_name = product_result["name"]
-            #     retail_price = Decimal(product_result["retail_price"])
-            #     product_url = product_result["url"]
-            #     in_stock = int(product_result["inventory_count"]) > 0
-            #     # Check for ss_on_sale entry
-            #     if product_result["ss_sale"] == "1":
-            #         on_sale = True
-            #     elif product_result["ss_sale"] == "0":
-            #         on_sale = False
-            # except KeyError:
-            #     empty_count += 1
-            #     print(product_result)
-            # current_price = Decimal(product_result["price"])
-
         # If more results left, crawl the next batch of 500 results
+        # previous_page = json_data["pagination"]["previousPage"]
+        # results_left = total_results - ((previous_page * 500) + len(results_list))
+        # if results_left > 0:
         total_pages = json_data["pagination"]["totalPages"]
         pages_left = total_pages - current_page
         if pages_left > 0:

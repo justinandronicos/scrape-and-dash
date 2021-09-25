@@ -107,7 +107,7 @@ class FFCategorySpider(Spider):
             yield ranked_product
 
 
-configure_logging()
+# configure_logging()
 
 # process = CrawlerProcess()
 # # Run spiders sequentially

@@ -66,5 +66,4 @@ class NLBrandSpider(Spider):
 # # Run spiders sequentially
 # process.crawl(NLBrandSpider)
 # process.start()  # the script will block here until all crawling jobs are finished
-
-# print(f"\nNum = {len(brands_links)}\n")
+print(f"\nNum = {len(brands_links)}\n")

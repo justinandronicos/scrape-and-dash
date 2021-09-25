@@ -9,13 +9,16 @@ from models import db_connect, create_table
 cfg = yaml.safe_load(open("config.yaml"))
 
 
-def prod_url_builder(website: str, offset: int = None, page_number: str = None) -> str:
-    """Helper function called by NLProductSpider/FFProductSpider class in nl_product_spider and ff_product_spider to build Nl/FF url GET request string for all products
+def prod_url_builder(
+    website: str, offset: int = None, page_number: str = None, brand_url: str = None
+) -> str:
+    """Helper function called by Product Spiders to build Nl/FF/GM url GET request string for all products or brands (gm)
 
     Args:
-        website (str): Code for website (nl, ff)
+        website (str): Code for website (nl, ff, gm)
         offset (int, optional): Sets start point for ff api request. Defaults to None.
         page_number (str, optional): Sets page number for nl api request. Defaults to None.
+        brand_url (str, optional): Scraped brand url for gm api request per brand. Defaults to None.
 
     Returns:
         str: Complete GET request string
@@ -31,6 +34,17 @@ def prod_url_builder(website: str, offset: int = None, page_number: str = None) 
             + "&max=500&offset="
             + str(offset)
         )
+    elif website == "gm":
+        if cfg["website_names"]["gm"] not in brand_url:
+            api_url = (
+                "https://"
+                + cfg["gm_ProductSpider"]["allowed_domains"][0]
+                + brand_url
+                + "/products.json"
+            )
+        else:
+            api_url = "https://" + brand_url + "/products.json"
+
     return api_url
 
 

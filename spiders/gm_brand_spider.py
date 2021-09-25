@@ -42,11 +42,12 @@ class GMBrandSpider(Spider):
     #     level=logging.ERROR,
     # )
 
-    logging.getLogger("scrapy").propagate = False
+    def __init__(self):
+        logging.getLogger("scrapy").propagate = False
 
     # Returns dictonary of (brand:link) pairs with only brands that match brands_dict
     def parse(self, response: response) -> Iterator[dict[str, str]]:
-        print("procesing:" + response.url)
+        print("procesing: " + response.url)
 
         brand_nodes = response.xpath(cfg["gm_BrandSpider"]["brand_nodes_xpath"])
         brands_list = brand_nodes.xpath(
