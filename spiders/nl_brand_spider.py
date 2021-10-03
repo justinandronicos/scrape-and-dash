@@ -10,7 +10,7 @@ from scrapy.utils.log import configure_logging
 cfg = yaml.safe_load(open("config.yaml"))
 
 # Dictionary of brands with corresponding links as values
-brands_links = {}
+brands_links: dict = {}
 
 
 class NLBrandSpider(Spider):
@@ -41,7 +41,7 @@ class NLBrandSpider(Spider):
 
     def parse(self, response: response) -> Iterator[dict[str, str]]:
 
-        print("procesing:" + response.url)
+        print(f"procesing: {response.url}")
 
         brand_nodes = response.xpath(cfg["nl_BrandSpider"]["brand_nodes_xpath"])
         brands_list = brand_nodes.xpath(

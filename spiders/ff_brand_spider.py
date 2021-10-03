@@ -40,7 +40,7 @@ class FFBrandSpider(Spider):
 
     # Returns dictonary of (brand:link) pairs with only brands that match brands_dict
     def parse(self, response: response) -> Iterator[dict[str, str]]:
-        print("procesing:" + response.url)
+        print(f"procesing: {response.url}")
 
         brand_nodes = response.xpath(cfg["ff_BrandSpider"]["brand_nodes_xpath"])
         brands_list = brand_nodes.xpath(

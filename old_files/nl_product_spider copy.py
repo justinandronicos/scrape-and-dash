@@ -38,7 +38,6 @@ count = 0  # counts total extra pages added (non first pages)
 skipped_brands = []
 empty_count = 0
 extra_variant_count = 0
-prod_count = 0
 
 product_list = []
 
@@ -75,22 +74,19 @@ class NLProductSpider(Spider):
         brand_url_dict: dict = (
             session.query(BrandUrlDict).filter_by(website=website_name).first().data
         )
-
-        print(f"\n {len(brand_url_dict)} \n")
-
-        for brand_name, brand_url in brand_url_dict.items():
-            api_url = prod_url_builder(website="nl", page_number=1, brand=brand_name)
-            yield Request(
-                url=api_url,
-                callback=self.parse,
-                meta={
-                    "total_results": 0,
-                    "max_results": 500,
-                    "page_number": 1,
-                    "brand_name": brand_name,
-                    "brand_url": brand_url,
-                },
-            )
+        brand_set: set = set()
+        api_url = prod_url_builder(website="nl", page_number=1)
+        yield Request(
+            url=api_url,
+            callback=self.parse,
+            meta={
+                "total_results": 0,
+                "max_results": 500,
+                "page_number": 1,
+                "brand_url_dict": brand_url_dict,
+                "brand_set": brand_set,
+            },
+        )
 
     def parse(
         self, response: response
@@ -100,20 +96,14 @@ class NLProductSpider(Spider):
         global skipped_brands
         global extra_variant_count
         global product_list
-        # global prod_count
 
         total_results = response.meta.get("total_results")
         current_page = response.meta.get("page_number")
         max_results = response.meta.get("max_results")
-        brand_name = response.meta.get("brand_name")
-        brand_url = response.meta.get("brand_url")
+        brand_url_dict = response.meta.get("brand_url_dict")
+        brand_set = response.meta.get("brand_set")
 
-        brand_item = BrandItem()
-        brand_item["name"] = brand_name
-        brand_item["url"] = brand_url
-        yield brand_item
-
-        print(f"procesing: {response.url}")
+        print("procesing:" + response.url)
 
         text_data = response.body.decode("utf8")
         json_string = text_data[text_data.index("{") :]
@@ -128,8 +118,6 @@ class NLProductSpider(Spider):
 
         prod_list.append(json_data)
         results_list = json_data["results"]
-
-        # prod_count += len(results_list)
 
         for product_result in results_list:
             uid = product_result["uid"]
@@ -164,6 +152,21 @@ class NLProductSpider(Spider):
 
                 variant_count += 1
 
+                # loader = ItemLoader(item=ProductItem(), response=response)
+                # loader.add_value("id", id)
+                # loader.add_value("brand", brand)
+                # loader.add_value(
+                #     "product_name", brand + " " + product_name + " - " + variant_label
+                # )
+                # loader.add_value("variant", variant_label)
+                # loader.add_value("retail_price", retail_price)
+                # loader.add_value("on_sale", on_sale)
+                # loader.add_value("current_price", current_price)
+                # loader.add_value("in_stock", in_stock)
+                # loader.add_value("product_url", product_url)
+                # product = loader.load_item()
+                # products_prices[id] = product
+
                 product = ProductItem()
 
                 product["code"] = id
@@ -181,6 +184,17 @@ class NLProductSpider(Spider):
                 product_list.append(product)
 
                 # products_prices[id] = product
+            # Check if brand has been added to brand_table
+            if brand not in brand_set:
+                brand_set.add(brand)
+                brand_item = BrandItem()
+                brand_item["name"] = brand
+                try:
+                    brand_item["url"] = brand_url_dict[brand]
+                except KeyError:
+                    brand_item["url"] = None
+
+                yield brand_item
 
                 yield product
 
@@ -202,6 +216,8 @@ class NLProductSpider(Spider):
                     "total_results": total_results,
                     "max_results": max_results,
                     "page_number": new_page,
+                    "brand_url_dict": brand_url_dict,
+                    "brand_set": brand_set,
                 },
             )
 

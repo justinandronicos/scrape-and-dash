@@ -43,6 +43,7 @@ class RankedProductItem(Item):
     category = Field()
     ranking = Field()
     filter = Field()
+    name = Field()
 
 
 class BrandItem(Item):

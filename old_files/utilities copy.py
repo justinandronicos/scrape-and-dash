@@ -3,19 +3,14 @@ from typing import BinaryIO
 from io import TextIOWrapper
 import hashlib
 from sqlalchemy.orm import sessionmaker
-from models import db_connect
-import urllib.parse
+from models import db_connect, create_table
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
 
 
 def prod_url_builder(
-    website: str,
-    offset: int = None,
-    page_number: int = None,
-    brand_url: str = None,
-    brand: str = None,
+    website: str, offset: int = None, page_number: str = None, brand_url: str = None
 ) -> str:
     """Helper function called by Product Spiders to build Nl/FF/GM url GET request string for all products or brands (gm)
 
@@ -30,12 +25,7 @@ def prod_url_builder(
     """
     api_url: str
     if website == "nl":
-        api_url = (
-            cfg["nl_api_url"]
-            + urllib.parse.quote(brand)
-            + "&resultsPerPage=500&page="
-            + str(page_number)
-        )
+        api_url = cfg["nl_api_url"] + "&resultsPerPage=500&page=" + str(page_number)
     elif website == "ff":
         api_url = (
             cfg["ff_api_url"]

@@ -106,7 +106,7 @@ class GMProductSpider(Spider):
         brand = response.meta.get("brand")
         brand_url = response.meta.get("brand_url")
 
-        print("procesing: " + response.url)
+        print(f"procesing: {response.url}")
         text_data = response.body.decode("utf8")
         json_string = text_data
         json_data = json.loads(json_string)
@@ -115,6 +115,12 @@ class GMProductSpider(Spider):
         total_results += len(results_list)
 
         prod_list.append(json_data)
+
+        brand_item = BrandItem()
+        brand_item["name"] = brand
+        brand_item["url"] = brand_url
+
+        yield brand_item
 
         for product_result in results_list:
             variant_list = product_result["variants"]
@@ -168,13 +174,8 @@ class GMProductSpider(Spider):
 
                 product_list.append(product)
 
-                brand_item = BrandItem()
-                brand_item["name"] = brand
-                brand_item["url"] = brand_url
-
                 # products_prices[id] = product
 
-                yield brand_item
                 yield product
 
 

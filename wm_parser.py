@@ -40,7 +40,7 @@ def wm_file_parser(
     """
 
     brands_set: set[str] = set()
-    product_list = []
+    product_list: list = []
     with open(file_path) as f:
         reader = csv.reader(f, delimiter=",")
         next(reader)  # Skip headers on first line

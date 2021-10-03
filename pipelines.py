@@ -133,7 +133,7 @@ class StoreBrandsPipeline(object):
                     session.close()
 
             else:
-                logging.log(logging.INFO, f"Duplicate brand item found: {item['name']}")
+                # logging.log(logging.INFO, f"Duplicate brand item found: {item['name']}")
                 session.close()
         else:
             try:
@@ -208,10 +208,10 @@ class StoreProductsPipeline(object):
             session.query(product_table).filter_by(code=product.code).first()
         )
         if existing_product is not None:  # the current product exists
-            logging.log(
-                logging.INFO,
-                f"Duplicate product item found: {item['product_name']}",
-            )
+            # logging.log(
+            #     logging.INFO,
+            #     f"Duplicate product item found: {item['product_name']}",
+            # )
             session.close()
 
         else:
@@ -338,10 +338,10 @@ class StorePricesPipeline(object):
                     session.close()
 
             else:
-                logging.log(
-                    logging.INFO,
-                    f"Update for product_id {price_object.product_id} less than 24hours old, no update was made.",
-                )
+                # logging.log(
+                #     logging.INFO,
+                #     f"Update for product_id {price_object.product_id} less than 24hours old, no update was made.",
+                # )
                 session.close()
 
         else:
@@ -410,7 +410,9 @@ class StoreRankedProductsPipeline(object):
                 session.query(product_table).filter_by(code=item["code"]).first().id
             )
         except Exception:
-            print(f"Could not find ranked product: {item['code']}")
+            print(
+                f"Could not find ranked product: {item['code']}, {item['name']}, {item['category']}"
+            )
             session.close()
 
         # check whether the product already exists in db
@@ -438,10 +440,10 @@ class StoreRankedProductsPipeline(object):
                     session.close()
 
             else:
-                logging.log(
-                    logging.INFO,
-                    f"Duplicate ranked product with code {item['code']} and category: {item['category']} less than 24hours old, no update was made.",
-                )
+                # logging.log(
+                #     logging.INFO,
+                #     f"Duplicate ranked product with code {item['code']} and category: {item['category']} less than 24hours old, no update was made.",
+                # )
                 # logging.log(
                 #     logging.INFO,
                 #     f"Duplicate ranked product item found with code: {item['code']} and category: {item['category']}",

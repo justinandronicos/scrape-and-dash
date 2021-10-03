@@ -107,7 +107,7 @@ class FFProductSpider(Spider):
         brand_url_dict = response.meta.get("brand_url_dict")
         brand_set = response.meta.get("brand_set")
 
-        print("procesing:" + response.url)
+        print(f"procesing: {response.url}")
         text_data = response.body.decode("utf8")
         json_string = text_data
         json_data = json.loads(json_string)

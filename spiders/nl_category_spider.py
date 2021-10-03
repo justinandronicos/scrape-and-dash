@@ -75,6 +75,8 @@ class NLCategorySpider(Spider):
 
         num_results += len(json_data["results"])
 
+        # print(f"CATEGORY: {category}, length {len(json_data['results'])}")
+
         # Results per page has been set to 51 because API returns n-1 results per page for some categories
         results = json_data["results"]
         if len(results) > 50:
@@ -82,6 +84,7 @@ class NLCategorySpider(Spider):
 
         for index, product_result in enumerate(results):
             uid = product_result["uid"]
+            name = product_result["name"].replace("&amp;", "&")
             category = category
             ranking = index + 1
             # brand = product_result["brand"]
@@ -94,6 +97,7 @@ class NLCategorySpider(Spider):
             ranked_product["category"] = category
             ranked_product["ranking"] = ranking
             ranked_product["filter"] = filter
+            ranked_product["name"] = name
 
             if filter == "best_selling":
                 # > best_selling_pipeline
