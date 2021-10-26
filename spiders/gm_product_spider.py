@@ -17,7 +17,7 @@ from scrapy.loader import ItemLoader
 from decimal import Decimal
 
 from items import BrandItem, ProductItem
-from utilities import get_session, prod_url_builder
+from utilities import get_session, gm_url_builder
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -83,7 +83,7 @@ class GMProductSpider(Spider):
         )
         # brand_url_dict = json.loads(brand_url_json.data)
         for brand, brand_url in brand_url_dict.items():
-            api_url = prod_url_builder(website="gm", brand_url=brand_url)
+            api_url = gm_url_builder(brand_url=brand_url)
             # api_url = (
             #     "https://" + self.allowed_domains[0] + brand_url + "/products.json"
             # )

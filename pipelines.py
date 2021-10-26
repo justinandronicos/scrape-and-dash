@@ -1,7 +1,7 @@
 # from sqlalchemy.sql.expression import and_
 from sqlalchemy.sql.expression import union
 from items import BrandItem, ProductItem, RankedProductItem
-from psycopg2.extras import Json
+# from psycopg2.extras import Json
 import yaml
 from typing import Union
 
@@ -16,19 +16,15 @@ from models import (
     NLBrand,
     FFBrand,
     GMBrand,
-    WMBrand,
     NLProduct,
     FFProduct,
     GMProduct,
-    WMProduct,
     NLCurrentPrice,
     FFCurrentPrice,
     GMCurrentPrice,
-    WMCurrentPrice,
     NLHistoricalPrice,
     FFHistoricalPrice,
     GMHistoricalPrice,
-    WMHistoricalPrice,
     NLBestSelling,
     FFBestSelling,
     NLHighestRated,

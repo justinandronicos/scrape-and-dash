@@ -163,27 +163,3 @@ if __name__ == "__main__":
 
     # print(nl_products_prices["35470123"])
     # print("\n\n")
-
-    # configure_logging()
-    # runner = CrawlerRunner()
-    # @defer.inlineCallbacks
-    # def nl_crawl():
-    #     yield runner.crawl(NLBrandSpider)
-    #     yield runner.crawl(NLProductSpider)
-    #     reactor.stop()
-
-    # nl_crawl()
-    # reactor.run()  # the script will block here until the last crawl call is finished
-
-    # configure_logging()
-    # runner = CrawlerRunner()
-
-    # # Run spiders sequentially
-    # @defer.inlineCallbacks
-    # def ff_crawl():
-    #     yield runner.crawl(FFBrandSpider)
-    #     yield runner.crawl(FFProductSpider)
-    #     reactor.stop()
-
-    # ff_crawl()
-    # reactor.run()  # the script will block here until the last crawl call is finished

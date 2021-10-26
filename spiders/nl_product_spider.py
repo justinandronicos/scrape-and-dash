@@ -12,7 +12,7 @@ from scrapy.utils.log import configure_logging
 from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
-from utilities import prod_url_builder, get_session
+from utilities import nl_url_builder, get_session
 from items import ProductItem, BrandItem
 from models import BrandUrlDict
 
@@ -79,7 +79,7 @@ class NLProductSpider(Spider):
         print(f"\n {len(brand_url_dict)} \n")
 
         for brand_name, brand_url in brand_url_dict.items():
-            api_url = prod_url_builder(website="nl", page_number=1, brand=brand_name)
+            api_url = nl_url_builder(brand=brand_name, page_number=1)
             yield Request(
                 url=api_url,
                 callback=self.parse,
@@ -193,7 +193,7 @@ class NLProductSpider(Spider):
         if pages_left > 0:
             count += 1  # Check all extra pages have been scraped
             new_page = current_page + 1
-            next_url = prod_url_builder(website="nl", page_number=new_page)
+            next_url = nl_url_builder(brand=brand_name, page_number=new_page)
             print("Found url: {}".format(next_url))  # Write a debug statement
             yield Request(
                 url=next_url,

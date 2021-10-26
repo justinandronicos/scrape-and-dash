@@ -15,7 +15,7 @@ from scrapy.loader import ItemLoader
 from decimal import Decimal
 
 from items import ProductItem, BrandItem
-from utilities import prod_url_builder, get_session
+from utilities import ff_url_builder, get_session
 from models import BrandUrlDict
 
 # load config file
@@ -79,7 +79,7 @@ class FFProductSpider(Spider):
             session.query(BrandUrlDict).filter_by(website=website_name).first().data
         )
         brand_set: set = set()
-        api_url = prod_url_builder(website="ff", offset=0)
+        api_url = ff_url_builder(offset=0)
         yield Request(
             url=api_url,
             callback=self.parse,
@@ -186,7 +186,7 @@ class FFProductSpider(Spider):
         if results_left > 0:
             count += 1  # Check all extra pages have been scraped
             new_offset = current_offset + max_results
-            next_url = prod_url_builder(website="ff", offset=new_offset)
+            next_url = ff_url_builder(offset=new_offset)
             print("Found url: {}".format(next_url))  # Write a debug statement
             yield Request(
                 url=next_url,

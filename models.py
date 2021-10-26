@@ -315,5 +315,12 @@ class BrandUrlDict(Base):
     data = Column(JSON)
 
 
+# class ScrapeHistory(Base):
+#         """Table containing date records of each scraping run"""
+
+#     __tablename__ = "scrape_history"
+#     id = Column(Integer, primary_key=True)
+#     time_stamp = Column("time_stamp", DateTime)
+
 # engine = create_engine(cfg["db_connection_string"], echo=True)
 # Base.metadata.create_all(engine, checkfirst=True)
