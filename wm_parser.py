@@ -45,6 +45,8 @@ def wm_file_parser(
         reader = csv.reader(f, delimiter=",")
         next(reader)  # Skip headers on first line
         for product_row in reader:
+            if not product_row:  # Skip blank lines
+                continue
             brand = product_row[1]
             product_name = product_row[2]
             if product_name == "" or product_name == "Description":

@@ -4,12 +4,10 @@ import numpy
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output, State
-import plotly.express as px
 import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
-
 import sys
 import os
 from sqlalchemy import create_engine, select, join, cast, Date
@@ -17,7 +15,7 @@ from sqlalchemy import create_engine, select, join, cast, Date
 dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(dir))
 
-
+from utilities import get_session
 from models import (
     FFBrand,
     FFCurrentPrice,
@@ -36,8 +34,6 @@ from models import (
     WMHistoricalPrice,
     WMProduct,
 )
-
-from utilities import get_session
 
 cfg = yaml.safe_load(open("config.yaml"))
 
@@ -60,8 +56,7 @@ nl_stmt = (
     session.query(
         NLProduct.code,
         NLProduct.name,
-        NLProduct.variant,
-        NLProduct.url,
+        # NLProduct.variant,
         NLBrand.name.label("brand_name"),
         NLCurrentPrice.retail_price,
         NLCurrentPrice.time_stamp.cast(Date),  # Converted from datetime to date
@@ -75,10 +70,12 @@ nl_stmt = (
         NLHistoricalPrice.on_sale.label("historical_on_sale"),
         NLHistoricalPrice.current_price.label("historical_current_price"),
         NLHistoricalPrice.in_stock.label("historical_in_stock"),
+        NLProduct.url,
     )
     .join(NLBrand, NLBrand.id == NLProduct.brand_id)
     .join(NLCurrentPrice, NLCurrentPrice.product_id == NLProduct.id)
     .join(NLHistoricalPrice, NLHistoricalPrice.product_id == NLProduct.id)
+    .order_by(NLProduct.name)
 ).statement
 
 nl_df = pd.read_sql(nl_stmt, con=engine)
@@ -88,8 +85,7 @@ ff_stmt = (
     session.query(
         FFProduct.code,
         FFProduct.name,
-        FFProduct.variant,
-        FFProduct.url,
+        # FFProduct.variant,
         FFBrand.name.label("brand_name"),
         FFCurrentPrice.retail_price,
         FFCurrentPrice.time_stamp.cast(Date),  # Converted from datetime to date
@@ -103,10 +99,12 @@ ff_stmt = (
         FFHistoricalPrice.on_sale.label("historical_on_sale"),
         FFHistoricalPrice.current_price.label("historical_current_price"),
         FFHistoricalPrice.in_stock.label("historical_in_stock"),
+        FFProduct.url,
     )
     .join(FFBrand, FFBrand.id == FFProduct.brand_id)
     .join(FFCurrentPrice, FFCurrentPrice.product_id == FFProduct.id)
-    .outerjoin(FFHistoricalPrice, FFHistoricalPrice.product_id == FFProduct.id)
+    .join(FFHistoricalPrice, FFHistoricalPrice.product_id == FFProduct.id)
+    .order_by(FFProduct.name)
 ).statement
 
 ff_df = pd.read_sql(ff_stmt, con=engine)
@@ -116,8 +114,7 @@ gm_stmt = (
     session.query(
         GMProduct.code,
         GMProduct.name,
-        GMProduct.variant,
-        GMProduct.url,
+        # GMProduct.variant,
         GMBrand.name.label("brand_name"),
         GMCurrentPrice.retail_price,
         GMCurrentPrice.time_stamp.cast(Date),  # Converted from datetime to date
@@ -131,10 +128,12 @@ gm_stmt = (
         GMHistoricalPrice.on_sale.label("historical_on_sale"),
         GMHistoricalPrice.current_price.label("historical_current_price"),
         GMHistoricalPrice.in_stock.label("historical_in_stock"),
+        GMProduct.url,
     )
     .join(GMBrand, GMBrand.id == GMProduct.brand_id)
     .join(GMCurrentPrice, GMCurrentPrice.product_id == GMProduct.id)
-    .outerjoin(GMHistoricalPrice, GMHistoricalPrice.product_id == GMProduct.id)
+    .join(GMHistoricalPrice, GMHistoricalPrice.product_id == GMProduct.id)
+    .order_by(GMProduct.name)
 ).statement
 
 gm_df = pd.read_sql(gm_stmt, con=engine)
@@ -144,8 +143,7 @@ wm_stmt = (
     session.query(
         WMProduct.code,
         WMProduct.name,
-        WMProduct.variant,
-        WMProduct.url,
+        # WMProduct.variant,
         WMBrand.name.label("brand_name"),
         WMCurrentPrice.retail_price,
         WMCurrentPrice.time_stamp.cast(Date),  # Converted from datetime to date
@@ -159,10 +157,12 @@ wm_stmt = (
         WMHistoricalPrice.on_sale.label("historical_on_sale"),
         WMHistoricalPrice.current_price.label("historical_current_price"),
         WMHistoricalPrice.in_stock.label("historical_in_stock"),
+        WMProduct.url,
     )
     .join(WMBrand, WMBrand.id == WMProduct.brand_id)
     .join(WMCurrentPrice, WMCurrentPrice.product_id == WMProduct.id)
-    .outerjoin(WMHistoricalPrice, WMHistoricalPrice.product_id == WMProduct.id)
+    .join(WMHistoricalPrice, WMHistoricalPrice.product_id == WMProduct.id)
+    .order_by(WMProduct.name)
 ).statement
 
 wm_df = pd.read_sql(wm_stmt, con=engine)
@@ -177,8 +177,10 @@ brand_dict = {
 
 # dates_dict = {
 #     "nl": [
-#         numpy.append(
-#             nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
+#         numpy.unique(
+#             numpy.append(
+#                 nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
+#             )
 #         )[::-1].sort()
 #     ],
 #     "ff": [
@@ -201,6 +203,55 @@ brand_dict = {
 #     ],
 # }
 
+# nl_dates = numpy.append(
+#     nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
+# )
+# ff_dates = numpy.append(
+#     ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
+# )
+# gm_dates = numpy.append(
+#     gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
+# )
+# wm_dates = numpy.append(
+#     wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
+# )
+dates_dict = {
+    "nl": [
+        numpy.append(
+            nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
+        )
+    ],
+    "ff": [
+        numpy.append(
+            ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
+        )
+    ],
+    "gm": [
+        numpy.append(
+            gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
+        )
+    ],
+    "wm": [
+        numpy.append(
+            wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
+        )
+    ],
+}
+
+
+# print(f"\n\n FF HIST DATES: {ff_df['historical_time_stamp'].unique()}")
+# print(f"\n\n FF CUR DATES: {ff_df['time_stamp'].unique()}")
+
+
+# print(f"\n\n NL DATE: {dates_dict['nl']}")
+# print(f"\n\n FF DATE: {dates_dict['ff']}")
+
+# print(f"\n\n WM HIST DATES: {wm_df['historical_time_stamp'].unique()}")
+# print(f"\n\n WM CUR DATES: {wm_df['time_stamp'].unique()}")
+
+# print(f"\n\n WM DATE: {dates_dict['wm']}")
+
+# print(f"\n\n WM DF : {wm_df}")
 
 app.layout = html.Div(
     [
@@ -223,19 +274,20 @@ app.layout = html.Div(
                         ),
                         html.Div(id="website-dd-output-container"),
                     ],
-                    style={"width": "25%"},
+                    style={"width": "25%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
                         "Date",
                         dcc.Dropdown(
                             id="date-dropdown",
+                            # value="latest",
                             value="latest",
                             clearable=False,
                         ),
                         html.Div(id="date-dd-output-container"),
                     ],
-                    style={"width": "25%"},
+                    style={"width": "25%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
@@ -246,17 +298,17 @@ app.layout = html.Div(
                         ),
                         html.Div(id="brand-dd-output-container"),
                     ],
-                    style={"width": "25%"},
+                    style={"width": "25%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
                         html.Button("Download CSV", id="btn_csv"),
                         dcc.Download(id="download-datatable-csv"),
                     ],
-                    style={"width": "5%"},
+                    style={"width": "10%"},
                 ),
             ],
-            style=dict(display="flex"),
+            style=dict(display="flex", horizontalAlign="center"),
         ),
         html.Div(
             [
@@ -274,34 +326,42 @@ app.layout = html.Div(
 @app.callback(
     # Output("date-dropdown", "value"),
     Output("date-dropdown", "options"),
+    Output("date-dropdown", "value"),
     Input("website-dropdown", "value"),
 )
-def update_date_options(selected_website):
-    website_df = (
-        nl_df
-        if selected_website == "nl"
-        else ff_df
-        if selected_website == "ff"
-        else gm_df
-        if selected_website == "gm"
-        else wm_df
-        if selected_website == "wm"
-        else None
-    )
+def update_date_options_value(selected_website):
+    """Updates date options after website selected and sets selected date to latest available by default"""
 
-    print(f"\n\n UNIQUE1: {website_df['time_stamp'].unique()}")
-    print(f"\n\n UNIQUE2: {website_df['historical_time_stamp'].unique()}")
-    date_array = numpy.unique(
-        numpy.append(
-            website_df["historical_time_stamp"].unique(),
-            website_df["time_stamp"].unique(),
-        )
-    )
+    date_array = numpy.unique(dates_dict[selected_website])
     date_array[::-1].sort()  # Sort dates descending
-    # sorted_dates = sorted(date_array.tolist())
-    print(date_array)
-    print(f"\n\n {[{'label': i, 'value': i} for i in date_array]}")
-    return [{"label": i, "value": i} for i in date_array]
+    # print(date_array)
+    # print(f"\n\n {[{'label': i, 'value': i} for i in date_array]}")
+    return [{"label": i, "value": i} for i in date_array], date_array[0]
+    # website_df = (
+    #     nl_df
+    #     if selected_website == "nl"
+    #     else ff_df
+    #     if selected_website == "ff"
+    #     else gm_df
+    #     if selected_website == "gm"
+    #     else wm_df
+    #     if selected_website == "wm"
+    #     else None
+    # )
+
+    # print(f"\n\n UNIQUE1: {website_df['time_stamp'].unique()}")
+    # print(f"\n\n UNIQUE2: {website_df['historical_time_stamp'].unique()}")
+    # date_array = numpy.unique(
+    #     numpy.append(
+    #         website_df["historical_time_stamp"].unique(),
+    #         website_df["time_stamp"].unique(),
+    #     )
+    # )
+    # date_array[::-1].sort()  # Sort dates descending
+    # # sorted_dates = sorted(date_array.tolist())
+    # print(date_array)
+    # print(f"\n\n {[{'label': i, 'value': i} for i in date_array]}")
+    # return [{"label": i, "value": i} for i in date_array]
 
 
 @app.callback(
@@ -319,8 +379,8 @@ def update_brand_options(selected_brand):
 #     Input("brand-dropdown", "value"),
 # )
 def filter_table_by_brand(df, selected_brand):
-    return df.loc[df["brand_name"] == selected_brand]
-    # website_df = (
+    filtered_df = df.loc[df["brand_name"] == selected_brand]
+    return filtered_df.drop("brand_name", axis=1, inplace=False)
     #     nl_df
     #     if selected_website == "nl"
     #     else ff_df
@@ -338,12 +398,12 @@ def filter_table_by_brand(df, selected_brand):
 
 def filter_table_by_date(website_df, selected_date, date_options):
     dates = [x["value"] for x in date_options]
-    print(f"\n\n Sorted: {dates}")
-    print(f"\n\n Selected: {selected_date}")
-    print(f"\n\n df: {website_df}")
+    # print(f"\n\n Sorted: {dates}")
+    # print(f"\n\n Selected: {selected_date}")
+    # print(f"\n\n df: {website_df}")
     formatted_date = date.fromisoformat(selected_date)
-    print(f"DATE: {str(formatted_date)}")
-    print(f"DATE: {dates[0]}")
+    # print(f"DATE: {str(formatted_date)}")
+    # print(f"DATE: {dates[0]}")
     if selected_date == dates[0] or selected_date == "latest":
         filtered_df = website_df.drop(
             [
@@ -363,11 +423,11 @@ def filter_table_by_date(website_df, selected_date, date_options):
             axis=1,
             inplace=False,
         )
-        print(f"\n\n filtered df: {filtered_df}")
+        # print(f"\n\n filtered df: {filtered_df}")
         filtered_df = filtered_df.loc[
             filtered_df["historical_time_stamp"] == date.fromisoformat(selected_date)
         ]
-        print(f"\n\n refiltered df: {filtered_df}")
+        # print(f"\n\n refiltered df: {filtered_df}")
     return filtered_df
 
 
@@ -392,8 +452,8 @@ def update_table(selected_website, selected_date, date_options, selected_brand):
         else None
     )
 
-    ids = website_df.loc[website_df["code"] == "2597686/1"]
-    print(f"\n\n IDs: {ids['time_stamp']} , {ids['historical_time_stamp']}")
+    # ids = website_df.loc[website_df["code"] == "2597686/1"]
+    # print(f"\n\n IDs: {ids['time_stamp']} , {ids['historical_time_stamp']}")
 
     filtered_df = filter_table_by_date(website_df, selected_date, date_options)
 
