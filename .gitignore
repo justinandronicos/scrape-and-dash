@@ -128,7 +128,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#logs
+.DS_Store
+
+# Logs Foder
 logs/
 
-.DS_Store
+# Config file
+*config.py
+*config.yaml
+*config.yml

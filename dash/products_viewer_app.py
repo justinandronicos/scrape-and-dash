@@ -1,6 +1,6 @@
 from datetime import date
 import dash
-import numpy
+import numpy as np
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output, State
@@ -177,64 +177,56 @@ brand_dict = {
 
 # dates_dict = {
 #     "nl": [
-#         numpy.unique(
-#             numpy.append(
+#         np.unique(
+#             np.append(
 #                 nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
 #             )
 #         )[::-1].sort()
 #     ],
 #     "ff": [
 #         {"label": i, "value": i}
-#         for i in numpy.append(
+#         for i in np.append(
 #             ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
 #         )
 #     ],
 #     "gm": [
 #         {"label": i, "value": i}
-#         for i in numpy.append(
+#         for i in np.append(
 #             gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
 #         )
 #     ],
 #     "wm": [
 #         {"label": i, "value": i}
-#         for i in numpy.append(
+#         for i in np.append(
 #             wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
 #         )
 #     ],
 # }
 
-# nl_dates = numpy.append(
+# nl_dates = np.append(
 #     nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
 # )
-# ff_dates = numpy.append(
+# ff_dates = np.append(
 #     ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
 # )
-# gm_dates = numpy.append(
+# gm_dates = np.append(
 #     gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
 # )
-# wm_dates = numpy.append(
+# wm_dates = np.append(
 #     wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
 # )
 dates_dict = {
     "nl": [
-        numpy.append(
-            nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
-        )
+        np.append(nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique())
     ],
     "ff": [
-        numpy.append(
-            ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
-        )
+        np.append(ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique())
     ],
     "gm": [
-        numpy.append(
-            gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
-        )
+        np.append(gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique())
     ],
     "wm": [
-        numpy.append(
-            wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
-        )
+        np.append(wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique())
     ],
 }
 
@@ -272,7 +264,7 @@ app.layout = html.Div(
                             value="nl",
                             clearable=False,
                         ),
-                        html.Div(id="website-dd-output-container"),
+                        # html.Div(id="website-dd-output-container"),
                     ],
                     style={"width": "25%", "textAlign": "center"},
                 ),
@@ -285,7 +277,7 @@ app.layout = html.Div(
                             value="latest",
                             clearable=False,
                         ),
-                        html.Div(id="date-dd-output-container"),
+                        # html.Div(id="date-dd-output-container"),
                     ],
                     style={"width": "25%", "textAlign": "center"},
                 ),
@@ -296,7 +288,7 @@ app.layout = html.Div(
                             id="brand-dropdown",
                             placeholder="Select Brand...",
                         ),
-                        html.Div(id="brand-dd-output-container"),
+                        # html.Div(id="brand-dd-output-container"),
                     ],
                     style={"width": "25%", "textAlign": "center"},
                 ),
@@ -332,7 +324,7 @@ app.layout = html.Div(
 def update_date_options_value(selected_website):
     """Updates date options after website selected and sets selected date to latest available by default"""
 
-    date_array = numpy.unique(dates_dict[selected_website])
+    date_array = np.unique(dates_dict[selected_website])
     date_array[::-1].sort()  # Sort dates descending
     # print(date_array)
     # print(f"\n\n {[{'label': i, 'value': i} for i in date_array]}")
@@ -351,8 +343,8 @@ def update_date_options_value(selected_website):
 
     # print(f"\n\n UNIQUE1: {website_df['time_stamp'].unique()}")
     # print(f"\n\n UNIQUE2: {website_df['historical_time_stamp'].unique()}")
-    # date_array = numpy.unique(
-    #     numpy.append(
+    # date_array = np.unique(
+    #     np.append(
     #         website_df["historical_time_stamp"].unique(),
     #         website_df["time_stamp"].unique(),
     #     )
@@ -366,10 +358,12 @@ def update_date_options_value(selected_website):
 
 @app.callback(
     Output("brand-dropdown", "options"),
+    Output("brand-dropdown", "value"),
     Input("website-dropdown", "value"),
 )
-def update_brand_options(selected_brand):
-    return [{"label": i, "value": i} for i in brand_dict[selected_brand]]
+def update_brand_options(selected_website):
+    # Set brand value to none in case of switching websites when brand already selected for previous website
+    return [{"label": i, "value": i} for i in brand_dict[selected_website]], None
 
 
 # @app.callback(
@@ -401,7 +395,7 @@ def filter_table_by_date(website_df, selected_date, date_options):
     # print(f"\n\n Sorted: {dates}")
     # print(f"\n\n Selected: {selected_date}")
     # print(f"\n\n df: {website_df}")
-    formatted_date = date.fromisoformat(selected_date)
+    # formatted_date = date.fromisoformat(selected_date)
     # print(f"DATE: {str(formatted_date)}")
     # print(f"DATE: {dates[0]}")
     if selected_date == dates[0] or selected_date == "latest":

@@ -29,7 +29,6 @@ cfg = yaml.safe_load(open("config.yaml"))
 
 session = get_session()
 engine = create_engine(cfg["db_connection_string"], echo=True)
-# connection = engine.connect()
 
 app = dash.Dash(__name__)
 
@@ -41,11 +40,9 @@ nl_stmt = (
     )
     .join(NLBrand, NLBrand.id == NLProduct.brand_id)
     .group_by(NLBrand.name, NLBrand.url)
-    .order_by(NLBrand.name)
 ).statement
 nl_df = pd.read_sql(nl_stmt, con=engine)
 
-print(f"\n\n\n NF: {nl_df}")
 
 ff_stmt = (
     session.query(
@@ -55,11 +52,8 @@ ff_stmt = (
     )
     .join(FFBrand, FFBrand.id == FFProduct.brand_id)
     .group_by(FFBrand.name, FFBrand.url)
-    .order_by(FFBrand.name)
 ).statement
 ff_df = pd.read_sql(ff_stmt, con=engine)
-
-print(f"\n\n\n FF: {ff_df}")
 
 gm_stmt = (
     session.query(
@@ -69,11 +63,9 @@ gm_stmt = (
     )
     .join(GMBrand, GMBrand.id == GMProduct.brand_id)
     .group_by(GMBrand.name, GMBrand.url)
-    .order_by(GMBrand.name)
 ).statement
 gm_df = pd.read_sql(gm_stmt, con=engine)
 
-print(f"\n\n\n GM: {gm_df}")
 
 wm_stmt = (
     session.query(
@@ -83,11 +75,8 @@ wm_stmt = (
     )
     .join(WMBrand, WMBrand.id == WMProduct.brand_id)
     .group_by(WMBrand.name, WMBrand.url)
-    .order_by(WMBrand.name)
 ).statement
 wm_df = pd.read_sql(wm_stmt, con=engine)
-
-print(f"\n\n\n WM: {wm_df}")
 
 app.layout = html.Div(
     [
@@ -108,7 +97,23 @@ app.layout = html.Div(
                             value="nl",
                             clearable=False,
                         ),
-                        html.Div(id="website-dd-output-container"),
+                        # html.Div(id="website-dd-output-container"),
+                    ],
+                    style={"width": "30%", "textAlign": "center"},
+                ),
+                html.Div(
+                    [
+                        "Sort By",
+                        dcc.Dropdown(
+                            id="sort-dropdown",
+                            options=[
+                                {"label": "Brand Name", "value": "brand_name"},
+                                {"label": "Product Count", "value": "prod_count"},
+                            ],
+                            value="brand_name",
+                            clearable=False,
+                        ),
+                        # html.Div(id="sort-dd-output-container"),
                     ],
                     style={"width": "30%", "textAlign": "center"},
                 ),
@@ -118,7 +123,7 @@ app.layout = html.Div(
                         dash.html.Output(
                             id="brand_count_output", children=str(len(nl_df))
                         ),
-                        html.Div(id="brand-count-output-container"),
+                        # html.Div(id="brand-count-output-container"),
                     ],
                     style={
                         "width": "20%",
@@ -129,7 +134,7 @@ app.layout = html.Div(
                     [
                         html.Button("Download CSV", id="btn_csv"),
                         dcc.Download(id="download-datatable-csv"),
-                        html.Div(id="download-btn-container"),
+                        # html.Div(id="download-btn-container"),
                     ],
                     style={"width": "20%"},
                 ),
@@ -172,8 +177,9 @@ def update_brand_count(selected_website):
     Output("table", "data"),
     Output("table", "columns"),
     Input("website-dropdown", "value"),
+    Input("sort-dropdown", "value"),
 )
-def update_table(selected_website):
+def update_table(selected_website, sort_by):
     website_df = (
         nl_df
         if selected_website == "nl"
@@ -185,9 +191,13 @@ def update_table(selected_website):
         if selected_website == "wm"
         else None
     )
+    if sort_by == "brand_name":
+        sorted_df = website_df.sort_values(by="brand_name", ascending=True)
+    else:
+        sorted_df = website_df.sort_values(by="product_count", ascending=False)
 
-    columns = [{"name": i, "id": i} for i in website_df.columns]
-    return website_df.to_dict("records"), columns
+    columns = [{"name": i, "id": i} for i in sorted_df.columns]
+    return sorted_df.to_dict("records"), columns
 
 
 @app.callback(
