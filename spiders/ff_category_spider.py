@@ -79,7 +79,7 @@ class FFCategorySpider(Spider):
         for index, product_result in enumerate(json_data["products"]):
             id = product_result["id"]
             category = category
-            ranking = index
+            ranking = index + 1
             # brand = product_result["brand"]
             # product_name = product_result["name"].replace("&amp;", "&")
 
