@@ -1,6 +1,7 @@
 # from sqlalchemy.sql.expression import and_
 from sqlalchemy.sql.expression import union
 from items import BrandItem, ProductItem, RankedProductItem
+
 # from psycopg2.extras import Json
 import yaml
 from typing import Union
@@ -8,6 +9,7 @@ from typing import Union
 # from sqlalchemy.ext.declarative import DeclarativeMeta
 from scrapy import Spider
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import desc
 import logging
 from datetime import datetime
 from models import (
@@ -382,6 +384,7 @@ class StoreRankedProductsPipeline(object):
             ),
         }
 
+    # Fixed to only update rankings list once every 24hours
     def process_item(
         self, item: RankedProductItem, spider: Spider
     ) -> RankedProductItem:
@@ -411,40 +414,16 @@ class StoreRankedProductsPipeline(object):
             )
             session.close()
 
-        # check whether the product already exists in db
-        existing_product = (
+        # Check if current ranking is over 24hours old
+        latest_date = (
             session.query(ranked_product_table)
-            .filter(
-                (ranked_product_table.product_id == ranked_product.product_id)
-                & (ranked_product_table.category == ranked_product.category)
-            )
+            .order_by(desc("time_stamp"))
             .first()
+            .time_stamp
         )
-        if existing_product is not None:  # the current product exists
-            time_between_insertion = datetime.now() - existing_product.time_stamp
-            # Check if current ranking is over 24hours old
-            if time_between_insertion.days > 1:
-                try:
-                    session.add(ranked_product)
-                    session.commit()
-
-                except Exception:
-                    session.rollback()
-                    raise
-
-                finally:
-                    session.close()
-
-            else:
-                # logging.log(
-                #     logging.INFO,
-                #     f"Duplicate ranked product with code {item['code']} and category: {item['category']} less than 24hours old, no update was made.",
-                # )
-                # logging.log(
-                #     logging.INFO,
-                #     f"Duplicate ranked product item found with code: {item['code']} and category: {item['category']}",
-                # )
-                session.close()
+        time_between_insertion = datetime.now() - latest_date
+        if time_between_insertion.days < 1:
+            session.close()
 
         else:
             try:
@@ -459,3 +438,51 @@ class StoreRankedProductsPipeline(object):
                 session.close()
 
         return item
+        # # check whether the product already exists in db
+        # existing_product = (
+        #     session.query(ranked_product_table)
+        #     .filter(
+        #         (ranked_product_table.product_id == ranked_product.product_id)
+        #         & (ranked_product_table.category == ranked_product.category)
+        #     )
+        #     .first()
+        # )
+        # if existing_product is not None:  # the current product exists
+        #     time_between_insertion = datetime.now() - existing_product.time_stamp
+        #     # Check if current ranking is over 24hours old
+        #     if time_between_insertion.days > 1:
+        #         try:
+        #             session.add(ranked_product)
+        #             session.commit()
+
+        #         except Exception:
+        #             session.rollback()
+        #             raise
+
+        #         finally:
+        #             session.close()
+
+        #     else:
+        #         # logging.log(
+        #         #     logging.INFO,
+        #         #     f"Duplicate ranked product with code {item['code']} and category: {item['category']} less than 24hours old, no update was made.",
+        #         # )
+        #         # logging.log(
+        #         #     logging.INFO,
+        #         #     f"Duplicate ranked product item found with code: {item['code']} and category: {item['category']}",
+        #         # )
+        #         session.close()
+
+        # else:
+        #     try:
+        #         session.add(ranked_product)
+        #         session.commit()
+
+        #     except Exception:
+        #         session.rollback()
+        #         raise
+
+        #     finally:
+        #         session.close()
+
+        # return item
