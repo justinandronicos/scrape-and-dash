@@ -41,6 +41,8 @@ session = get_session()
 engine = create_engine(cfg["db_connection_string"], echo=True)
 # connection = engine.connect()
 
+website_names = cfg["website_names"]
+
 app = dash.Dash(__name__)
 
 # website_tables = {
@@ -215,6 +217,8 @@ brand_dict = {
 # wm_dates = np.append(
 #     wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
 # )
+
+
 dates_dict = {
     "nl": [
         np.append(nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique())
@@ -231,6 +235,24 @@ dates_dict = {
 }
 
 
+# dates_dict = {
+#     "nl": [
+#         nl_df["historical_time_stamp"].unique().tolist()
+#         + nl_df["time_stamp"].unique().tolist()
+#     ],
+#     "ff": [
+#         ff_df["historical_time_stamp"].unique().tolist()
+#         + ff_df["time_stamp"].unique().tolist()
+#     ],
+#     "gm": [
+#         gm_df["historical_time_stamp"].unique().tolist()
+#         + gm_df["time_stamp"].unique().tolist()
+#     ],
+#     "wm": [
+#         wm_df["historical_time_stamp"].unique().tolist()
+#         + wm_df["time_stamp"].unique().tolist()
+#     ],
+# }
 # print(f"\n\n FF HIST DATES: {ff_df['historical_time_stamp'].unique()}")
 # print(f"\n\n FF CUR DATES: {ff_df['time_stamp'].unique()}")
 
@@ -247,19 +269,20 @@ dates_dict = {
 
 app.layout = html.Div(
     [
+        html.Div(html.H2("Products Viewer"), style={"textAlign": "center"}),
         html.Div(
             className="filters_row",
             children=[
                 html.Div(
                     [
-                        "Website",
+                        html.B("Website"),
                         dcc.Dropdown(
                             id="website-dropdown",
                             options=[
-                                {"label": cfg["website_names"]["nl"], "value": "nl"},
-                                {"label": cfg["website_names"]["ff"], "value": "ff"},
-                                {"label": cfg["website_names"]["gm"], "value": "gm"},
-                                {"label": cfg["website_names"]["wm"], "value": "wm"},
+                                {"label": website_names["nl"], "value": "nl"},
+                                {"label": website_names["ff"], "value": "ff"},
+                                {"label": website_names["gm"], "value": "gm"},
+                                {"label": website_names["wm"], "value": "wm"},
                             ],
                             value="nl",
                             clearable=False,
@@ -270,11 +293,10 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        "Date",
+                        html.B("Date"),
                         dcc.Dropdown(
                             id="date-dropdown",
                             # value="latest",
-                            value="latest",
                             clearable=False,
                         ),
                         # html.Div(id="date-dd-output-container"),
@@ -283,7 +305,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        "Brand",
+                        html.B("Brand"),
                         dcc.Dropdown(
                             id="brand-dropdown",
                             placeholder="Select Brand...",
@@ -300,7 +322,7 @@ app.layout = html.Div(
                     style={"width": "10%"},
                 ),
             ],
-            style=dict(display="flex", horizontalAlign="center"),
+            style={"display": "flex", "horizontalAlign": "center"},
         ),
         html.Div(
             [
@@ -316,7 +338,6 @@ app.layout = html.Div(
 
 
 @app.callback(
-    # Output("date-dropdown", "value"),
     Output("date-dropdown", "options"),
     Output("date-dropdown", "value"),
     Input("website-dropdown", "value"),
@@ -362,6 +383,7 @@ def update_date_options_value(selected_website):
     Input("website-dropdown", "value"),
 )
 def update_brand_options(selected_website):
+    """Updates brand options after website selected and defaults to no selection"""
     # Set brand value to none in case of switching websites when brand already selected for previous website
     return [{"label": i, "value": i} for i in brand_dict[selected_website]], None
 
@@ -398,7 +420,7 @@ def filter_table_by_date(website_df, selected_date, date_options):
     # formatted_date = date.fromisoformat(selected_date)
     # print(f"DATE: {str(formatted_date)}")
     # print(f"DATE: {dates[0]}")
-    if selected_date == dates[0] or selected_date == "latest":
+    if selected_date == dates[0]:
         filtered_df = website_df.drop(
             [
                 "historical_retail_price",
@@ -470,9 +492,11 @@ def update_table(selected_website, selected_date, date_options, selected_brand):
 def download_table(n_clicks, data, selected_website, selected_date, selected_brand):
     df = pd.DataFrame.from_records(data)
     if selected_brand is not None:
-        filename = f"{cfg['website_names'][selected_website]}_{selected_brand}_{selected_date}_products_prices.csv"
+        filename = f"{website_names[selected_website]}_{selected_brand}_{selected_date}_products_prices.csv"
     else:
-        filename = f"{cfg['website_names'][selected_website]}_{selected_date}_products_prices.csv"
+        filename = (
+            f"{website_names[selected_website]}_{selected_date}_products_prices.csv"
+        )
     return dcc.send_data_frame(
         df.to_csv,
         filename=filename,

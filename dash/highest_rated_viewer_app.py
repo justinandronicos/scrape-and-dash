@@ -29,6 +29,8 @@ cfg = yaml.safe_load(open("config.yaml"))
 session = get_session()
 engine = create_engine(cfg["db_connection_string"], echo=True)
 
+website_names = cfg["website_names"]
+
 app = dash.Dash(__name__)
 
 nl_stmt = (
@@ -65,17 +67,18 @@ ff_df = pd.read_sql(ff_stmt, con=engine)
 
 app.layout = html.Div(
     [
+        html.Div(html.H2("Highest Rated Products"), style={"textAlign": "center"}),
         html.Div(
             className="filters_row",
             children=[
                 html.Div(
                     [
-                        "Website",
+                        html.B("Website"),
                         dcc.Dropdown(
                             id="website-dropdown",
                             options=[
-                                {"label": cfg["website_names"]["nl"], "value": "nl"},
-                                {"label": cfg["website_names"]["ff"], "value": "ff"},
+                                {"label": website_names["nl"], "value": "nl"},
+                                {"label": website_names["ff"], "value": "ff"},
                             ],
                             value="nl",
                             clearable=False,
@@ -86,7 +89,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        "Date",
+                        html.B("Date"),
                         dcc.Dropdown(
                             id="date-dropdown",
                             value="latest",
@@ -98,7 +101,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        "Category",
+                        html.B("Category"),
                         dcc.Dropdown(
                             id="category-dropdown",
                         ),
@@ -114,7 +117,7 @@ app.layout = html.Div(
                     style={"width": "10%"},
                 ),
             ],
-            style=dict(display="flex", horizontalAlign="center"),
+            style={"display": "flex", "horizontalAlign": "center"},
         ),
         html.Div(
             [
@@ -217,9 +220,11 @@ def update_table(selected_website, selected_date, date_options, selected_categor
 def download_table(n_clicks, data, selected_website, selected_date, selected_category):
     df = pd.DataFrame.from_records(data)
     if selected_category:
-        filename = f"{cfg['website_names'][selected_website]}_{selected_category}_highest_rated_list_{selected_date}.csv"
+        filename = f"{website_names [selected_website]}_{selected_category}_highest_rated_list_{selected_date}.csv"
     else:
-        filename = f"{cfg['website_names'][selected_website]}_highest_rated_list_{selected_date}.csv"
+        filename = (
+            f"{website_names [selected_website]}_highest_rated_list_{selected_date}.csv"
+        )
     return dcc.send_data_frame(
         df.to_csv,
         filename=filename,

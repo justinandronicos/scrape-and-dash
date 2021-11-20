@@ -30,6 +30,8 @@ cfg = yaml.safe_load(open("config.yaml"))
 session = get_session()
 engine = create_engine(cfg["db_connection_string"], echo=True)
 
+website_names = cfg["website_names"]
+
 app = dash.Dash(__name__)
 
 nl_stmt = (
@@ -80,19 +82,20 @@ wm_df = pd.read_sql(wm_stmt, con=engine)
 
 app.layout = html.Div(
     [
+        html.Div(html.H2("Brands Viewer"), style={"textAlign": "center"}),
         html.Div(
             className="filters_row",
             children=[
                 html.Div(
                     [
-                        "Website",
+                        html.B("Website"),
                         dcc.Dropdown(
                             id="website-dropdown",
                             options=[
-                                {"label": cfg["website_names"]["nl"], "value": "nl"},
-                                {"label": cfg["website_names"]["ff"], "value": "ff"},
-                                {"label": cfg["website_names"]["gm"], "value": "gm"},
-                                {"label": cfg["website_names"]["wm"], "value": "wm"},
+                                {"label": website_names["nl"], "value": "nl"},
+                                {"label": website_names["ff"], "value": "ff"},
+                                {"label": website_names["gm"], "value": "gm"},
+                                {"label": website_names["wm"], "value": "wm"},
                             ],
                             value="nl",
                             clearable=False,
@@ -103,7 +106,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        "Sort By",
+                        html.B("Sort By"),
                         dcc.Dropdown(
                             id="sort-dropdown",
                             options=[
@@ -139,7 +142,7 @@ app.layout = html.Div(
                     style={"width": "20%"},
                 ),
             ],
-            style=dict(display="flex", horizontalAlign="center"),
+            style={"display": "flex", "horizontalAlign": "center"},
         ),
         html.Div(
             [
@@ -209,7 +212,7 @@ def update_table(selected_website, sort_by):
 )
 def download_table(n_clicks, data, selected_website):
     df = pd.DataFrame.from_records(data)
-    filename = f"{cfg['website_names'][selected_website]}_brands_list.csv"
+    filename = f"{website_names[selected_website]}_brands_list.csv"
     return dcc.send_data_frame(
         df.to_csv,
         filename=filename,
