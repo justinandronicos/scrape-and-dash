@@ -1,5 +1,5 @@
 # from sqlalchemy.sql.expression import and_
-from sqlalchemy.sql.expression import union
+from sqlalchemy.sql.expression import null, union
 from items import BrandItem, ProductItem, RankedProductItem
 
 # from psycopg2.extras import Json
@@ -8,13 +8,13 @@ from typing import Union
 
 # from sqlalchemy.ext.declarative import DeclarativeMeta
 from scrapy import Spider
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import desc
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import desc, exc
 import logging
 from datetime import datetime
 from models import (
-    BrandUrlDict,
     db_connect,
+    BrandUrlDict,
     NLBrand,
     FFBrand,
     GMBrand,
@@ -35,6 +35,27 @@ from models import (
 
 cfg = yaml.safe_load(open("config.yaml"))
 logging.getLogger("scrapy").propagate = False
+
+
+# def add_to_database(
+#     item: Union[BrandItem, ProductItem, RankedProductItem], session: Session
+# ) -> None:
+#     """Attemps to add item to database. Raises db exception and performs rollback if error encountered.
+
+#     Args:
+#         item (Union[BrandItem, ProductItem, RankedProductItem]): item to commit
+#         session ([type]): Instantiated Session object
+#     """
+#     try:
+#         session.add(item)
+#         session.commit()
+
+#     except Exception:
+#         session.rollback()
+#         raise
+
+#     finally:
+#         session.close()
 
 
 class StoreBrandUrlDictPipeline(object):
@@ -390,7 +411,8 @@ class StoreRankedProductsPipeline(object):
     ) -> RankedProductItem:
         """Save ranked products (best selling, highest rated) in the database
         This method is called for every RankedProduct Item pipeline component
-        List of highest ranking and highest rating are updated if > 24 hours since last update (timestamp), old items still kept in table
+        List of best selling and highest rated are updated if > 24 hours since last update (timestamp), old items still kept in table
+        Highest Rated Items have the additional fields of 'rating' and 'review_count'
         """
 
         session = self.Session()
@@ -404,6 +426,10 @@ class StoreRankedProductsPipeline(object):
         ranked_product.ranking = item["ranking"]
         ranked_product.time_stamp = datetime.now().isoformat(timespec="seconds")
 
+        if filter == "highest_rated":
+            ranked_product.rating = item["rating"]
+            ranked_product.review_count = item["review_count"]
+
         try:
             ranked_product.product_id = (
                 session.query(product_table).filter_by(code=item["code"]).first().id
@@ -414,28 +440,31 @@ class StoreRankedProductsPipeline(object):
             )
             session.close()
 
-        # Check if current ranking is over 24hours old
-        latest_date = (
+        # Get latest product with same ranking and category to check if last date within 24hrs
+        latest_equivalent = (
             session.query(ranked_product_table)
+            .filter_by(category=item["category"], ranking=item["ranking"])
             .order_by(desc("time_stamp"))
             .first()
-            .time_stamp
         )
-        time_between_insertion = datetime.now() - latest_date
-        if time_between_insertion.days < 1:
-            session.close()
-
-        else:
-            try:
-                session.add(ranked_product)
-                session.commit()
-
-            except Exception:
-                session.rollback()
-                raise
-
-            finally:
+        if latest_equivalent is not null:
+            # Check if current ranking is over 24hours old
+            latest_date = latest_equivalent.time_stamp
+            time_between_insertion = datetime.now() - latest_date
+            if time_between_insertion.days < 1:
                 session.close()
+                return item
+
+        try:
+            session.add(ranked_product)
+            session.commit()
+
+        except Exception:
+            session.rollback()
+            raise
+
+        finally:
+            session.close()
 
         return item
         # # check whether the product already exists in db

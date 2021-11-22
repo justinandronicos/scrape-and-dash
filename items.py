@@ -42,6 +42,8 @@ class RankedProductItem(Item):
     code = Field()
     category = Field()
     ranking = Field()
+    rating = Field()
+    review_count = Field()
     filter = Field()
     name = Field()
 

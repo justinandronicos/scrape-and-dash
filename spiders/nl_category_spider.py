@@ -38,7 +38,7 @@ class NLCategorySpider(Spider):
 
     # configure_logging(install_root_handler=False)
     # logging.basicConfig(
-    #     filename="nl_ranked_product_log.txt",
+    #     filename=f"{cfg['scraper_log_path']}/nl_ranked_product_log.txt",
     #     format="%(levelname)s: %(message)s",
     #     level=logging.ERROR,
     # )
@@ -108,6 +108,11 @@ class NLCategorySpider(Spider):
                     selling_list[category].append(ranked_product)
 
             elif filter == "highest_rated":
+                rating = float(product_result["rating"])  # 5 star rating (float)
+                review_count = product_result["ratingCount"]
+                ranked_product["rating"] = rating
+                ranked_product["review_count"] = review_count
+
                 # > highest_rated_pipeline
                 if category not in rated_list.keys():
                     rated_list[category] = [ranked_product]

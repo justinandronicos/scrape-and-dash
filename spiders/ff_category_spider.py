@@ -39,7 +39,7 @@ class FFCategorySpider(Spider):
 
     # configure_logging(install_root_handler=False)
     # logging.basicConfig(
-    #     filename="ff_ranked_product_log.txt",
+    #     filename=f"{cfg['scraper_log_path']}/ff_ranked_product_log.txt",
     #     format="%(levelname)s: %(message)s",
     #     level=logging.ERROR,
     # )
@@ -98,6 +98,13 @@ class FFCategorySpider(Spider):
                     selling_list[category].append(ranked_product)
 
             elif filter == "highest_rated":
+                rating = float(
+                    product_result["rating_summary"] / 20
+                )  # Convert to 5 star rating (float)
+                review_count = product_result["reviews_count"]
+                ranked_product["rating"] = rating
+                ranked_product["review_count"] = review_count
+
                 # > highest_rated_pipeline
                 if category not in rated_list.keys():
                     rated_list[category] = [ranked_product]

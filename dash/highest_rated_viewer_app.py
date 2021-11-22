@@ -7,14 +7,12 @@ import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
-import sys
-import os
 from sqlalchemy import create_engine, Date
 
-dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(dir))
+# dir = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(dir))
 
-from utilities import get_session
+# from utilities import get_session
 from models import (
     FFHighestRated,
     FFBrand,
@@ -23,20 +21,23 @@ from models import (
     NLBrand,
     NLProduct,
 )
+from dash_app import session, engine, app
 
 cfg = yaml.safe_load(open("config.yaml"))
 
-session = get_session()
-engine = create_engine(cfg["db_connection_string"], echo=True)
+# engine = create_engine(cfg["db_connection_string"], echo=True)
 
 website_names = cfg["website_names"]
 
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
+# from dash_app import app
 
 nl_stmt = (
     session.query(
         NLHighestRated.ranking,
         NLProduct.name,
+        NLHighestRated.rating.label("rating (5-star)"),
+        NLHighestRated.review_count,
         NLBrand.name.label("brand_name"),
         NLProduct.url,
         NLHighestRated.category,
@@ -53,6 +54,8 @@ ff_stmt = (
     session.query(
         FFHighestRated.ranking,
         FFProduct.name,
+        FFHighestRated.rating.label("rating (5-star)"),
+        FFHighestRated.review_count,
         FFBrand.name.label("brand_name"),
         FFProduct.url,
         FFHighestRated.category,
@@ -65,17 +68,17 @@ ff_stmt = (
 
 ff_df = pd.read_sql(ff_stmt, con=engine)
 
-app.layout = html.Div(
+layout = html.Div(
     [
         html.Div(html.H2("Highest Rated Products"), style={"textAlign": "center"}),
         html.Div(
-            className="filters_row",
+            className="hr-filters_row",
             children=[
                 html.Div(
                     [
                         html.B("Website"),
                         dcc.Dropdown(
-                            id="website-dropdown",
+                            id="hr-website-dropdown",
                             options=[
                                 {"label": website_names["nl"], "value": "nl"},
                                 {"label": website_names["ff"], "value": "ff"},
@@ -91,7 +94,7 @@ app.layout = html.Div(
                     [
                         html.B("Date"),
                         dcc.Dropdown(
-                            id="date-dropdown",
+                            id="hr-date-dropdown",
                             value="latest",
                             clearable=False,
                         ),
@@ -103,7 +106,7 @@ app.layout = html.Div(
                     [
                         html.B("Category"),
                         dcc.Dropdown(
-                            id="category-dropdown",
+                            id="hr-category-dropdown",
                         ),
                         # html.Div(id="date-dd-output-container"),
                     ],
@@ -111,8 +114,8 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Button("Download CSV", id="btn_csv"),
-                        dcc.Download(id="download-datatable-csv"),
+                        html.Button("Download CSV", id="hr-btn-csv"),
+                        dcc.Download(id="hr-download-datatable-csv"),
                     ],
                     style={"width": "10%"},
                 ),
@@ -122,7 +125,7 @@ app.layout = html.Div(
         html.Div(
             [
                 dash_table.DataTable(
-                    id="table",
+                    id="hr-table",
                     columns=[{"name": i, "id": i} for i in nl_df.columns],
                     data=nl_df.to_dict("records"),
                     page_size=50,
@@ -134,9 +137,9 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("category-dropdown", "options"),
-    Output("category-dropdown", "value"),
-    Input("website-dropdown", "value"),
+    Output("hr-category-dropdown", "options"),
+    Output("hr-category-dropdown", "value"),
+    Input("hr-website-dropdown", "value"),
 )
 def update_category_options(selected_website):
     """Updates category options based on selected website and defaults to no selection"""
@@ -152,10 +155,10 @@ def update_category_options(selected_website):
 
 
 @app.callback(
-    Output("date-dropdown", "options"),
-    Output("date-dropdown", "value"),
-    Input("website-dropdown", "value"),
-    Input("category-dropdown", "value"),
+    Output("hr-date-dropdown", "options"),
+    Output("hr-date-dropdown", "value"),
+    Input("hr-website-dropdown", "value"),
+    Input("hr-category-dropdown", "value"),
 )
 def update_date_options_value(selected_website, selected_category):
     """Updates date options after website selected and sets selected date to latest available by default"""
@@ -182,12 +185,12 @@ def update_date_options_value(selected_website, selected_category):
 
 
 @app.callback(
-    Output("table", "data"),
-    Output("table", "columns"),
-    Input("website-dropdown", "value"),
-    Input("date-dropdown", "value"),
-    Input("date-dropdown", "options"),
-    Input("category-dropdown", "value"),
+    Output("hr-table", "data"),
+    Output("hr-table", "columns"),
+    Input("hr-website-dropdown", "value"),
+    Input("hr-date-dropdown", "value"),
+    Input("hr-date-dropdown", "options"),
+    Input("hr-category-dropdown", "value"),
 )
 def update_table(selected_website, selected_date, date_options, selected_category):
     website_df = (
@@ -209,12 +212,12 @@ def update_table(selected_website, selected_date, date_options, selected_categor
 
 
 @app.callback(
-    Output("download-datatable-csv", "data"),
-    Input("btn_csv", "n_clicks"),
-    State("table", "data"),
-    State("website-dropdown", "value"),
-    State("date-dropdown", "value"),
-    State("category-dropdown", "value"),
+    Output("hr-download-datatable-csv", "data"),
+    Input("hr-btn-csv", "n_clicks"),
+    State("hr-table", "data"),
+    State("hr-website-dropdown", "value"),
+    State("hr-date-dropdown", "value"),
+    State("hr-category-dropdown", "value"),
     prevent_initial_call=True,
 )
 def download_table(n_clicks, data, selected_website, selected_date, selected_category):
@@ -232,5 +235,5 @@ def download_table(n_clicks, data, selected_website, selected_date, selected_cat
     )
 
 
-if __name__ == "__main__":
-    app.run_server(debug=True)
+# if __name__ == "__main__":
+#     app.run_server(debug=True)

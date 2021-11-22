@@ -8,6 +8,7 @@ from sqlalchemy import (
     Numeric,
     DateTime,
     Boolean,
+    Float,
     Date,
     Sequence,
     LargeBinary,
@@ -28,10 +29,24 @@ def db_connect():
     """
     engine = create_engine(cfg["db_connection_string"])
     Base.metadata.bind = engine
+    return engine
 
 
 def create_table(engine):
     Base.metadata.create_all(engine, checkfirst=True)
+
+
+def get_session():
+    """Initializes database connection and sessionmaker
+
+    Returns:
+        session: Instantiated Session object for database
+    """
+    engine = db_connect()
+    # create_table(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
 
 """Brand Tables"""
@@ -281,6 +296,8 @@ class NLHighestRated(Base):
     product_id = Column("product_id", ForeignKey("nl_product.id"))
     category = Column("category", String(50))
     ranking = Column("ranking", Integer)
+    rating = Column("rating", Float)
+    review_count = Column("review_count", Integer)
     time_stamp = Column("time_stamp", DateTime)
 
 
@@ -290,6 +307,8 @@ class FFHighestRated(Base):
     product_id = Column("product_id", ForeignKey("ff_product.id"))
     category = Column("category", String(50))
     ranking = Column("ranking", Integer)
+    rating = Column("rating", Float)
+    review_count = Column("review_count", Integer)
     time_stamp = Column("time_stamp", DateTime)
 
 
