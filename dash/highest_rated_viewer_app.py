@@ -1,13 +1,11 @@
-from datetime import date
 import dash
-from dash import dcc
-from dash import html
+from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 import pandas as pd
-from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
 from sqlalchemy import create_engine, Date
+from datetime import date
 
 # dir = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.dirname(dir))
@@ -21,7 +19,7 @@ from models import (
     NLBrand,
     NLProduct,
 )
-from dash_app import session, engine, app
+from app import session, engine, app
 
 cfg = yaml.safe_load(open("config.yaml"))
 
@@ -49,6 +47,7 @@ nl_stmt = (
 ).statement
 
 nl_df = pd.read_sql(nl_stmt, con=engine)
+nl_df["rating (5-star)"] = nl_df["rating (5-star)"].round(2)
 
 ff_stmt = (
     session.query(
@@ -67,6 +66,7 @@ ff_stmt = (
 ).statement
 
 ff_df = pd.read_sql(ff_stmt, con=engine)
+ff_df["rating (5-star)"] = ff_df["rating (5-star)"].round(2)
 
 layout = html.Div(
     [
@@ -88,19 +88,18 @@ layout = html.Div(
                         ),
                         # html.Div(id="website-dd-output-container"),
                     ],
-                    style={"width": "25%", "textAlign": "center"},
+                    style={"width": "20%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
                         html.B("Date"),
                         dcc.Dropdown(
                             id="hr-date-dropdown",
-                            value="latest",
                             clearable=False,
                         ),
                         # html.Div(id="date-dd-output-container"),
                     ],
-                    style={"width": "25%", "textAlign": "center"},
+                    style={"width": "20%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
@@ -110,7 +109,23 @@ layout = html.Div(
                         ),
                         # html.Div(id="date-dd-output-container"),
                     ],
-                    style={"width": "25%", "textAlign": "center"},
+                    style={"width": "20%", "textAlign": "center"},
+                ),
+                html.Div(
+                    [
+                        html.B("Sort By"),
+                        dcc.Dropdown(
+                            id="hr-sort-dropdown",
+                            options=[
+                                {"label": "Ranking", "value": "ranking"},
+                                {"label": "Review Count", "value": "review_count"},
+                            ],
+                            value="ranking",
+                            clearable=False,
+                        ),
+                        # html.Div(id="date-dd-output-container"),
+                    ],
+                    style={"width": "10%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
@@ -159,8 +174,9 @@ def update_category_options(selected_website):
     Output("hr-date-dropdown", "value"),
     Input("hr-website-dropdown", "value"),
     Input("hr-category-dropdown", "value"),
+    State("hr-date-dropdown", "value"),
 )
-def update_date_options_value(selected_website, selected_category):
+def update_date_options_value(selected_website, selected_category, selected_date):
     """Updates date options after website selected and sets selected date to latest available by default"""
     if selected_category:
         filtered_df = (
@@ -181,7 +197,17 @@ def update_date_options_value(selected_website, selected_category):
             else None
         )
     date_array[::-1].sort()  # Sort dates descending
-    return [{"label": i, "value": i} for i in date_array], date_array[0]
+
+    # Check if callback triggered by website or category change
+    ctx = dash.callback_context
+    trigger = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    # print(f"\n This is the trigger: {trigger}")
+
+    if trigger == "hr-category-dropdown" and selected_category is not None:
+        return [{"label": i, "value": i} for i in date_array], selected_date
+    else:
+        return [{"label": i, "value": i} for i in date_array], date_array[0]
 
 
 @app.callback(
@@ -191,8 +217,11 @@ def update_date_options_value(selected_website, selected_category):
     Input("hr-date-dropdown", "value"),
     Input("hr-date-dropdown", "options"),
     Input("hr-category-dropdown", "value"),
+    Input("hr-sort-dropdown", "value"),
 )
-def update_table(selected_website, selected_date, date_options, selected_category):
+def update_table(
+    selected_website, selected_date, date_options, selected_category, sort_by
+):
     website_df = (
         nl_df
         if selected_website == "nl"
@@ -207,6 +236,10 @@ def update_table(selected_website, selected_date, date_options, selected_categor
     if selected_category:
         filtered_df = filtered_df.loc[filtered_df["category"] == selected_category]
     filtered_df = filtered_df.drop_duplicates(subset=["ranking", "name"])
+
+    if sort_by == "review_count":
+        filtered_df.sort_values(by=sort_by, ascending=False, inplace=True)
+
     columns = [{"name": i, "id": i} for i in filtered_df.columns]
     return filtered_df.to_dict("records"), columns
 

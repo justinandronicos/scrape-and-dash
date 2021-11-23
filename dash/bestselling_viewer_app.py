@@ -1,30 +1,37 @@
-from datetime import date
 import dash
-from dash import dcc
-from dash import html
+from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 import pandas as pd
-from dash import dash_table
-from sqlalchemy.orm import session
 import yaml
-import sys
-import os
-from sqlalchemy import create_engine, Date
+from sqlalchemy import Date
+from datetime import date
 
-dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(dir))
+# import os
+# import sys
 
-from utilities import get_session
-from models import FFBestSelling, FFBrand, FFProduct, NLBestSelling, NLBrand, NLProduct
+# dir = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(dir))
+
+# from dash_app import session, engine, app
+
+# from utilities import get_session
+from models import (
+    FFBestSelling,
+    FFBrand,
+    FFProduct,
+    NLBestSelling,
+    NLBrand,
+    NLProduct,
+)
+from app import app, session, engine
 
 cfg = yaml.safe_load(open("config.yaml"))
-
-session = get_session()
-engine = create_engine(cfg["db_connection_string"], echo=True)
+# engine = create_engine(cfg["db_connection_string"], echo=True)
 
 website_names = cfg["website_names"]
 
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
+# from dash_app import app
 
 nl_stmt = (
     session.query(
@@ -63,17 +70,17 @@ ff_df = pd.read_sql(ff_stmt, con=engine)
 #     "ff": ff_df["time_stamp"].unique(),
 # }
 
-app.layout = html.Div(
+layout = html.Div(
     [
         html.Div(html.H2("Best Selling Products"), style={"textAlign": "center"}),
         html.Div(
-            className="filters_row",
+            className="bs-filters-row",
             children=[
                 html.Div(
                     [
                         html.B("Website"),
                         dcc.Dropdown(
-                            id="website-dropdown",
+                            id="bs-website-dropdown",
                             options=[
                                 {"label": website_names["nl"], "value": "nl"},
                                 {"label": website_names["ff"], "value": "ff"},
@@ -89,7 +96,7 @@ app.layout = html.Div(
                     [
                         html.B("Date"),
                         dcc.Dropdown(
-                            id="date-dropdown",
+                            id="bs-date-dropdown",
                             value="latest",
                             clearable=False,
                         ),
@@ -101,7 +108,7 @@ app.layout = html.Div(
                     [
                         html.B("Category"),
                         dcc.Dropdown(
-                            id="category-dropdown",
+                            id="bs-category-dropdown",
                         ),
                         # html.Div(id="date-dd-output-container"),
                     ],
@@ -109,8 +116,8 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Button("Download CSV", id="btn_csv"),
-                        dcc.Download(id="download-datatable-csv"),
+                        html.Button("Download CSV", id="bs-btn-csv"),
+                        dcc.Download(id="bs-download-datatable-csv"),
                     ],
                     style={"width": "10%"},
                 ),
@@ -120,7 +127,7 @@ app.layout = html.Div(
         html.Div(
             [
                 dash_table.DataTable(
-                    id="table",
+                    id="bs-table",
                     columns=[{"name": i, "id": i} for i in nl_df.columns],
                     data=nl_df.to_dict("records"),
                     page_size=50,
@@ -132,9 +139,9 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("category-dropdown", "options"),
-    Output("category-dropdown", "value"),
-    Input("website-dropdown", "value"),
+    Output("bs-category-dropdown", "options"),
+    Output("bs-category-dropdown", "value"),
+    Input("bs-website-dropdown", "value"),
 )
 def update_category_options(selected_website):
     """Updates category options based on selected website and defaults to no selection"""
@@ -150,13 +157,16 @@ def update_category_options(selected_website):
 
 
 @app.callback(
-    Output("date-dropdown", "options"),
-    Output("date-dropdown", "value"),
-    Input("website-dropdown", "value"),
-    Input("category-dropdown", "value"),
+    Output("bs-date-dropdown", "options"),
+    Output("bs-date-dropdown", "value"),
+    Input("bs-website-dropdown", "value"),
+    Input("bs-category-dropdown", "value"),
+    State("bs-date-dropdown", "value"),
 )
-def update_date_options_value(selected_website, selected_category):
-    """Updates date options after website selected and sets selected date to latest available by default"""
+def update_date_options_value(selected_website, selected_category, selected_date):
+    """Updates date options after website selected
+    - If triggered by website dropdown: sets selected date to latest available
+    - If triggered by category dropdown: keeps currently selected date"""
     if selected_category:
         filtered_df = (
             nl_df.loc[nl_df["category"] == selected_category]
@@ -177,16 +187,26 @@ def update_date_options_value(selected_website, selected_category):
         )
         # date_array = dates_dict[selected_website]
     date_array[::-1].sort()  # Sort dates descending
-    return [{"label": i, "value": i} for i in date_array], date_array[0]
+
+    # Check if callback triggered by website or category change
+    ctx = dash.callback_context
+    trigger = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    # print(f"\n This is the trigger: {trigger}")
+
+    if trigger == "bs-category-dropdown" and selected_category is not None:
+        return [{"label": i, "value": i} for i in date_array], selected_date
+    else:
+        return [{"label": i, "value": i} for i in date_array], date_array[0]
 
 
 @app.callback(
-    Output("table", "data"),
-    Output("table", "columns"),
-    Input("website-dropdown", "value"),
-    Input("date-dropdown", "value"),
-    Input("date-dropdown", "options"),
-    Input("category-dropdown", "value"),
+    Output("bs-table", "data"),
+    Output("bs-table", "columns"),
+    Input("bs-website-dropdown", "value"),
+    Input("bs-date-dropdown", "value"),
+    Input("bs-date-dropdown", "options"),
+    Input("bs-category-dropdown", "value"),
 )
 def update_table(selected_website, selected_date, date_options, selected_category):
     website_df = (
@@ -215,12 +235,12 @@ def update_table(selected_website, selected_date, date_options, selected_categor
 
 
 @app.callback(
-    Output("download-datatable-csv", "data"),
-    Input("btn_csv", "n_clicks"),
-    State("table", "data"),
-    State("website-dropdown", "value"),
-    State("date-dropdown", "value"),
-    State("category-dropdown", "value"),
+    Output("bs-download-datatable-csv", "data"),
+    Input("bs-btn-csv", "n_clicks"),
+    State("bs-table", "data"),
+    State("bs-website-dropdown", "value"),
+    State("bs-date-dropdown", "value"),
+    State("bs-category-dropdown", "value"),
     prevent_initial_call=True,
 )
 def download_table(n_clicks, data, selected_website, selected_date, selected_category):
@@ -228,7 +248,9 @@ def download_table(n_clicks, data, selected_website, selected_date, selected_cat
     if selected_category:
         filename = f"{website_names[selected_website]}_{selected_category}_best_selling_list_{selected_date}.csv"
     else:
-        filename = f"{website_names[selected_website]}_best_selling_list_{selected_date}.csv"
+        filename = (
+            f"{website_names[selected_website]}_best_selling_list_{selected_date}.csv"
+        )
     return dcc.send_data_frame(
         df.to_csv,
         filename=filename,
@@ -236,5 +258,5 @@ def download_table(n_clicks, data, selected_website, selected_date, selected_cat
     )
 
 
-if __name__ == "__main__":
-    app.run_server(debug=True)
+# if __name__ == "__main__":
+#     app.run_server(debug=True)
