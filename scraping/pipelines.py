@@ -1,5 +1,5 @@
 # from sqlalchemy.sql.expression import and_
-from sqlalchemy.sql.expression import null, union
+from sqlalchemy.sql.expression import null
 from items import BrandItem, ProductItem, RankedProductItem
 
 # from psycopg2.extras import Json

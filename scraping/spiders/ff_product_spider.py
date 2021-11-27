@@ -15,8 +15,8 @@ from scrapy.loader import ItemLoader
 from decimal import Decimal
 
 from items import ProductItem, BrandItem
-from utilities import ff_url_builder, get_session
-from models import BrandUrlDict
+from utilities import ff_url_builder
+from models import get_session, BrandUrlDict
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
@@ -67,7 +67,7 @@ class FFProductSpider(Spider):
 
     # configure_logging(install_root_handler=False)
     # logging.basicConfig(
-    #     filename="logs/ff_product_log.txt",
+    #     filename=f"{cfg['scraper_log_path']}/ff_product_log.txt",
     #     format="%(levelname)s: %(message)s",
     #     level=logging.ERROR,
     # )

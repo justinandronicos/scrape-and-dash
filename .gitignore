@@ -132,8 +132,3 @@ dmypy.json
 
 # Logs Foder
 logs/
-
-# Config file
-*config.py
-*config.yaml
-*config.yml

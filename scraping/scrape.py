@@ -1,3 +1,10 @@
+import os
+import sys
+
+dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(dir))
+import models
+
 from spiders.nl_product_spider import NLProductSpider
 from spiders.ff_brand_spider import FFBrandSpider
 from spiders.nl_brand_spider import NLBrandSpider
@@ -12,7 +19,8 @@ from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 from scrapy.crawler import CrawlerProcess
 import logging
-from models import db_connect, create_table
+
+# from models import db_connect, create_table
 
 # Nested dictionary of form {id: {brand, product_name, variant, retail_price, on_sale, current_price, in_stock, product_url}}
 # Access product prices with wm_products_prices[product_id]
@@ -38,8 +46,8 @@ ff_products_prices = {}
 
 
 def main():
-    engine = db_connect()
-    create_table(engine)
+    engine = models.db_connect()
+    models.create_table(engine)
 
     configure_logging()
     wm_parser.main()

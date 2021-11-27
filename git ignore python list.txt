@@ -129,3 +129,6 @@ dmypy.json
 *config.py
 *config.yaml
 *config.yml
+
+# Logs folder
+*logs/

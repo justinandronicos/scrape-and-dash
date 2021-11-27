@@ -32,12 +32,12 @@ class NLBrandSpider(Spider):
         }
     }
 
-    configure_logging(install_root_handler=False)
-    logging.basicConfig(
-        filename="logs/nl_brand_log.txt",
-        format="%(levelname)s: %(message)s",
-        level=logging.ERROR,
-    )
+    # configure_logging(install_root_handler=False)
+    # logging.basicConfig(
+    #     filename=f"{cfg['scraper_log_path']}/nl_brand_log.txt",
+    #     format="%(levelname)s: %(message)s",
+    #     level=logging.ERROR,
+    # )
 
     def parse(self, response: response) -> Iterator[dict[str, str]]:
 

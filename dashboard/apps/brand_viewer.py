@@ -6,14 +6,15 @@ import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
-import sys
-import os
-from sqlalchemy import create_engine, func
 
-dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(dir))
+from sqlalchemy import func
 
-from utilities import get_session
+# import os
+# import sys
+
+# dir = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(dir))
+
 from models import (
     FFBrand,
     GMBrand,
@@ -24,15 +25,18 @@ from models import (
     NLProduct,
     WMProduct,
 )
+from app import session, engine, app
 
 cfg = yaml.safe_load(open("config.yaml"))
 
-session = get_session()
-engine = create_engine(cfg["db_connection_string"], echo=True)
+# session = get_session()
+# engine = session.get_bind()
+# engine = create_engine(cfg["db_connection_string"], echo=True)
 
 website_names = cfg["website_names"]
 
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
+# from dash_app import app
 
 nl_stmt = (
     session.query(
@@ -80,17 +84,17 @@ wm_stmt = (
 ).statement
 wm_df = pd.read_sql(wm_stmt, con=engine)
 
-app.layout = html.Div(
+layout = html.Div(
     [
         html.Div(html.H2("Brands Viewer"), style={"textAlign": "center"}),
         html.Div(
-            className="filters_row",
+            className="bv-filters-row",
             children=[
                 html.Div(
                     [
                         html.B("Website"),
                         dcc.Dropdown(
-                            id="website-dropdown",
+                            id="bv-website-dropdown",
                             options=[
                                 {"label": website_names["nl"], "value": "nl"},
                                 {"label": website_names["ff"], "value": "ff"},
@@ -108,7 +112,7 @@ app.layout = html.Div(
                     [
                         html.B("Sort By"),
                         dcc.Dropdown(
-                            id="sort-dropdown",
+                            id="bv-sort-dropdown",
                             options=[
                                 {"label": "Brand Name", "value": "brand_name"},
                                 {"label": "Product Count", "value": "prod_count"},
@@ -124,7 +128,7 @@ app.layout = html.Div(
                     [
                         "Number of Brands: ",
                         dash.html.Output(
-                            id="brand_count_output", children=str(len(nl_df))
+                            id="bv-brand-count-output", children=str(len(nl_df))
                         ),
                         # html.Div(id="brand-count-output-container"),
                     ],
@@ -135,8 +139,8 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Button("Download CSV", id="btn_csv"),
-                        dcc.Download(id="download-datatable-csv"),
+                        html.Button("Download CSV", id="bv-btn-csv"),
+                        dcc.Download(id="bv-download-datatable-csv"),
                         # html.Div(id="download-btn-container"),
                     ],
                     style={"width": "20%"},
@@ -147,7 +151,7 @@ app.layout = html.Div(
         html.Div(
             [
                 dash_table.DataTable(
-                    id="table",
+                    id="bv-table",
                     columns=[{"name": i, "id": i} for i in nl_df.columns],
                     data=nl_df.to_dict("records"),
                 )
@@ -158,8 +162,8 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("brand_count_output", "children"),
-    Input("website-dropdown", "value"),
+    Output("bv-brand-count-output", "children"),
+    Input("bv-website-dropdown", "value"),
 )
 def update_brand_count(selected_website):
     brand_count = (
@@ -177,10 +181,10 @@ def update_brand_count(selected_website):
 
 
 @app.callback(
-    Output("table", "data"),
-    Output("table", "columns"),
-    Input("website-dropdown", "value"),
-    Input("sort-dropdown", "value"),
+    Output("bv-table", "data"),
+    Output("bv-table", "columns"),
+    Input("bv-website-dropdown", "value"),
+    Input("bv-sort-dropdown", "value"),
 )
 def update_table(selected_website, sort_by):
     website_df = (
@@ -204,10 +208,10 @@ def update_table(selected_website, sort_by):
 
 
 @app.callback(
-    Output("download-datatable-csv", "data"),
-    Input("btn_csv", "n_clicks"),
-    State("table", "data"),
-    State("website-dropdown", "value"),
+    Output("bv-download-datatable-csv", "data"),
+    Input("bv-btn-csv", "n_clicks"),
+    State("bv-table", "data"),
+    State("bv-website-dropdown", "value"),
     prevent_initial_call=True,
 )
 def download_table(n_clicks, data, selected_website):
@@ -220,5 +224,5 @@ def download_table(n_clicks, data, selected_website):
     )
 
 
-if __name__ == "__main__":
-    app.run_server(debug=True)
+# if __name__ == "__main__":
+#     app.run_server(debug=True)

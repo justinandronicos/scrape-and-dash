@@ -3,21 +3,25 @@ import yaml
 from typing import Iterator, Union
 import json
 from scrapy.http import response
-import string
 import logging
 from scrapy.utils.log import configure_logging
+from sqlalchemy.orm import sessionmaker
+from models import get_session, BrandUrlDict
+
 
 # from twisted.internet import reactor, defer
 # from scrapy.crawler import CrawlerRunner
+# from scrapy.utils.log import configure_logging
 from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
-from utilities import nl_url_builder, get_session
-from items import ProductItem, BrandItem
-from models import BrandUrlDict
+
+from items import BrandItem, ProductItem
+from utilities import gm_url_builder
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
+
 
 # ## Dict of of processed WM brands for easier matching (lowercase & remove commas/white space)
 # #  with values of actual matching WM brands
@@ -27,6 +31,8 @@ cfg = yaml.safe_load(open("config.yaml"))
 # Nested dictionary of form {id: {brand, product_name, variant, retail_price, on_sale, current_price, in_stock, product_url}}
 # Access product prices with products_prices[product_id]
 # products_prices = {}
+# # Dictionary of brands with corresponding links as values
+# brands_links = {}
 
 
 ### FOR DEBGUGGING ###
@@ -38,19 +44,18 @@ count = 0  # counts total extra pages added (non first pages)
 skipped_brands = []
 empty_count = 0
 extra_variant_count = 0
-prod_count = 0
 
 product_list = []
 
 
-class NLProductSpider(Spider):
+class GMProductSpider(Spider):
     # @classmethod
     # def from_crawler(cls, crawler):
     #     settings = crawler.settings
     #     return cls(settings.getbool("LOG_ENABLED"))
 
-    name = cfg["nl_ProductSpider"]["name"]
-    allowed_domains = cfg["nl_ProductSpider"]["allowed_domains"]
+    name = cfg["gm_ProductSpider"]["name"]
+    allowed_domains = cfg["gm_ProductSpider"]["allowed_domains"]
 
     custom_settings = {
         "ITEM_PIPELINES": {
@@ -60,97 +65,88 @@ class NLProductSpider(Spider):
         }
     }
 
+    def __init__(self):
+        logging.getLogger("scrapy").propagate = False
+
     # configure_logging(install_root_handler=False)
     # logging.basicConfig(
-    #     filename="logs/nl_product_log.txt",
+    #     filename=f"{cfg['scraper_log_path']}/gm_product_log.txt",
     #     format="%(levelname)s: %(message)s",
     #     level=logging.ERROR,
     # )
-    configure_logging(install_root_handler=False)
-    logging.getLogger("scrapy").propagate = False
 
     def start_requests(self) -> Iterator[Request]:
         session = get_session()
-        website_name = cfg["website_names"]["nl"]
+        website_name = cfg["website_names"]["gm"]
         brand_url_dict: dict = (
             session.query(BrandUrlDict).filter_by(website=website_name).first().data
         )
-
-        print(f"\n {len(brand_url_dict)} \n")
-
-        for brand_name, brand_url in brand_url_dict.items():
-            api_url = nl_url_builder(brand=brand_name, page_number=1)
+        # brand_url_dict = json.loads(brand_url_json.data)
+        for brand, brand_url in brand_url_dict.items():
+            api_url = gm_url_builder(brand_url=brand_url)
+            # api_url = (
+            #     "https://" + self.allowed_domains[0] + brand_url + "/products.json"
+            # )
             yield Request(
                 url=api_url,
                 callback=self.parse,
-                meta={
-                    "total_results": 0,
-                    "max_results": 500,
-                    "page_number": 1,
-                    "brand_name": brand_name,
-                    "brand_url": brand_url,
-                },
+                meta={"brand": brand, "brand_url": brand_url, "total_results": 0},
             )
 
     def parse(
         self, response: response
-    ) -> Union[Iterator[BrandItem], Iterator[ProductItem], Iterator[Request]]:
+    ) -> Union[Iterator[BrandItem], Iterator[ProductItem]]:
         global count
         global empty_count
         global skipped_brands
-        global extra_variant_count
         global product_list
-        # global prod_count
+        global extra_variant_count
 
         total_results = response.meta.get("total_results")
-        current_page = response.meta.get("page_number")
-        max_results = response.meta.get("max_results")
-        brand_name = response.meta.get("brand_name")
+        brand = response.meta.get("brand")
         brand_url = response.meta.get("brand_url")
 
-        brand_item = BrandItem()
-        brand_item["name"] = brand_name
-        brand_item["url"] = brand_url
-        yield brand_item
-
         print(f"procesing: {response.url}")
-
         text_data = response.body.decode("utf8")
-        json_string = text_data[text_data.index("{") :]
+        json_string = text_data
         json_data = json.loads(json_string)
+        results_list = json_data["products"]
 
-        # # Check if no products listed for brand
-        # if len(json_data["results"]) == 0:
-        #     empty_count += 1
-        #     skipped_brands.append(response)
-        #     print("\n\n\n\n ERROR FROM RESPONSE \n \n \n" + str(response))
-        #     return
+        total_results += len(results_list)
 
         prod_list.append(json_data)
-        results_list = json_data["results"]
 
-        # prod_count += len(results_list)
+        brand_item = BrandItem()
+        brand_item["name"] = brand
+        brand_item["url"] = brand_url
+
+        yield brand_item
 
         for product_result in results_list:
-            uid = product_result["uid"]
-            brand = product_result["brand"]
-            product_name = product_result["name"].replace("&amp;", "&")
-            product_url = product_result["url"]
-            variant_list = json.loads(
-                product_result["matrix_options"].replace("&quot;", '"')
-            )
-
+            variant_list = product_result["variants"]
             variant_count = 1
-
-            # letters = list(string.ascii_uppercase)
             for product_variant in variant_list:
                 extra_variant_count = len(variant_list) - 1
                 try:
-                    id = uid + "/" + str(variant_count)
-                    variant_label = product_variant["label"]
-                    retail_price = Decimal(product_variant["retail_price"])
+                    id = str(product_result["id"]) + "/" + str(variant_count)
+                    variant_title = product_variant["title"]
+                    prod_title = product_result["title"]
+                    product_name = (
+                        prod_title + " - " + variant_title
+                        if (
+                            variant_title is not None
+                            and variant_title != "Default Title"
+                            and prod_title != variant_title
+                        )
+                        else product_result["title"]
+                    )
+
+                    variant_size = product_variant["grams"]
+                    variant_label = str(variant_size) + "g" if variant_size > 0 else ""
+
+                    retail_price = Decimal(product_variant["price"])
                     current_price = Decimal(product_variant["price"])
-                    in_stock = int(product_variant["inventory"]) > 0
+                    in_stock = product_variant["available"]
 
                     # Check if sale price
                     if float(current_price) < float(retail_price):
@@ -168,15 +164,13 @@ class NLProductSpider(Spider):
 
                 product["code"] = id
                 product["brand"] = brand
-                product["product_name"] = (
-                    brand + " " + product_name + " - " + variant_label
-                )
+                product["product_name"] = product_name
                 product["variant"] = variant_label
                 product["retail_price"] = retail_price
                 product["on_sale"] = on_sale
                 product["current_price"] = current_price
                 product["in_stock"] = in_stock
-                product["product_url"] = product_url
+                product["product_url"] = ""
 
                 product_list.append(product)
 
@@ -184,61 +178,22 @@ class NLProductSpider(Spider):
 
                 yield product
 
-        # If more results left, crawl the next batch of 500 results
-        # previous_page = json_data["pagination"]["previousPage"]
-        # results_left = total_results - ((previous_page * 500) + len(results_list))
-        # if results_left > 0:
-        total_pages = json_data["pagination"]["totalPages"]
-        pages_left = total_pages - current_page
-        if pages_left > 0:
-            count += 1  # Check all extra pages have been scraped
-            new_page = current_page + 1
-            next_url = nl_url_builder(brand=brand_name, page_number=new_page)
-            print("Found url: {}".format(next_url))  # Write a debug statement
-            yield Request(
-                url=next_url,
-                callback=self.parse,
-                meta={
-                    "total_results": total_results,
-                    "max_results": max_results,
-                    "page_number": new_page,
-                },
-            )
-
-        # Return a call to the function "parse"
-        # total_pages = json_data["pagination"]["totalPages"]
-        # current_page = json_data["pagination"]["currentPage"]
-
-        # # If more then 1 page, crawl the rest
-        # if current_page < total_pages:
-        #     count += 1  # Check all extra pages have been scraped
-        #     link = brands_links.get(brand)
-        #     current_page += 1
-        #     # callback_num = current_page - 1
-
-        #     next_page = nl_url_builder(current_page, brand, link)
-        #     print("Found url: {}".format(next_page))  # Write a debug statement
-        #     yield scrapy.Request(
-        #         next_page, callback=self.parse
-        #     )  # Return a call to the function "parse"
-
 
 # from scrapy.crawler import CrawlerProcess
 
 # process = CrawlerProcess()
 # # Run spiders sequentially
-# process.crawl(NLProductSpider)
+# process.crawl(GMProductSpider)
 # process.start()  # the script will block here until all crawling jobs are finished
-print(f"\n Num products= {len(product_list)}\n")
-
+# print(f"\n Num products= {len(product_list)}\n")
 
 # crawl()
 # reactor.run()  # the script will block here until the last crawl call is finished
-
+print("\nExtra Variants = " + str(extra_variant_count))
 print("\nExtra Pages = " + str(count))
 # if len(brands_links) + count == len(prod_list):
 #     print("Successfully scraped all pages")
-# print("Prod Length = " + str(len(products_prices)))
+print("Prod Length = " + str(len(product_list)))
 # print("Num Brands = " + str(len(brands_links)))
 # print(brands_links)
 # print("\n" + str(empty_count) + " Empty Brands =", skipped_brands)
@@ -246,8 +201,11 @@ print("\nExtra Pages = " + str(count))
 # print("\n\n")
 # print("Total results: ")
 # print(sum(len(v) for v in products_prices.values()))
+
 # print(products_prices.keys())
 
 print(" \n \n Empty Count = " + str(empty_count))
 
-# new = product_matcher(products_prices, matched_wm_brands)
+
+# for brand in skipped_brands:
+#     print(brand)

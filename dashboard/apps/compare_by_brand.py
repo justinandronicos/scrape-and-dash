@@ -8,17 +8,15 @@ import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
-import sys
-import os
 from sqlalchemy import create_engine, Date
 from collections import Counter
 
 import time
 
-dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(dir))
+# dir = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(dir))
 
-from utilities import get_session
+# from utilities import get_session
 from models import (
     FFBrand,
     FFCurrentPrice,
@@ -37,15 +35,16 @@ from models import (
     WMHistoricalPrice,
     WMProduct,
 )
+from app import session, engine, app
 
 cfg = yaml.safe_load(open("config.yaml"))
 
-session = get_session()
-engine = create_engine(cfg["db_connection_string"], echo=True)
+# engine = create_engine(cfg["db_connection_string"], echo=True)
 
 website_names = cfg["website_names"]
 
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
+# from dash_app import app
 
 nl_stmt = (
     session.query(
@@ -341,17 +340,17 @@ date_dict = {
 table_style = {"display": "inline-block", "margin-right": "10px"}
 
 # TODO: Fix table layout to be horizontally aligned correctly
-app.layout = html.Div(
+layout = html.Div(
     [
         html.Div(html.H2("Websites by Brand"), style={"textAlign": "center"}),
         html.Div(
-            className="filters-row",
+            className="cb-filters-row",
             children=[
                 html.Div(
                     [
                         html.B("Select Websites"),
                         dcc.Checklist(
-                            id="website-checklist",
+                            id="cb-website-checklist",
                             options=[
                                 {"label": website_names["nl"], "value": "nl"},
                                 {"label": website_names["ff"], "value": "ff"},
@@ -361,7 +360,7 @@ app.layout = html.Div(
                             value=["nl", "ff", "gm", "wm"],
                             labelStyle={"display": "inline-block"},
                         ),
-                        html.Div(id="website-cl-output-container"),
+                        html.Div(id="cb-website-cl-output-container"),
                     ],
                     style={"width": "20%", "textAlign": "center"},
                 ),
@@ -369,10 +368,10 @@ app.layout = html.Div(
                     [
                         html.B("Brand"),
                         dcc.Dropdown(
-                            id="brand-dropdown",
+                            id="cb-brand-dropdown",
                             placeholder="Select Brand...",
                         ),
-                        html.Div(id="brand-dd-output-container"),
+                        html.Div(id="cb-brand-dd-output-container"),
                     ],
                     style={"width": "25%", "textAlign": "center"},
                 ),
@@ -380,20 +379,20 @@ app.layout = html.Div(
                     [
                         html.B("Date"),
                         dcc.Dropdown(
-                            id="date-dropdown",
+                            id="cb-date-dropdown",
                             # options=[{"label": i, "value": i} for i in date_array],
                             # value="latest",
                             # value=date_array[0],
                             clearable=False,
                         ),
-                        html.Div(id="date-dd-output-container"),
+                        html.Div(id="cb-date-dd-output-container"),
                     ],
                     style={"width": "25%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
-                        html.Button("Download CSV", id="btn_csv"),
-                        dcc.Download(id="download-datatable-csv"),
+                        html.Button("Download CSV", id="cb-btn-csv"),
+                        dcc.Download(id="cb-download-datatable-csv"),
                     ],
                     style={"width": "10%", "vertical-align": "top"},
                 ),
@@ -405,17 +404,17 @@ app.layout = html.Div(
             },
         ),
         html.Div(
-            className="tables-container",
+            className="cb-tables-container",
             children=[
                 html.Div(
-                    id="nl-table-container",
+                    id="cb-nl-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["nl"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="nl-table",
+                            id="cb-nl-table",
                             # columns=[{"name": i, "id": i} for i in nl_df.columns],
                             # data=nl_df.to_dict("records"),
                         ),
@@ -423,14 +422,14 @@ app.layout = html.Div(
                     style=table_style,
                 ),
                 html.Div(
-                    id="ff-table-container",
+                    id="cb-ff-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["ff"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="ff-table",
+                            id="cb-ff-table",
                             # columns=[{"name": i, "id": i} for i in ff_df.columns],
                             # data=ff_df.to_dict("records"),
                         ),
@@ -438,14 +437,14 @@ app.layout = html.Div(
                     style=table_style,
                 ),
                 html.Div(
-                    id="gm-table-container",
+                    id="cb-gm-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["gm"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="gm-table",
+                            id="cb-gm-table",
                             # columns=[{"name": i, "id": i} for i in gm_df.columns],
                             # data=gm_df.to_dict("records"),
                         ),
@@ -453,14 +452,14 @@ app.layout = html.Div(
                     style=table_style,
                 ),
                 html.Div(
-                    id="wm-table-container",
+                    id="cb-wm-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["wm"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="wm-table",
+                            id="cb-wm-table",
                             # columns=[{"name": i, "id": i} for i in wm_df.columns],
                             # data=wm_df.to_dict("records"),
                         ),
@@ -493,9 +492,9 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("date-dropdown", "options"),
-    Output("date-dropdown", "value"),
-    Input("website-checklist", "value"),
+    Output("cb-date-dropdown", "options"),
+    Output("cb-date-dropdown", "value"),
+    Input("cb-website-checklist", "value"),
 )
 def update_date_options(selected_websites):
     """Updates date options based on selected websites and selects latest available date as default
@@ -518,8 +517,8 @@ def update_date_options(selected_websites):
 
 
 @app.callback(
-    Output("brand-dropdown", "options"),
-    Input("website-checklist", "value"),
+    Output("cb-brand-dropdown", "options"),
+    Input("cb-website-checklist", "value"),
 )
 def update_brand_options(selected_websites):
     filtered_brands = []
@@ -627,13 +626,13 @@ def filter_table_by_date(website_df, selected_date, date_options):
 
 
 @app.callback(
-    Output(component_id="nl-table-container", component_property="style"),
-    Output(component_id="ff-table-container", component_property="style"),
-    Output(component_id="gm-table-container", component_property="style"),
-    Output(component_id="wm-table-container", component_property="style"),
-    Input(component_id="website-checklist", component_property="value"),
-    Input(component_id="brand-dropdown", component_property="value"),
-    Input(component_id="date-dropdown", component_property="value"),
+    Output(component_id="cb-nl-table-container", component_property="style"),
+    Output(component_id="cb-ff-table-container", component_property="style"),
+    Output(component_id="cb-gm-table-container", component_property="style"),
+    Output(component_id="cb-wm-table-container", component_property="style"),
+    Input(component_id="cb-website-checklist", component_property="value"),
+    Input(component_id="cb-brand-dropdown", component_property="value"),
+    Input(component_id="cb-date-dropdown", component_property="value"),
 )
 def show_hide_tables(selected_websites, selected_brand, selected_date):
     """Dynamically shows or hides website table container based on:
@@ -653,14 +652,14 @@ def show_hide_tables(selected_websites, selected_brand, selected_date):
 
 
 @app.callback(
-    [Output("nl-table", "data"), Output("nl-table", "columns")],
-    [Output("ff-table", "data"), Output("ff-table", "columns")],
-    [Output("gm-table", "data"), Output("gm-table", "columns")],
-    [Output("wm-table", "data"), Output("wm-table", "columns")],
-    Input("website-checklist", "value"),
-    Input("date-dropdown", "value"),
-    Input("date-dropdown", "options"),
-    Input("brand-dropdown", "value"),
+    [Output("cb-nl-table", "data"), Output("cb-nl-table", "columns")],
+    [Output("cb-ff-table", "data"), Output("cb-ff-table", "columns")],
+    [Output("cb-gm-table", "data"), Output("cb-gm-table", "columns")],
+    [Output("cb-wm-table", "data"), Output("cb-wm-table", "columns")],
+    Input("cb-website-checklist", "value"),
+    Input("cb-date-dropdown", "value"),
+    Input("cb-date-dropdown", "options"),
+    Input("cb-brand-dropdown", "value"),
 )
 def update_tables(selected_websites, selected_date, date_options, selected_brand):
     tables_dict = dict.fromkeys(df_dict.keys())
@@ -713,17 +712,17 @@ def update_tables(selected_websites, selected_date, date_options, selected_brand
 
 
 @app.callback(
-    Output("download-datatable-csv", "data"),
-    Input("btn_csv", "n_clicks"),
+    Output("cb-download-datatable-csv", "data"),
+    Input("cb-btn-csv", "n_clicks"),
     [
-        State("nl-table", "data"),
-        State("ff-table", "data"),
-        State("gm-table", "data"),
-        State("wm-table", "data"),
+        State("cb-nl-table", "data"),
+        State("cb-ff-table", "data"),
+        State("cb-gm-table", "data"),
+        State("cb-wm-table", "data"),
     ],
     # State("website-checklist", "value"),
-    State("date-dropdown", "value"),
-    State("brand-dropdown", "value"),
+    State("cb-date-dropdown", "value"),
+    State("cb-brand-dropdown", "value"),
     prevent_initial_call=True,
 )
 def download_table(
@@ -749,5 +748,5 @@ def download_table(
     )
 
 
-if __name__ == "__main__":
-    app.run_server(debug=True)
+# if __name__ == "__main__":
+#     app.run_server(debug=True)

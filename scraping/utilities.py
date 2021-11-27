@@ -3,7 +3,8 @@ from typing import BinaryIO
 from io import TextIOWrapper
 import hashlib
 from sqlalchemy.orm import sessionmaker
-from models import db_connect
+
+# from models import db_connect
 import urllib.parse
 
 # load config file
@@ -211,14 +212,14 @@ def get_hash(fpath: BinaryIO) -> bytes:
     return complete_hash.encode("ascii")
 
 
-def get_session():
-    """Initializes database connection and sessionmaker
+# def get_session():
+#     """Initializes database connection and sessionmaker
 
-    Returns:
-        Session: Session object for database
-    """
-    engine = db_connect()
-    # create_table(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
+#     Returns:
+#         Session: Session object for database
+#     """
+#     engine = db_connect()
+#     # create_table(engine)
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
+#     return session

@@ -37,7 +37,7 @@ class GMBrandSpider(Spider):
 
     # configure_logging(install_root_handler=False)
     # logging.basicConfig(
-    #     filename="logs/ff_brand_log.txt",
+    #     filename=f"{cfg['scraper_log_path']}/ff_brand_log.txt",
     #     format="%(levelname)s: %(message)s",
     #     level=logging.ERROR,
     # )

@@ -1,13 +1,11 @@
-from utilities import get_hash, get_session
+from utilities import get_hash
 import yaml
 import csv
 from decimal import Decimal
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from items import ProductItem
 from models import (
-    create_table,
-    db_connect,
+    get_session,
     WMBrand,
     WMProduct,
     WMCurrentPrice,

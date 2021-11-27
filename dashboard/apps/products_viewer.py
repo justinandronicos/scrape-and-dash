@@ -8,14 +8,12 @@ import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
-import sys
-import os
 from sqlalchemy import create_engine, select, join, cast, Date
 
-dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(dir))
+# dir = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(dir))
 
-from utilities import get_session
+# from utilities import get_session
 from models import (
     FFBrand,
     FFCurrentPrice,
@@ -34,16 +32,17 @@ from models import (
     WMHistoricalPrice,
     WMProduct,
 )
+from app import session, engine, app
 
 cfg = yaml.safe_load(open("config.yaml"))
 
-session = get_session()
-engine = create_engine(cfg["db_connection_string"], echo=True)
+# engine = create_engine(cfg["db_connection_string"], echo=True)
 # connection = engine.connect()
 
 website_names = cfg["website_names"]
 
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
+# from dash_app import app
 
 # website_tables = {
 #     "nl": (NLProduct, NLBrand, NLCurrentPrice, NLHistoricalPrice),
@@ -267,17 +266,17 @@ dates_dict = {
 
 # print(f"\n\n WM DF : {wm_df}")
 
-app.layout = html.Div(
+layout = html.Div(
     [
         html.Div(html.H2("Products Viewer"), style={"textAlign": "center"}),
         html.Div(
-            className="filters_row",
+            className="pv-filters_row",
             children=[
                 html.Div(
                     [
                         html.B("Website"),
                         dcc.Dropdown(
-                            id="website-dropdown",
+                            id="pv-website-dropdown",
                             options=[
                                 {"label": website_names["nl"], "value": "nl"},
                                 {"label": website_names["ff"], "value": "ff"},
@@ -295,7 +294,7 @@ app.layout = html.Div(
                     [
                         html.B("Date"),
                         dcc.Dropdown(
-                            id="date-dropdown",
+                            id="pv-date-dropdown",
                             # value="latest",
                             clearable=False,
                         ),
@@ -307,7 +306,7 @@ app.layout = html.Div(
                     [
                         html.B("Brand"),
                         dcc.Dropdown(
-                            id="brand-dropdown",
+                            id="pv-brand-dropdown",
                             placeholder="Select Brand...",
                         ),
                         # html.Div(id="brand-dd-output-container"),
@@ -316,8 +315,8 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Button("Download CSV", id="btn_csv"),
-                        dcc.Download(id="download-datatable-csv"),
+                        html.Button("Download CSV", id="pv-btn-csv"),
+                        dcc.Download(id="pv-download-datatable-csv"),
                     ],
                     style={"width": "10%"},
                 ),
@@ -327,7 +326,7 @@ app.layout = html.Div(
         html.Div(
             [
                 dash_table.DataTable(
-                    id="table",
+                    id="pv-table",
                     columns=[{"name": i, "id": i} for i in nl_df.columns],
                     data=nl_df.to_dict("records"),
                 )
@@ -338,9 +337,9 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("date-dropdown", "options"),
-    Output("date-dropdown", "value"),
-    Input("website-dropdown", "value"),
+    Output("pv-date-dropdown", "options"),
+    Output("pv-date-dropdown", "value"),
+    Input("pv-website-dropdown", "value"),
 )
 def update_date_options_value(selected_website):
     """Updates date options after website selected and sets selected date to latest available by default"""
@@ -378,9 +377,9 @@ def update_date_options_value(selected_website):
 
 
 @app.callback(
-    Output("brand-dropdown", "options"),
-    Output("brand-dropdown", "value"),
-    Input("website-dropdown", "value"),
+    Output("pv-brand-dropdown", "options"),
+    Output("pv-brand-dropdown", "value"),
+    Input("pv-website-dropdown", "value"),
 )
 def update_brand_options(selected_website):
     """Updates brand options after website selected and defaults to no selection"""
@@ -448,12 +447,12 @@ def filter_table_by_date(website_df, selected_date, date_options):
 
 
 @app.callback(
-    Output("table", "data"),
-    Output("table", "columns"),
-    Input("website-dropdown", "value"),
-    Input("date-dropdown", "value"),
-    Input("date-dropdown", "options"),
-    Input("brand-dropdown", "value"),
+    Output("pv-table", "data"),
+    Output("pv-table", "columns"),
+    Input("pv-website-dropdown", "value"),
+    Input("pv-date-dropdown", "value"),
+    Input("pv-date-dropdown", "options"),
+    Input("pv-brand-dropdown", "value"),
 )
 def update_table(selected_website, selected_date, date_options, selected_brand):
     website_df = (
@@ -481,12 +480,12 @@ def update_table(selected_website, selected_date, date_options, selected_brand):
 
 
 @app.callback(
-    Output("download-datatable-csv", "data"),
-    Input("btn_csv", "n_clicks"),
-    State("table", "data"),
-    State("website-dropdown", "value"),
-    State("date-dropdown", "value"),
-    State("brand-dropdown", "value"),
+    Output("pv-download-datatable-csv", "data"),
+    Input("pv-btn-csv", "n_clicks"),
+    State("pv-table", "data"),
+    State("pv-website-dropdown", "value"),
+    State("pv-date-dropdown", "value"),
+    State("pv-brand-dropdown", "value"),
     prevent_initial_call=True,
 )
 def download_table(n_clicks, data, selected_website, selected_date, selected_brand):
@@ -504,8 +503,8 @@ def download_table(n_clicks, data, selected_website, selected_date, selected_bra
     )
 
 
-if __name__ == "__main__":
-    app.run_server(debug=True)
+# if __name__ == "__main__":
+#     app.run_server(debug=True)
 
 # TODO: Search box, date dropdown (unique dates from cached query results for brand)
 # Callback to get all results for brand on page load
@@ -522,120 +521,3 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         print("Connection to database failed, retrying.")
 #         raise Exception
-
-
-# app.layout = html.Div(
-#     [
-#         dcc.Graph(id="graph-with-slider"),
-#         dcc.Slider(
-#             id="year-slider",
-#             min=df["year"].min(),
-#             max=df["year"].max(),
-#             value=df["year"].min(),
-#             marks={str(year): str(year) for year in df["year"].unique()},
-#             step=None,
-#         ),
-#     ]
-# )
-
-
-# @app.callback(Output("graph-with-slider", "figure"), Input("year-slider", "value"))
-# def update_figure(selected_year):
-#     filtered_df = df[df.year == selected_year]
-
-#     fig = px.scatter(
-#         filtered_df,
-#         x="gdpPercap",
-#         y="lifeExp",
-#         size="pop",
-#         color="continent",
-#         hover_name="country",
-#         log_x=True,
-#         size_max=55,
-#     )
-
-#     fig.update_layout(transition_duration=500)
-
-#     return fig
-
-
-# nl_df = pd.read_sql(
-#     session.query(NLProduct)
-#     .join(NLBrand.name)
-#     .join(
-#         NLCurrentPrice.retail_price,
-#         NLCurrentPrice.time_stamp,
-#         NLCurrentPrice.on_sale,
-#         NLCurrentPrice.current_price,
-#         NLCurrentPrice.in_stock,
-#     )
-#     .join(
-#         NLHistoricalPrice.retail_price,
-#         NLHistoricalPrice.time_stamp,
-#         NLHistoricalPrice.on_sale,
-#         NLHistoricalPrice.current_price,
-#         NLHistoricalPrice.in_stock,
-#     )
-#     .statement,
-#     con=engine,
-# )
-# ff_df = pd.read_sql(
-#     session.query(FFProduct)
-#     .join(FFBrand.name)
-#     .join(
-#         FFCurrentPrice.retail_price,
-#         FFCurrentPrice.time_stamp,
-#         FFCurrentPrice.on_sale,
-#         FFCurrentPrice.current_price,
-#         FFCurrentPrice.in_stock,
-#     )
-#     .join(
-#         FFHistoricalPrice.retail_price,
-#         FFHistoricalPrice.time_stamp,
-#         FFHistoricalPrice.on_sale,
-#         FFHistoricalPrice.current_price,
-#         FFHistoricalPrice.in_stock,
-#     )
-#     .statement,
-#     con=engine,
-# )
-# gm_df = pd.read_sql(
-#     session.query(GMProduct)
-#     .join(GMBrand.name)
-#     .join(
-#         GMCurrentPrice.retail_price,
-#         GMCurrentPrice.time_stamp,
-#         GMCurrentPrice.on_sale,
-#         GMCurrentPrice.current_price,
-#         GMCurrentPrice.in_stock,
-#     )
-#     .join(
-#         GMHistoricalPrice.retail_price,
-#         GMHistoricalPrice.time_stamp,
-#         GMHistoricalPrice.on_sale,
-#         GMHistoricalPrice.current_price,
-#         GMHistoricalPrice.in_stock,
-#     )
-#     .statement,
-#     con=engine,
-# )
-# wm_df = pd.read_sql(
-#     session.query(WMProduct)
-#     .join(WMBrand.name)
-#     .join(
-#         WMCurrentPrice.retail_price,
-#         WMCurrentPrice.time_stamp,
-#         WMCurrentPrice.on_sale,
-#         WMCurrentPrice.current_price,
-#         WMCurrentPrice.in_stock,
-#     )
-#     .join(
-#         WMHistoricalPrice.retail_price,
-#         WMHistoricalPrice.time_stamp,
-#         WMHistoricalPrice.on_sale,
-#         WMHistoricalPrice.current_price,
-#         WMHistoricalPrice.in_stock,
-#     )
-#     .statement,
-#     con=engine,
-# )
