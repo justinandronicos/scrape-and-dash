@@ -1,0 +1,16 @@
+on: push
+jobs:
+  git-sync:
+    if: ${{ github.repository == 'justinandronicos/Project-Scrape' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: git-sync
+        uses: wei/git-sync@v3.0.0
+        with:
+          source_repo: "git@github.com:justinandronicos/Project-Scrape.git"
+          source_branch: "develop-cleaned"
+          destination_repo: "git@github.com:justinandronicos/scrape-and-dash.git"
+          destination_branch: "develop-cleaned"
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }} # optional
+#           source_ssh_private_key: ${{ secrets.SOURCE_SSH_PRIVATE_KEY }} # optional, will override `SSH_PRIVATE_KEY`
+#           destination_ssh_private_key: ${{ secrets.DESTINATION_SSH_PRIVATE_KEY }} # optional, will override `SSH_PRIVATE_KEY`
