@@ -13,7 +13,8 @@ from spiders.nl_category_spider import NLCategorySpider
 from spiders.ff_category_spider import FFCategorySpider
 from spiders.gm_product_spider import GMProductSpider
 from spiders.gm_brand_spider import GMBrandSpider
-import wm_parser
+
+# import wm_parser
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
@@ -50,7 +51,7 @@ def main():
     models.create_table(engine)
 
     configure_logging()
-    wm_parser.main()
+    # wm_parser.main()
 
     # runner.crawl(NLBrandSpider)
     # runner.crawl(FFBrandSpider)

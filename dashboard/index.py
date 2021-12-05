@@ -13,6 +13,7 @@ from apps import (
     highest_rated_viewer,
     products_viewer,
     home,
+    file_upload,
 )
 
 # Building the navigation bar
@@ -25,6 +26,7 @@ dropdown = dbc.DropdownMenu(
         dbc.DropdownMenuItem("Compare by Brand", href="/brand-comparison"),
         dbc.DropdownMenuItem("Best Selling", href="/best-selling"),
         dbc.DropdownMenuItem("Highest Rated", href="/highest-rated"),
+        dbc.DropdownMenuItem("Upload Product File", href="/file-upload"),
     ],
     nav=True,
     in_navbar=True,
@@ -95,6 +97,7 @@ app.validation_layout = html.Div(
             "compare_by_brand",
             "highest_rated_viewer",
             "products_viewer",
+            "file_upload"
         ]
     ]
 )
@@ -112,6 +115,8 @@ def display_page(pathname):
         return best_selling_viewer.layout
     elif pathname == "/highest-rated":
         return highest_rated_viewer.layout
+    elif pathname == "/file-upload":
+        return file_upload.layout
     else:
         return home.layout
 

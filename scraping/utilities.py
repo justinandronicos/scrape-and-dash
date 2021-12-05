@@ -195,21 +195,21 @@ def highest_rated_url_builder(website: str) -> dict[str, str]:
     return cat_url_dict
 
 
-def get_hash(fpath: BinaryIO) -> bytes:
-    """Calculate hash of file to check whether it has been updated
+# def get_hash(fpath: BinaryIO) -> bytes:
+#     """Calculate hash of file to check whether it has been updated
 
-    Args:
-        fname(BinaryIO): path of file to calculate hash for
+#     Args:
+#         fname(BinaryIO): path of file to calculate hash for
 
-    Returns:
-        binary string: binary string containing hexdigest of hash
-    """
-    hash_md5: hashlib._Hash = hashlib.md5()
-    with open(fpath, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    complete_hash = hash_md5.hexdigest()
-    return complete_hash.encode("ascii")
+#     Returns:
+#         binary string: binary string containing hexdigest of hash
+#     """
+#     hash_md5: hashlib._Hash = hashlib.md5()
+#     with open(fpath, "rb") as f:
+#         for chunk in iter(lambda: f.read(4096), b""):
+#             hash_md5.update(chunk)
+#     complete_hash = hash_md5.hexdigest()
+#     return complete_hash.encode("ascii")
 
 
 # def get_session():

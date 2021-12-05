@@ -123,7 +123,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
 .DS_Store
+
+.direnv
 
 # Config file
 *config.py
@@ -132,3 +135,6 @@ dmypy.json
 
 # Logs folder
 *logs/
+
+# Dedupe data matching
+data_matching_*
