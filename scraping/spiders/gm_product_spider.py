@@ -6,7 +6,7 @@ from scrapy.http import response
 import logging
 from scrapy.utils.log import configure_logging
 from sqlalchemy.orm import sessionmaker
-from models import get_session, BrandUrlDict
+from models_items.models import get_session, BrandUrlDict
 
 
 # from twisted.internet import reactor, defer
@@ -16,7 +16,7 @@ from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
 
-from items import BrandItem, ProductItem
+from models_items.items import BrandItem, ProductItem
 from utilities import gm_url_builder
 
 # load config file

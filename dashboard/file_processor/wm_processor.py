@@ -3,7 +3,7 @@ import hashlib
 import yaml
 from decimal import Decimal
 from sqlalchemy.orm.session import Session
-from .items import ProductItem
+from models_items.items import ProductItem
 import logging
 from datetime import datetime
 from io import StringIO, BytesIO
@@ -13,7 +13,7 @@ from file_processor.wm_pipelines import (
     wm_products_pipeline,
     wm_price_pipeline,
 )
-from models import WMPriceFileInfo
+from models_items.models import WMPriceFileInfo
 
 from app import session
 

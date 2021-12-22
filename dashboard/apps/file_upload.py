@@ -8,7 +8,7 @@ from sqlalchemy.sql.sqltypes import Boolean, String
 import yaml
 import dash_bootstrap_components as dbc
 from file_processor import wm_processor
-from models import WMPriceFileInfo
+from models_items.models import WMPriceFileInfo
 
 # external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 

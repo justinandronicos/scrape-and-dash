@@ -134,7 +134,7 @@ app.validation_layout = html.Div(
 def show_hide_links(pathname):
     """Dynamically shows or hides logout and create user links in navbar based on whether
     user is logged in"""
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and pathname != "/logout":
         return {"display": "inline-block"}, {"display": "inline-block"}
     else:
         return {"display": "none"}, {"display": "none"}

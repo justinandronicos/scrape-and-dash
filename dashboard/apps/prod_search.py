@@ -18,7 +18,7 @@ dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(dir))
 
 # from utilities import get_session
-from models import (
+from models_items.models import (
     FFBrand,
     FFCurrentPrice,
     FFHistoricalPrice,

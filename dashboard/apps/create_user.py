@@ -1,6 +1,6 @@
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-from app import RegisteredUser
+from models_items.models import RegisteredUser
 from werkzeug.security import generate_password_hash
 from app import session, app
 

@@ -13,9 +13,9 @@ from scrapy import Request, Spider
 from scrapy.loader import ItemLoader
 from decimal import Decimal
 
-from items import ProductItem, BrandItem
+from models_items.items import ProductItem, BrandItem
 from utilities import nl_url_builder
-from models import get_session, BrandUrlDict
+from models_items.models import get_session, BrandUrlDict
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))

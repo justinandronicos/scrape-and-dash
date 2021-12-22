@@ -15,7 +15,7 @@ from sqlalchemy import func
 # dir = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.dirname(dir))
 
-from models import (
+from models_items.models import (
     FFBrand,
     GMBrand,
     NLBrand,

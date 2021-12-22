@@ -1,6 +1,6 @@
 # from sqlalchemy.sql.expression import and_
 from sqlalchemy.sql.expression import null
-from items import BrandItem, ProductItem, RankedProductItem
+from models_items.items import BrandItem, ProductItem, RankedProductItem
 
 # from psycopg2.extras import Json
 import yaml
@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import desc, exc
 import logging
 from datetime import datetime
-from models import (
+from models_items.models import (
     db_connect,
     BrandUrlDict,
     NLBrand,

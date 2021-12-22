@@ -10,7 +10,7 @@ cfg = yaml.safe_load(open("config.yaml"))
 
 dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(dir))
-from models import get_session, RegisteredUser
+from models_items.models import get_session, RegisteredUser
 
 session = get_session()
 engine = session.get_bind()

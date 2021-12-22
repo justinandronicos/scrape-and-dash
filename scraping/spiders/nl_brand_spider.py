@@ -2,7 +2,7 @@ import yaml
 from scrapy.http import response
 from scrapy import Spider
 from typing import Iterator
-from items import BrandItem
+from models_items.items import BrandItem
 import logging
 from scrapy.utils.log import configure_logging
 

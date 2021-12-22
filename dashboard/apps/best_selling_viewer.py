@@ -15,7 +15,7 @@ from datetime import date
 # from dash_app import session, engine, app
 
 # from utilities import get_session
-from models import (
+from models_items.models import (
     FFBestSelling,
     FFBrand,
     FFProduct,

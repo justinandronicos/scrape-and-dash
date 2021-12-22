@@ -3,7 +3,8 @@ import sys
 
 dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(dir))
-import models
+
+from models_items import models
 
 from spiders.nl_product_spider import NLProductSpider
 from spiders.ff_brand_spider import FFBrandSpider

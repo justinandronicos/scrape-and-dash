@@ -1,6 +1,6 @@
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-from models import RegisteredUser
+from models_items.models import RegisteredUser
 from flask_login import login_user
 from werkzeug.security import check_password_hash
 from app import RegisteredUser

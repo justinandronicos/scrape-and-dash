@@ -1,7 +1,7 @@
 from decimal import Decimal
 from sqlalchemy.orm.session import Session
-from .items import ProductItem
-from models import (
+from models_items.items import ProductItem
+from models_items.models import (
     WMBrand,
     WMProduct,
     WMCurrentPrice,
