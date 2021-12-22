@@ -16,6 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.sql.expression import null, true
 from sqlalchemy.sql.schema import PrimaryKeyConstraint
+from flask_login import UserMixin
 from yaml import safe_load
 
 cfg = safe_load(open("config.yaml"))
@@ -312,7 +313,7 @@ class FFHighestRated(Base):
     time_stamp = Column("time_stamp", DateTime)
 
 
-# TODO: Implement hash check for wm file in data processor, normalise wm_product table to use time_stamp from this table?
+# TODO: Normalise wm_product table to use time_stamp from this table?
 class WMPriceFileInfo(Base):
     """Table containing wm price file related information to only update wm
     tables when the file has been updated"""
@@ -332,6 +333,16 @@ class BrandUrlDict(Base):
     id = Column(Integer, primary_key=True)
     website = Column("website", String(30))
     data = Column(JSON)
+
+
+class RegisteredUser(UserMixin, Base):
+    """Table used to store registered users for authentication
+    with username and password hash"""
+
+    __tablename__ = "registered_user"
+    id = Column(Integer, primary_key=True)
+    username = Column("username", String(15), unique=True, nullable=False)
+    password = Column("password", String(128))
 
 
 # class ScrapeHistory(Base):

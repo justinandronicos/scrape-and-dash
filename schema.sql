@@ -5,7 +5,7 @@
 -- Dumped from database version 13.5
 -- Dumped by pg_dump version 13.3
 
--- Started on 2021-11-21 19:34:26 AEDT
+-- Started on 2021-12-22 15:23:02 AEDT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -65,7 +65,7 @@ CREATE SEQUENCE public.brand_url_dict_id_seq
 ALTER TABLE public.brand_url_dict_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3508 (class 0 OID 0)
+-- TOC entry 3519 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: brand_url_dict_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -106,7 +106,7 @@ CREATE SEQUENCE public.ff_best_selling_id_seq
 ALTER TABLE public.ff_best_selling_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3509 (class 0 OID 0)
+-- TOC entry 3520 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: ff_best_selling_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -148,7 +148,7 @@ CREATE SEQUENCE public.ff_brand_id_seq
 ALTER TABLE public.ff_brand_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3510 (class 0 OID 0)
+-- TOC entry 3521 (class 0 OID 0)
 -- Dependencies: 202
 -- Name: ff_brand_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -191,7 +191,7 @@ CREATE SEQUENCE public.ff_current_price_id_seq
 ALTER TABLE public.ff_current_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3511 (class 0 OID 0)
+-- TOC entry 3522 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: ff_current_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -234,7 +234,7 @@ CREATE SEQUENCE public.ff_highest_rated_id_seq
 ALTER TABLE public.ff_highest_rated_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3512 (class 0 OID 0)
+-- TOC entry 3523 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: ff_highest_rated_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -277,7 +277,7 @@ CREATE SEQUENCE public.ff_historical_price_id_seq
 ALTER TABLE public.ff_historical_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3513 (class 0 OID 0)
+-- TOC entry 3524 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: ff_historical_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -322,7 +322,7 @@ CREATE SEQUENCE public.ff_product_id_seq
 ALTER TABLE public.ff_product_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3514 (class 0 OID 0)
+-- TOC entry 3525 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: ff_product_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -364,7 +364,7 @@ CREATE SEQUENCE public.gm_brand_id_seq
 ALTER TABLE public.gm_brand_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3515 (class 0 OID 0)
+-- TOC entry 3526 (class 0 OID 0)
 -- Dependencies: 204
 -- Name: gm_brand_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -407,7 +407,7 @@ CREATE SEQUENCE public.gm_current_price_id_seq
 ALTER TABLE public.gm_current_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3516 (class 0 OID 0)
+-- TOC entry 3527 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: gm_current_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -450,7 +450,7 @@ CREATE SEQUENCE public.gm_historical_price_id_seq
 ALTER TABLE public.gm_historical_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3517 (class 0 OID 0)
+-- TOC entry 3528 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: gm_historical_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -495,7 +495,7 @@ CREATE SEQUENCE public.gm_product_id_seq
 ALTER TABLE public.gm_product_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3518 (class 0 OID 0)
+-- TOC entry 3529 (class 0 OID 0)
 -- Dependencies: 212
 -- Name: gm_product_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -536,7 +536,7 @@ CREATE SEQUENCE public.nl_best_selling_id_seq
 ALTER TABLE public.nl_best_selling_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3519 (class 0 OID 0)
+-- TOC entry 3530 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: nl_best_selling_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -578,7 +578,7 @@ CREATE SEQUENCE public.nl_brand_id_seq
 ALTER TABLE public.nl_brand_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3520 (class 0 OID 0)
+-- TOC entry 3531 (class 0 OID 0)
 -- Dependencies: 200
 -- Name: nl_brand_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -621,7 +621,7 @@ CREATE SEQUENCE public.nl_current_price_id_seq
 ALTER TABLE public.nl_current_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3521 (class 0 OID 0)
+-- TOC entry 3532 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: nl_current_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -664,7 +664,7 @@ CREATE SEQUENCE public.nl_highest_rated_id_seq
 ALTER TABLE public.nl_highest_rated_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3522 (class 0 OID 0)
+-- TOC entry 3533 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: nl_highest_rated_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -707,7 +707,7 @@ CREATE SEQUENCE public.nl_historical_price_id_seq
 ALTER TABLE public.nl_historical_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3523 (class 0 OID 0)
+-- TOC entry 3534 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: nl_historical_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -752,12 +752,51 @@ CREATE SEQUENCE public.nl_product_id_seq
 ALTER TABLE public.nl_product_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3524 (class 0 OID 0)
+-- TOC entry 3535 (class 0 OID 0)
 -- Dependencies: 208
 -- Name: nl_product_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
 
 ALTER SEQUENCE public.nl_product_id_seq OWNED BY public.nl_product.id;
+
+
+--
+-- TOC entry 246 (class 1259 OID 26364)
+-- Name: registered_user; Type: TABLE; Schema: public; Owner: justinandronicos
+--
+
+CREATE TABLE public.registered_user (
+    id integer NOT NULL,
+    username character varying(15) NOT NULL,
+    password character varying(128)
+);
+
+
+ALTER TABLE public.registered_user OWNER TO justinandronicos;
+
+--
+-- TOC entry 245 (class 1259 OID 26362)
+-- Name: registered_user_id_seq; Type: SEQUENCE; Schema: public; Owner: justinandronicos
+--
+
+CREATE SEQUENCE public.registered_user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.registered_user_id_seq OWNER TO justinandronicos;
+
+--
+-- TOC entry 3536 (class 0 OID 0)
+-- Dependencies: 245
+-- Name: registered_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
+--
+
+ALTER SEQUENCE public.registered_user_id_seq OWNED BY public.registered_user.id;
 
 
 --
@@ -794,7 +833,7 @@ CREATE SEQUENCE public.wm_brand_id_seq
 ALTER TABLE public.wm_brand_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3525 (class 0 OID 0)
+-- TOC entry 3537 (class 0 OID 0)
 -- Dependencies: 206
 -- Name: wm_brand_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -837,7 +876,7 @@ CREATE SEQUENCE public.wm_current_price_id_seq
 ALTER TABLE public.wm_current_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3526 (class 0 OID 0)
+-- TOC entry 3538 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: wm_current_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -880,7 +919,7 @@ CREATE SEQUENCE public.wm_historical_price_id_seq
 ALTER TABLE public.wm_historical_price_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3527 (class 0 OID 0)
+-- TOC entry 3539 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: wm_historical_price_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -920,7 +959,7 @@ CREATE SEQUENCE public.wm_price_file_info_id_seq
 ALTER TABLE public.wm_price_file_info_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3528 (class 0 OID 0)
+-- TOC entry 3540 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: wm_price_file_info_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -965,7 +1004,7 @@ CREATE SEQUENCE public.wm_product_id_seq
 ALTER TABLE public.wm_product_id_seq OWNER TO justinandronicos;
 
 --
--- TOC entry 3529 (class 0 OID 0)
+-- TOC entry 3541 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: wm_product_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: justinandronicos
 --
@@ -974,7 +1013,7 @@ ALTER SEQUENCE public.wm_product_id_seq OWNED BY public.wm_product.id;
 
 
 --
--- TOC entry 3264 (class 2604 OID 25927)
+-- TOC entry 3270 (class 2604 OID 25927)
 -- Name: brand_url_dict id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -982,7 +1021,7 @@ ALTER TABLE ONLY public.brand_url_dict ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3274 (class 2604 OID 26079)
+-- TOC entry 3280 (class 2604 OID 26079)
 -- Name: ff_best_selling id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -990,7 +1029,7 @@ ALTER TABLE ONLY public.ff_best_selling ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 3256 (class 2604 OID 25850)
+-- TOC entry 3262 (class 2604 OID 25850)
 -- Name: ff_brand id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -998,7 +1037,7 @@ ALTER TABLE ONLY public.ff_brand ALTER COLUMN id SET DEFAULT nextval('public.ff_
 
 
 --
--- TOC entry 3266 (class 2604 OID 25954)
+-- TOC entry 3272 (class 2604 OID 25954)
 -- Name: ff_current_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1006,7 +1045,7 @@ ALTER TABLE ONLY public.ff_current_price ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3276 (class 2604 OID 26105)
+-- TOC entry 3282 (class 2604 OID 26105)
 -- Name: ff_highest_rated id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1014,7 +1053,7 @@ ALTER TABLE ONLY public.ff_highest_rated ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3270 (class 2604 OID 26018)
+-- TOC entry 3276 (class 2604 OID 26018)
 -- Name: ff_historical_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1022,7 +1061,7 @@ ALTER TABLE ONLY public.ff_historical_price ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3260 (class 2604 OID 25884)
+-- TOC entry 3266 (class 2604 OID 25884)
 -- Name: ff_product id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1030,7 +1069,7 @@ ALTER TABLE ONLY public.ff_product ALTER COLUMN id SET DEFAULT nextval('public.f
 
 
 --
--- TOC entry 3257 (class 2604 OID 25858)
+-- TOC entry 3263 (class 2604 OID 25858)
 -- Name: gm_brand id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1038,7 +1077,7 @@ ALTER TABLE ONLY public.gm_brand ALTER COLUMN id SET DEFAULT nextval('public.gm_
 
 
 --
--- TOC entry 3267 (class 2604 OID 25970)
+-- TOC entry 3273 (class 2604 OID 25970)
 -- Name: gm_current_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1046,7 +1085,7 @@ ALTER TABLE ONLY public.gm_current_price ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3271 (class 2604 OID 26034)
+-- TOC entry 3277 (class 2604 OID 26034)
 -- Name: gm_historical_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1054,7 +1093,7 @@ ALTER TABLE ONLY public.gm_historical_price ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3261 (class 2604 OID 25894)
+-- TOC entry 3267 (class 2604 OID 25894)
 -- Name: gm_product id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1062,7 +1101,7 @@ ALTER TABLE ONLY public.gm_product ALTER COLUMN id SET DEFAULT nextval('public.g
 
 
 --
--- TOC entry 3273 (class 2604 OID 26066)
+-- TOC entry 3279 (class 2604 OID 26066)
 -- Name: nl_best_selling id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1070,7 +1109,7 @@ ALTER TABLE ONLY public.nl_best_selling ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 3255 (class 2604 OID 25842)
+-- TOC entry 3261 (class 2604 OID 25842)
 -- Name: nl_brand id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1078,7 +1117,7 @@ ALTER TABLE ONLY public.nl_brand ALTER COLUMN id SET DEFAULT nextval('public.nl_
 
 
 --
--- TOC entry 3265 (class 2604 OID 25938)
+-- TOC entry 3271 (class 2604 OID 25938)
 -- Name: nl_current_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1086,7 +1125,7 @@ ALTER TABLE ONLY public.nl_current_price ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3275 (class 2604 OID 26092)
+-- TOC entry 3281 (class 2604 OID 26092)
 -- Name: nl_highest_rated id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1094,7 +1133,7 @@ ALTER TABLE ONLY public.nl_highest_rated ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3269 (class 2604 OID 26002)
+-- TOC entry 3275 (class 2604 OID 26002)
 -- Name: nl_historical_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1102,7 +1141,7 @@ ALTER TABLE ONLY public.nl_historical_price ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3259 (class 2604 OID 25874)
+-- TOC entry 3265 (class 2604 OID 25874)
 -- Name: nl_product id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1110,7 +1149,15 @@ ALTER TABLE ONLY public.nl_product ALTER COLUMN id SET DEFAULT nextval('public.n
 
 
 --
--- TOC entry 3258 (class 2604 OID 25866)
+-- TOC entry 3283 (class 2604 OID 26367)
+-- Name: registered_user id; Type: DEFAULT; Schema: public; Owner: justinandronicos
+--
+
+ALTER TABLE ONLY public.registered_user ALTER COLUMN id SET DEFAULT nextval('public.registered_user_id_seq'::regclass);
+
+
+--
+-- TOC entry 3264 (class 2604 OID 25866)
 -- Name: wm_brand id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1118,7 +1165,7 @@ ALTER TABLE ONLY public.wm_brand ALTER COLUMN id SET DEFAULT nextval('public.wm_
 
 
 --
--- TOC entry 3268 (class 2604 OID 25986)
+-- TOC entry 3274 (class 2604 OID 25986)
 -- Name: wm_current_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1126,7 +1173,7 @@ ALTER TABLE ONLY public.wm_current_price ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3272 (class 2604 OID 26050)
+-- TOC entry 3278 (class 2604 OID 26050)
 -- Name: wm_historical_price id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1134,7 +1181,7 @@ ALTER TABLE ONLY public.wm_historical_price ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3263 (class 2604 OID 25914)
+-- TOC entry 3269 (class 2604 OID 25914)
 -- Name: wm_price_file_info id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1142,7 +1189,7 @@ ALTER TABLE ONLY public.wm_price_file_info ALTER COLUMN id SET DEFAULT nextval('
 
 
 --
--- TOC entry 3262 (class 2604 OID 25904)
+-- TOC entry 3268 (class 2604 OID 25904)
 -- Name: wm_product id; Type: DEFAULT; Schema: public; Owner: justinandronicos
 --
 
@@ -1150,7 +1197,7 @@ ALTER TABLE ONLY public.wm_product ALTER COLUMN id SET DEFAULT nextval('public.w
 
 
 --
--- TOC entry 3332 (class 2606 OID 26331)
+-- TOC entry 3339 (class 2606 OID 26331)
 -- Name: alembic_version alembic_version_pkc; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1159,7 +1206,7 @@ ALTER TABLE ONLY public.alembic_version
 
 
 --
--- TOC entry 3306 (class 2606 OID 25932)
+-- TOC entry 3313 (class 2606 OID 25932)
 -- Name: brand_url_dict brand_url_dict_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1168,7 +1215,7 @@ ALTER TABLE ONLY public.brand_url_dict
 
 
 --
--- TOC entry 3326 (class 2606 OID 26081)
+-- TOC entry 3333 (class 2606 OID 26081)
 -- Name: ff_best_selling ff_best_selling_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1177,7 +1224,7 @@ ALTER TABLE ONLY public.ff_best_selling
 
 
 --
--- TOC entry 3280 (class 2606 OID 25852)
+-- TOC entry 3287 (class 2606 OID 25852)
 -- Name: ff_brand ff_brand_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1186,7 +1233,7 @@ ALTER TABLE ONLY public.ff_brand
 
 
 --
--- TOC entry 3310 (class 2606 OID 25959)
+-- TOC entry 3317 (class 2606 OID 25959)
 -- Name: ff_current_price ff_current_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1195,7 +1242,7 @@ ALTER TABLE ONLY public.ff_current_price
 
 
 --
--- TOC entry 3330 (class 2606 OID 26107)
+-- TOC entry 3337 (class 2606 OID 26107)
 -- Name: ff_highest_rated ff_highest_rated_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1204,7 +1251,7 @@ ALTER TABLE ONLY public.ff_highest_rated
 
 
 --
--- TOC entry 3318 (class 2606 OID 26023)
+-- TOC entry 3325 (class 2606 OID 26023)
 -- Name: ff_historical_price ff_historical_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1213,7 +1260,7 @@ ALTER TABLE ONLY public.ff_historical_price
 
 
 --
--- TOC entry 3290 (class 2606 OID 25888)
+-- TOC entry 3297 (class 2606 OID 25888)
 -- Name: ff_product ff_product_code_key; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1222,7 +1269,7 @@ ALTER TABLE ONLY public.ff_product
 
 
 --
--- TOC entry 3292 (class 2606 OID 25886)
+-- TOC entry 3299 (class 2606 OID 25886)
 -- Name: ff_product ff_product_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1231,7 +1278,7 @@ ALTER TABLE ONLY public.ff_product
 
 
 --
--- TOC entry 3282 (class 2606 OID 25860)
+-- TOC entry 3289 (class 2606 OID 25860)
 -- Name: gm_brand gm_brand_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1240,7 +1287,7 @@ ALTER TABLE ONLY public.gm_brand
 
 
 --
--- TOC entry 3312 (class 2606 OID 25975)
+-- TOC entry 3319 (class 2606 OID 25975)
 -- Name: gm_current_price gm_current_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1249,7 +1296,7 @@ ALTER TABLE ONLY public.gm_current_price
 
 
 --
--- TOC entry 3320 (class 2606 OID 26039)
+-- TOC entry 3327 (class 2606 OID 26039)
 -- Name: gm_historical_price gm_historical_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1258,7 +1305,7 @@ ALTER TABLE ONLY public.gm_historical_price
 
 
 --
--- TOC entry 3294 (class 2606 OID 25898)
+-- TOC entry 3301 (class 2606 OID 25898)
 -- Name: gm_product gm_product_code_key; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1267,7 +1314,7 @@ ALTER TABLE ONLY public.gm_product
 
 
 --
--- TOC entry 3296 (class 2606 OID 25896)
+-- TOC entry 3303 (class 2606 OID 25896)
 -- Name: gm_product gm_product_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1276,7 +1323,7 @@ ALTER TABLE ONLY public.gm_product
 
 
 --
--- TOC entry 3324 (class 2606 OID 26068)
+-- TOC entry 3331 (class 2606 OID 26068)
 -- Name: nl_best_selling nl_best_selling_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1285,7 +1332,7 @@ ALTER TABLE ONLY public.nl_best_selling
 
 
 --
--- TOC entry 3278 (class 2606 OID 25844)
+-- TOC entry 3285 (class 2606 OID 25844)
 -- Name: nl_brand nl_brand_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1294,7 +1341,7 @@ ALTER TABLE ONLY public.nl_brand
 
 
 --
--- TOC entry 3308 (class 2606 OID 25943)
+-- TOC entry 3315 (class 2606 OID 25943)
 -- Name: nl_current_price nl_current_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1303,7 +1350,7 @@ ALTER TABLE ONLY public.nl_current_price
 
 
 --
--- TOC entry 3328 (class 2606 OID 26094)
+-- TOC entry 3335 (class 2606 OID 26094)
 -- Name: nl_highest_rated nl_highest_rated_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1312,7 +1359,7 @@ ALTER TABLE ONLY public.nl_highest_rated
 
 
 --
--- TOC entry 3316 (class 2606 OID 26007)
+-- TOC entry 3323 (class 2606 OID 26007)
 -- Name: nl_historical_price nl_historical_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1321,7 +1368,7 @@ ALTER TABLE ONLY public.nl_historical_price
 
 
 --
--- TOC entry 3286 (class 2606 OID 25878)
+-- TOC entry 3293 (class 2606 OID 25878)
 -- Name: nl_product nl_product_code_key; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1330,7 +1377,7 @@ ALTER TABLE ONLY public.nl_product
 
 
 --
--- TOC entry 3288 (class 2606 OID 25876)
+-- TOC entry 3295 (class 2606 OID 25876)
 -- Name: nl_product nl_product_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1339,7 +1386,25 @@ ALTER TABLE ONLY public.nl_product
 
 
 --
--- TOC entry 3284 (class 2606 OID 25868)
+-- TOC entry 3341 (class 2606 OID 26369)
+-- Name: registered_user registered_user_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
+--
+
+ALTER TABLE ONLY public.registered_user
+    ADD CONSTRAINT registered_user_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3343 (class 2606 OID 26371)
+-- Name: registered_user registered_user_username_key; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
+--
+
+ALTER TABLE ONLY public.registered_user
+    ADD CONSTRAINT registered_user_username_key UNIQUE (username);
+
+
+--
+-- TOC entry 3291 (class 2606 OID 25868)
 -- Name: wm_brand wm_brand_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1348,7 +1413,7 @@ ALTER TABLE ONLY public.wm_brand
 
 
 --
--- TOC entry 3314 (class 2606 OID 25991)
+-- TOC entry 3321 (class 2606 OID 25991)
 -- Name: wm_current_price wm_current_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1357,7 +1422,7 @@ ALTER TABLE ONLY public.wm_current_price
 
 
 --
--- TOC entry 3322 (class 2606 OID 26055)
+-- TOC entry 3329 (class 2606 OID 26055)
 -- Name: wm_historical_price wm_historical_price_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1366,7 +1431,7 @@ ALTER TABLE ONLY public.wm_historical_price
 
 
 --
--- TOC entry 3302 (class 2606 OID 25921)
+-- TOC entry 3309 (class 2606 OID 25921)
 -- Name: wm_price_file_info wm_price_file_info_hash_key; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1375,7 +1440,7 @@ ALTER TABLE ONLY public.wm_price_file_info
 
 
 --
--- TOC entry 3304 (class 2606 OID 25919)
+-- TOC entry 3311 (class 2606 OID 25919)
 -- Name: wm_price_file_info wm_price_file_info_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1384,7 +1449,7 @@ ALTER TABLE ONLY public.wm_price_file_info
 
 
 --
--- TOC entry 3298 (class 2606 OID 25908)
+-- TOC entry 3305 (class 2606 OID 25908)
 -- Name: wm_product wm_product_code_key; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1393,7 +1458,7 @@ ALTER TABLE ONLY public.wm_product
 
 
 --
--- TOC entry 3300 (class 2606 OID 25906)
+-- TOC entry 3307 (class 2606 OID 25906)
 -- Name: wm_product wm_product_pkey; Type: CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1402,7 +1467,7 @@ ALTER TABLE ONLY public.wm_product
 
 
 --
--- TOC entry 3370 (class 2606 OID 26082)
+-- TOC entry 3381 (class 2606 OID 26082)
 -- Name: ff_best_selling ff_best_selling_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1411,7 +1476,7 @@ ALTER TABLE ONLY public.ff_best_selling
 
 
 --
--- TOC entry 3336 (class 2606 OID 26168)
+-- TOC entry 3347 (class 2606 OID 26168)
 -- Name: ff_brand ff_brand_gm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1420,7 +1485,7 @@ ALTER TABLE ONLY public.ff_brand
 
 
 --
--- TOC entry 3337 (class 2606 OID 26238)
+-- TOC entry 3348 (class 2606 OID 26238)
 -- Name: ff_brand ff_brand_nl_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1429,7 +1494,7 @@ ALTER TABLE ONLY public.ff_brand
 
 
 --
--- TOC entry 3338 (class 2606 OID 26243)
+-- TOC entry 3349 (class 2606 OID 26243)
 -- Name: ff_brand ff_brand_wm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1438,7 +1503,7 @@ ALTER TABLE ONLY public.ff_brand
 
 
 --
--- TOC entry 3362 (class 2606 OID 25960)
+-- TOC entry 3373 (class 2606 OID 25960)
 -- Name: ff_current_price ff_current_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1447,7 +1512,7 @@ ALTER TABLE ONLY public.ff_current_price
 
 
 --
--- TOC entry 3372 (class 2606 OID 26108)
+-- TOC entry 3383 (class 2606 OID 26108)
 -- Name: ff_highest_rated ff_highest_rated_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1456,7 +1521,7 @@ ALTER TABLE ONLY public.ff_highest_rated
 
 
 --
--- TOC entry 3366 (class 2606 OID 26024)
+-- TOC entry 3377 (class 2606 OID 26024)
 -- Name: ff_historical_price ff_historical_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1465,7 +1530,7 @@ ALTER TABLE ONLY public.ff_historical_price
 
 
 --
--- TOC entry 3350 (class 2606 OID 26163)
+-- TOC entry 3361 (class 2606 OID 26163)
 -- Name: ff_product ff_product_brand_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1474,7 +1539,7 @@ ALTER TABLE ONLY public.ff_product
 
 
 --
--- TOC entry 3352 (class 2606 OID 26198)
+-- TOC entry 3363 (class 2606 OID 26198)
 -- Name: ff_product ff_product_gm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1483,7 +1548,7 @@ ALTER TABLE ONLY public.ff_product
 
 
 --
--- TOC entry 3351 (class 2606 OID 26188)
+-- TOC entry 3362 (class 2606 OID 26188)
 -- Name: ff_product ff_product_nl_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1492,7 +1557,7 @@ ALTER TABLE ONLY public.ff_product
 
 
 --
--- TOC entry 3349 (class 2606 OID 26118)
+-- TOC entry 3360 (class 2606 OID 26118)
 -- Name: ff_product ff_product_wm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1501,7 +1566,7 @@ ALTER TABLE ONLY public.ff_product
 
 
 --
--- TOC entry 3339 (class 2606 OID 26123)
+-- TOC entry 3350 (class 2606 OID 26123)
 -- Name: gm_brand gm_brand_ff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1510,7 +1575,7 @@ ALTER TABLE ONLY public.gm_brand
 
 
 --
--- TOC entry 3340 (class 2606 OID 26138)
+-- TOC entry 3351 (class 2606 OID 26138)
 -- Name: gm_brand gm_brand_nl_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1519,7 +1584,7 @@ ALTER TABLE ONLY public.gm_brand
 
 
 --
--- TOC entry 3341 (class 2606 OID 26143)
+-- TOC entry 3352 (class 2606 OID 26143)
 -- Name: gm_brand gm_brand_wm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1528,7 +1593,7 @@ ALTER TABLE ONLY public.gm_brand
 
 
 --
--- TOC entry 3363 (class 2606 OID 25976)
+-- TOC entry 3374 (class 2606 OID 25976)
 -- Name: gm_current_price gm_current_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1537,7 +1602,7 @@ ALTER TABLE ONLY public.gm_current_price
 
 
 --
--- TOC entry 3367 (class 2606 OID 26040)
+-- TOC entry 3378 (class 2606 OID 26040)
 -- Name: gm_historical_price gm_historical_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1546,7 +1611,7 @@ ALTER TABLE ONLY public.gm_historical_price
 
 
 --
--- TOC entry 3355 (class 2606 OID 26233)
+-- TOC entry 3366 (class 2606 OID 26233)
 -- Name: gm_product gm_product_brand_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1555,7 +1620,7 @@ ALTER TABLE ONLY public.gm_product
 
 
 --
--- TOC entry 3356 (class 2606 OID 26248)
+-- TOC entry 3367 (class 2606 OID 26248)
 -- Name: gm_product gm_product_ff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1564,7 +1629,7 @@ ALTER TABLE ONLY public.gm_product
 
 
 --
--- TOC entry 3354 (class 2606 OID 26228)
+-- TOC entry 3365 (class 2606 OID 26228)
 -- Name: gm_product gm_product_nl_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1573,7 +1638,7 @@ ALTER TABLE ONLY public.gm_product
 
 
 --
--- TOC entry 3353 (class 2606 OID 26128)
+-- TOC entry 3364 (class 2606 OID 26128)
 -- Name: gm_product gm_product_wm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1582,7 +1647,7 @@ ALTER TABLE ONLY public.gm_product
 
 
 --
--- TOC entry 3369 (class 2606 OID 26069)
+-- TOC entry 3380 (class 2606 OID 26069)
 -- Name: nl_best_selling nl_best_selling_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1591,7 +1656,7 @@ ALTER TABLE ONLY public.nl_best_selling
 
 
 --
--- TOC entry 3335 (class 2606 OID 26208)
+-- TOC entry 3346 (class 2606 OID 26208)
 -- Name: nl_brand nl_brand_ff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1600,7 +1665,7 @@ ALTER TABLE ONLY public.nl_brand
 
 
 --
--- TOC entry 3333 (class 2606 OID 26148)
+-- TOC entry 3344 (class 2606 OID 26148)
 -- Name: nl_brand nl_brand_gm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1609,7 +1674,7 @@ ALTER TABLE ONLY public.nl_brand
 
 
 --
--- TOC entry 3334 (class 2606 OID 26153)
+-- TOC entry 3345 (class 2606 OID 26153)
 -- Name: nl_brand nl_brand_wm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1618,7 +1683,7 @@ ALTER TABLE ONLY public.nl_brand
 
 
 --
--- TOC entry 3361 (class 2606 OID 25944)
+-- TOC entry 3372 (class 2606 OID 25944)
 -- Name: nl_current_price nl_current_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1627,7 +1692,7 @@ ALTER TABLE ONLY public.nl_current_price
 
 
 --
--- TOC entry 3371 (class 2606 OID 26095)
+-- TOC entry 3382 (class 2606 OID 26095)
 -- Name: nl_highest_rated nl_highest_rated_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1636,7 +1701,7 @@ ALTER TABLE ONLY public.nl_highest_rated
 
 
 --
--- TOC entry 3365 (class 2606 OID 26008)
+-- TOC entry 3376 (class 2606 OID 26008)
 -- Name: nl_historical_price nl_historical_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1645,7 +1710,7 @@ ALTER TABLE ONLY public.nl_historical_price
 
 
 --
--- TOC entry 3348 (class 2606 OID 26223)
+-- TOC entry 3359 (class 2606 OID 26223)
 -- Name: nl_product nl_product_brand_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1654,7 +1719,7 @@ ALTER TABLE ONLY public.nl_product
 
 
 --
--- TOC entry 3347 (class 2606 OID 26203)
+-- TOC entry 3358 (class 2606 OID 26203)
 -- Name: nl_product nl_product_ff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1663,7 +1728,7 @@ ALTER TABLE ONLY public.nl_product
 
 
 --
--- TOC entry 3346 (class 2606 OID 26133)
+-- TOC entry 3357 (class 2606 OID 26133)
 -- Name: nl_product nl_product_gm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1672,7 +1737,7 @@ ALTER TABLE ONLY public.nl_product
 
 
 --
--- TOC entry 3345 (class 2606 OID 26113)
+-- TOC entry 3356 (class 2606 OID 26113)
 -- Name: nl_product nl_product_wm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1681,7 +1746,7 @@ ALTER TABLE ONLY public.nl_product
 
 
 --
--- TOC entry 3343 (class 2606 OID 26178)
+-- TOC entry 3354 (class 2606 OID 26178)
 -- Name: wm_brand wm_brand_ff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1690,7 +1755,7 @@ ALTER TABLE ONLY public.wm_brand
 
 
 --
--- TOC entry 3344 (class 2606 OID 26218)
+-- TOC entry 3355 (class 2606 OID 26218)
 -- Name: wm_brand wm_brand_gm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1699,7 +1764,7 @@ ALTER TABLE ONLY public.wm_brand
 
 
 --
--- TOC entry 3342 (class 2606 OID 26173)
+-- TOC entry 3353 (class 2606 OID 26173)
 -- Name: wm_brand wm_brand_nl_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1708,7 +1773,7 @@ ALTER TABLE ONLY public.wm_brand
 
 
 --
--- TOC entry 3364 (class 2606 OID 25992)
+-- TOC entry 3375 (class 2606 OID 25992)
 -- Name: wm_current_price wm_current_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1717,7 +1782,7 @@ ALTER TABLE ONLY public.wm_current_price
 
 
 --
--- TOC entry 3368 (class 2606 OID 26056)
+-- TOC entry 3379 (class 2606 OID 26056)
 -- Name: wm_historical_price wm_historical_price_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1726,7 +1791,7 @@ ALTER TABLE ONLY public.wm_historical_price
 
 
 --
--- TOC entry 3358 (class 2606 OID 26183)
+-- TOC entry 3369 (class 2606 OID 26183)
 -- Name: wm_product wm_product_brand_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1735,7 +1800,7 @@ ALTER TABLE ONLY public.wm_product
 
 
 --
--- TOC entry 3359 (class 2606 OID 26193)
+-- TOC entry 3370 (class 2606 OID 26193)
 -- Name: wm_product wm_product_ff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1744,7 +1809,7 @@ ALTER TABLE ONLY public.wm_product
 
 
 --
--- TOC entry 3360 (class 2606 OID 26213)
+-- TOC entry 3371 (class 2606 OID 26213)
 -- Name: wm_product wm_product_gm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1753,7 +1818,7 @@ ALTER TABLE ONLY public.wm_product
 
 
 --
--- TOC entry 3357 (class 2606 OID 26158)
+-- TOC entry 3368 (class 2606 OID 26158)
 -- Name: wm_product wm_product_nl_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: justinandronicos
 --
 
@@ -1761,7 +1826,7 @@ ALTER TABLE ONLY public.wm_product
     ADD CONSTRAINT wm_product_nl_id_fkey FOREIGN KEY (nl_id) REFERENCES public.nl_product(id);
 
 
--- Completed on 2021-11-21 19:34:27 AEDT
+-- Completed on 2021-12-22 15:23:02 AEDT
 
 --
 -- PostgreSQL database dump complete

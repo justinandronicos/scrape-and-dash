@@ -3,7 +3,7 @@ from scrapy.utils.log import configure_logging
 
 configure_logging(install_root_handler=False)
 logging.basicConfig(
-    filename="log.txt", format="%(levelname)s: %(message)s", level=logging.INFO
+    filename="logs/log.txt", format="%(levelname)s: %(message)s", level=logging.INFO
 )
 
 # USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
@@ -18,7 +18,7 @@ logging.getLogger("scrapy").propagate = False
 COOKIES_ENABLED = False
 AUTOTHROTTLE_ENABLED = True
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 3
-# AUTOTHROTTLE_DEBUG: True
+# AUTOTHROTTLE_DEBUG = True
 
 DOWNLOADER_MIDDLEWARES = {
     "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,

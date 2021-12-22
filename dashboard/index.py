@@ -1,8 +1,10 @@
-from dash import dcc, html
+from dash import dcc, html, no_update
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from importlib import import_module
+from flask_login import logout_user, current_user
 
+# from sqlalchemy.orm.base import PASSIVE_NO_FETCH
 from app import app
 
 # Import all pages in the app
@@ -14,13 +16,16 @@ from apps import (
     products_viewer,
     home,
     file_upload,
+    create_user,
+    login,
+    logout,
 )
 
 # Building the navigation bar
 # https://github.com/facultyai/dash-bootstrap-components/blob/master/examples/advanced-component-usage/Navbars.py
 dropdown = dbc.DropdownMenu(
     children=[
-        dbc.DropdownMenuItem("Home", href="/home"),
+        dbc.DropdownMenuItem("Home", href="/"),
         dbc.DropdownMenuItem("View Products", href="/products"),
         dbc.DropdownMenuItem("View Brands", href="/brands"),
         dbc.DropdownMenuItem("Compare by Brand", href="/brand-comparison"),
@@ -48,7 +53,7 @@ navbar = dbc.Navbar(
                     align="center",
                     className="g-0",
                 ),
-                href="/home",
+                href="/",
             ),
             dbc.NavbarToggler(id="navbar-toggler2"),
             dbc.Collapse(
@@ -60,6 +65,20 @@ navbar = dbc.Navbar(
                 ),
                 id="navbar-collapse2",
                 navbar=True,
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.A("Create User", href="/create-user", className="ml-2"),
+                        id="create-user-link",
+                    ),
+                    dbc.Col(
+                        html.A("Logout", href="/logout", className="ml-2"),
+                        id="logout-link",
+                    ),
+                ],
+                align="center",
+                className="g-0",
             ),
         ]
     ),
@@ -97,28 +116,81 @@ app.validation_layout = html.Div(
             "compare_by_brand",
             "highest_rated_viewer",
             "products_viewer",
-            "file_upload"
+            "file_upload",
+            "home",
+            "create_user",
+            "login",
+            "logout",
         ]
     ]
 )
 
 
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
-def display_page(pathname):
-    if pathname == "/products":
-        return products_viewer.layout
-    elif pathname == "/brands":
-        return brand_viewer.layout
-    elif pathname == "/brand-comparison":
-        return compare_by_brand.layout
-    elif pathname == "/best-selling":
-        return best_selling_viewer.layout
-    elif pathname == "/highest-rated":
-        return highest_rated_viewer.layout
-    elif pathname == "/file-upload":
-        return file_upload.layout
+@app.callback(
+    Output("logout-link", "style"),
+    Output("create-user-link", "style"),
+    Input("url", "pathname"),
+)
+def show_hide_links(pathname):
+    """Dynamically shows or hides logout and create user links in navbar based on whether
+    user is logged in"""
+    if current_user.is_authenticated:
+        return {"display": "inline-block"}, {"display": "inline-block"}
     else:
-        return home.layout
+        return {"display": "none"}, {"display": "none"}
+
+
+@app.callback(
+    Output("page-content", "children"),
+    Input("url", "pathname"),
+)
+def display_page(pathname):
+    """Handles layout display/routing with authentication check"""
+    if current_user.is_authenticated:
+        if pathname == "/products":
+            return products_viewer.layout
+        elif pathname == "/brands":
+            return brand_viewer.layout
+        elif pathname == "/brand-comparison":
+            return compare_by_brand.layout
+        elif pathname == "/best-selling":
+            return best_selling_viewer.layout
+        elif pathname == "/highest-rated":
+            return highest_rated_viewer.layout
+        elif pathname == "/file-upload":
+            return file_upload.layout
+        elif pathname == "/file-upload":
+            return file_upload.layout
+        elif pathname == "/create-user":
+            return create_user.layout
+        elif pathname == "/logout":
+            logout_user()
+            return logout.layout
+        elif pathname == "/" or pathname == "/home":
+            return home.layout
+        else:
+            return "404"
+    else:
+        return login.layout
+
+
+# else:
+# if pathname == "/create":
+#     return create_user.layout
+# else:
+# return login.layout
+
+
+# @app.callback(
+#     Output("url", "pathname"),
+#     Input("url", "pathname"),
+#     # State("url", "pathname"),
+# )
+# def display_login(content):
+#     if current_user.is_authenticated:
+#         return no_update
+#     else:
+#         return "/login"
 
 
 if __name__ == "__main__":

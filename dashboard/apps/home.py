@@ -14,7 +14,7 @@ layout = html.Div(
                     [
                         dbc.Col(
                             html.H1(
-                                "Welcome to the Project Scrape dashboard",
+                                "Welcome to the Scrape & Dash dashboard",
                                 className="text-center",
                             ),
                             className="mb-5 mt-5",
@@ -25,7 +25,8 @@ layout = html.Div(
                     [
                         dbc.Col(
                             html.H5(
-                                children="This app contains product data from 4 different ecommerce websites"
+                                children="This dashboard contains product and pricing data from 4 different ecommerce websites",
+                                className="text-center",
                             ),
                             className="mb-4",
                         )

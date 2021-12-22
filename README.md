@@ -39,7 +39,7 @@ A file parsing module is used to process a product pricing file for the base web
 
 ### **Dashboard**
 
-The dashboard web app provides multiple pages for analytics on each website and comparative views. It also supports data extraction via CSV downloads on each page. Dash was chosen due to its abstraction of React components and Plotly.js graphing into a Flask-based web app using reactive and functional Python callbacks.
+The dashboard web app provides multiple pages for analytics on each website and comparative views. It supports authentication and user creation as well as data extraction via CSV downloads on each page. Dash was chosen due to its abstraction of React components and Plotly.js graphing into a Flask-based web app using reactive and functional Python callbacks.
 
 - [x] Website comparison by brand
 - [x] Brand viewer
@@ -47,7 +47,7 @@ The dashboard web app provides multiple pages for analytics on each website and 
 - [x] Best-selling products viewer
 - [x] Highest-rated products viewer
 - [x] Product file upload
-- [ ] User creation and authorisation using Flask-Login
+- [x] User creation and authentication using Flask-Login
 - [ ] Product search
 - [ ] Aggregation graphing (e.g. price time-series comparison)
 
@@ -63,7 +63,7 @@ Product matching will be achieved through a process of data cleaning and transfo
 
 ### **Database**
 
-A relational database is used due to the inherent data relations between websites (brands, products, prices).
+A PostgreSQL relational database is used due to the inherent data relations between websites (brands, products, prices).
 
 Each website has the following tables:
 
@@ -76,7 +76,7 @@ Each website has the following tables:
 
 A *BrandUrlDict* table is used to store a JSON of Brand:URL key-value pairs used by product spiders to store brands.
 A *price file info* table is used to store file related information for the base website to only update the tables when the file has been updated.
-A *users* table is also used to store created users for authentication purposes.
+A *RegisteredUser* table is also used to store created users for authentication purposes.
 
 ## Deployment
 
@@ -87,6 +87,7 @@ This approach allows 24/7 uptime and responsiveness for the web app while taking
 ## Known Issues and Future Optimisations
 
 - [ ] Convert models schema file and items file to a PyPI package due to shared schema
+- [ ] Further reduce requests from spiders to minimise load on websites
 - [ ] Batch queries for scraper pipelines
 - [ ] Database Indexing
 - [ ] Typed data classes with Pydantic for scraper Items
