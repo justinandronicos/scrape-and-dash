@@ -86,8 +86,8 @@ This approach allows 24/7 uptime and responsiveness for the web app while taking
 
 ## Known Issues and Future Optimisations
 
+- [x] Further reduce requests from spiders to minimise load on websites
 - [ ] Convert models schema file and items file to a PyPI package due to shared schema
-- [ ] Further reduce requests from spiders to minimise load on websites
 - [ ] Batch queries for scraper pipelines
 - [ ] Database Indexing
 - [ ] Typed data classes with Pydantic for scraper Items

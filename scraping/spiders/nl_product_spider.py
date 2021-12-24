@@ -76,22 +76,19 @@ class NLProductSpider(Spider):
         brand_url_dict: dict = (
             session.query(BrandUrlDict).filter_by(website=website_name).first().data
         )
-
-        print(f"\n {len(brand_url_dict)} \n")
-
-        for brand_name, brand_url in brand_url_dict.items():
-            api_url = nl_url_builder(brand=brand_name, page_number=1)
-            yield Request(
-                url=api_url,
-                callback=self.parse,
-                meta={
-                    "total_results": 0,
-                    "max_results": 500,
-                    "page_number": 1,
-                    "brand_name": brand_name,
-                    "brand_url": brand_url,
-                },
-            )
+        brand_set: set = set()
+        api_url = nl_url_builder(page_number=1)
+        yield Request(
+            url=api_url,
+            callback=self.parse,
+            meta={
+                "total_results": 0,
+                "max_results": 500,
+                "page_number": 1,
+                "brand_url_dict": brand_url_dict,
+                "brand_set": brand_set,
+            },
+        )
 
     def parse(
         self, response: response
@@ -106,13 +103,8 @@ class NLProductSpider(Spider):
         total_results = response.meta.get("total_results")
         current_page = response.meta.get("page_number")
         max_results = response.meta.get("max_results")
-        brand_name = response.meta.get("brand_name")
-        brand_url = response.meta.get("brand_url")
-
-        brand_item = BrandItem()
-        brand_item["name"] = brand_name
-        brand_item["url"] = brand_url
-        yield brand_item
+        brand_url_dict = response.meta.get("brand_url_dict")
+        brand_set = response.meta.get("brand_set")
 
         print(f"procesing: {response.url}")
 
@@ -142,6 +134,18 @@ class NLProductSpider(Spider):
             )
 
             variant_count = 1
+
+            # Check if brand has been added to brand_table
+            if brand not in brand_set:
+                brand_set.add(brand)
+                brand_item = BrandItem()
+                brand_item["name"] = brand
+                try:
+                    brand_item["url"] = brand_url_dict[brand]
+                except KeyError:
+                    brand_item["url"] = None
+
+                yield brand_item
 
             # letters = list(string.ascii_uppercase)
             for product_variant in variant_list:
@@ -190,11 +194,12 @@ class NLProductSpider(Spider):
         # results_left = total_results - ((previous_page * 500) + len(results_list))
         # if results_left > 0:
         total_pages = json_data["pagination"]["totalPages"]
+        total_results = json_data["pagination"]["totalResults"]
         pages_left = total_pages - current_page
         if pages_left > 0:
             count += 1  # Check all extra pages have been scraped
             new_page = current_page + 1
-            next_url = nl_url_builder(brand=brand_name, page_number=new_page)
+            next_url = nl_url_builder(page_number=new_page)
             print("Found url: {}".format(next_url))  # Write a debug statement
             yield Request(
                 url=next_url,
@@ -203,6 +208,8 @@ class NLProductSpider(Spider):
                     "total_results": total_results,
                     "max_results": max_results,
                     "page_number": new_page,
+                    "brand_url_dict": brand_url_dict,
+                    "brand_set": brand_set,
                 },
             )
 

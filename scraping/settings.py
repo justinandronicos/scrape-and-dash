@@ -17,8 +17,8 @@ logging.basicConfig(
 logging.getLogger("scrapy").propagate = False
 COOKIES_ENABLED = False
 AUTOTHROTTLE_ENABLED = True
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 0.5
-# DOWNLOAD_DELAY = 1.0  # Minimum 1 second per request
+AUTOTHROTTLE_TARGET_CONCURRENCY = 0.5
+DOWNLOAD_DELAY = 1.0  # Minimum 1 second per request
 AUTOTHROTTLE_DEBUG = True
 
 DOWNLOADER_MIDDLEWARES = {

@@ -11,22 +11,16 @@ import urllib.parse
 cfg = yaml.safe_load(open("config.yaml"))
 
 
-def nl_url_builder(brand: str, page_number: int):
-    """Helper function called by NL Product Spider to build GET request url string for all brands
+def nl_url_builder(page_number: int):
+    """Helper function called by NL Product Spider to build GET request url string for all products
 
     Args:
-        brand (str): Target brand to build api url for
         page_number (int): Sets page number for nl api request.
 
     Returns:
         str: Complete API GET request string
     """
-    api_url: str = (
-        cfg["nl_api_url"]
-        + urllib.parse.quote(brand)
-        + "&resultsPerPage=500&page="
-        + str(page_number)
-    )
+    api_url: str = cfg["nl_api_url"] + "&resultsPerPage=500&page=" + str(page_number)
     return api_url
 
 
