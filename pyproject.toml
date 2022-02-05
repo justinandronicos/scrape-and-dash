@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "scrape_and_dash"
+version = "0.1.0"
+description = "An e-commerce product analytics dashboard app that scrapes and matches product and pricing data from multiple websites."
+authors = ["Justin Andronicos"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dash = "^2.1.0"
+dash-bootstrap-components = "^1.0.2"
+dedupe = "^2.0.13"
+Flask-Login = "^0.5.0"
+numpy = "^1.22.2"
+pandas = "^1.4.0"
+psycopg2 = "^2.9.3"
+PyYAML = "^6.0"
+requests = "^2.27.1"
+Scrapy = "^2.5.1"
+SQLAlchemy = "^1.4.31"
+Werkzeug = "^2.0.2"
+
+[tool.poetry.dev-dependencies]
+alembic = "^1.7.6"
+bandit = "^1.7.2"
+black = "^22.1.0"
+flake8 = "^4.0.1"
+mypy = "^0.931"
+pytest = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

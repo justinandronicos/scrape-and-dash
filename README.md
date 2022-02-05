@@ -1,6 +1,6 @@
 # Scrape & Dash
 
-An e-commerce data scraping and dashboard app for competitor tracking.
+An e-commerce data scraping, product matching, and dashboard app for competitor tracking.
 
 This repository is a mirror of the project's private repository that has been **cleaned of sensitive data** including the **config file** required to run the app. This is kept **in sync** with the private repo via a GitHub Action using [Git Sync](https://github.com/wei/git-sync).
 
@@ -17,6 +17,7 @@ This repository is a mirror of the project's private repository that has been **
   - [Deployment](#deployment)
   - [Known Issues and Future Optimisations](#known-issues-and-future-optimisations)
   - [Dependencies](#dependencies)
+  - [Dev Dependencies](#dev-dependencies)
   
 ## Overview
 
@@ -95,10 +96,8 @@ This approach allows 24/7 uptime and responsiveness for the web app while taking
 - [ ] Reduce initial database calls in dashboard and implement caching to improve performance as database size scales
 - [ ] Add tests & spider contracts
 
-
 ## Dependencies
 
-- [Alembic](https://github.com/sqlalchemy/alembic)
 - [Dash](https://github.com/plotly/dash)
 - [Dash Bootstrap Components](https://github.com/facultyai/dash-bootstrap-components)
 - [Dedupe](https://github.com/dedupeio/dedupe)
@@ -111,3 +110,12 @@ This approach allows 24/7 uptime and responsiveness for the web app while taking
 - [Scrapy](https://github.com/scrapy/scrapy)
 - [SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy)
 - [Werkzeug](https://github.com/pallets/werkzeug)
+
+## Dev Dependencies
+
+- [Alembic](https://github.com/sqlalchemy/alembic)
+- [Bandit](https://github.com/PyCQA/bandit)
+- [Black](https://github.com/psf/black)
+- [Flake8](https://github.com/PyCQA/flake8)
+- [Mypy](https://github.com/python/mypy)
+- [Pytest](https://github.com/pytest-dev/pytest)
