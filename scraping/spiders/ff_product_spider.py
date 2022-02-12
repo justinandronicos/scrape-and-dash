@@ -149,31 +149,37 @@ class FFProductSpider(Spider):
                 empty_count += 1
                 print(product_result)
 
-            variant_label = ""
+            variant_label = None
 
             # Check if brand has been added to brand_table
             if brand not in brand_set:
                 brand_set.add(brand)
-                brand_item = BrandItem()
-                brand_item["name"] = brand
-                try:
-                    brand_item["url"] = brand_url_dict[brand]
-                except KeyError:
-                    brand_item["url"] = None
+                brand_url = brand_url_dict.get(brand)
+                brand_item = BrandItem(name=brand, url=brand_url)
 
                 yield brand_item
 
-            product = ProductItem()
+            product = ProductItem(
+                code=id,
+                brand=brand,
+                product_name=product_name,
+                variant=variant_label,
+                retail_price=retail_price,
+                on_sale=on_sale,
+                current_price=current_price,
+                in_stock=in_stock,
+                product_url=product_url,
+            )
 
-            product["code"] = id
-            product["brand"] = brand
-            product["product_name"] = product_name
-            product["variant"] = variant_label
-            product["retail_price"] = retail_price
-            product["on_sale"] = on_sale
-            product["current_price"] = current_price
-            product["in_stock"] = in_stock
-            product["product_url"] = product_url
+            # product["code"] = id
+            # product["brand"] = brand
+            # product["product_name"] = product_name
+            # product["variant"] = variant_label
+            # product["retail_price"] = retail_price
+            # product["on_sale"] = on_sale
+            # product["current_price"] = current_price
+            # product["in_stock"] = in_stock
+            # product["product_url"] = product_url
 
             product_list.append(product)
 

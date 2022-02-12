@@ -1,5 +1,4 @@
 # from sqlalchemy.sql.expression import and_
-from sqlalchemy.sql.expression import null
 from models_items.items import BrandItem, ProductItem, RankedProductItem
 
 # from psycopg2.extras import Json
@@ -130,8 +129,8 @@ class StoreBrandsPipeline(object):
             else (None, None)
         )
 
-        brand.name = item["name"]
-        brand.url = item["url"]
+        brand.name = item.name
+        brand.url = item.url
 
         # check whether the brand exists
         existing_brand = session.query(brand_table).filter_by(name=brand.name).first()
@@ -140,7 +139,7 @@ class StoreBrandsPipeline(object):
             if existing_brand.url != brand.url:
                 logging.log(
                     logging.INFO,
-                    f"Updating url for duplicate brand item: {item['name']}",
+                    f"Updating url for duplicate brand item: {item.name}",
                 )
                 try:
                     existing_brand.url = brand.url
@@ -152,7 +151,7 @@ class StoreBrandsPipeline(object):
                     session.close()
 
             else:
-                # logging.log(logging.INFO, f"Duplicate brand item found: {item['name']}")
+                # logging.log(logging.INFO, f"Duplicate brand item found: {item.name}")
                 session.close()
         else:
             try:
@@ -202,20 +201,20 @@ class StoreProductsPipeline(object):
             else (None, None, None)
         )
 
-        product.code = item["code"]
-        product.name = item["product_name"]
+        product.code = item.code
+        product.name = item.product_name
         try:
             product.brand_id = (
-                session.query(brand_table).filter_by(name=item["brand"]).first().id
+                session.query(brand_table).filter_by(name=item.brand).first().id
             )
         except AttributeError:
             print(
-                f"brand: {item['brand']}\t prod_table: {product_table}\t prod: {product}\t brand_table: {brand_table}"
+                f"brand: {item.brand}\t prod_table: {product_table}\t prod: {product}\t brand_table: {brand_table}"
             )
             session.close()
 
-        product.variant = item["variant"]
-        product.url = item["product_url"]
+        product.variant = item.variant
+        product.url = item.product_url
 
         # product.retail_price = product_dict["retail_price"]
         # product.on_sale = product_dict["on_sale"]
@@ -229,7 +228,7 @@ class StoreProductsPipeline(object):
         if existing_product is not None:  # the current product exists
             # logging.log(
             #     logging.INFO,
-            #     f"Duplicate product item found: {item['product_name']}",
+            #     f"Duplicate product item found: {item.product_name}",
             # )
             session.close()
 
@@ -260,7 +259,7 @@ class StorePricesPipeline(object):
     ) -> Union[BrandItem, ProductItem]:
         """Save prices in the database
         - If product does not exist yet in current price > saves in current price table
-        - Else if exists and current price timestamp past threshold (>1day?) then update current price table and move old current price to historical prices table
+        - Else if exists and current price timestamp past threshold (>1day) then update current price table and move old current price to historical prices table
         This method is called for every Product Item pipeline component
         Skips any brand items passed
         """
@@ -283,17 +282,18 @@ class StorePricesPipeline(object):
 
         try:
             price_object.product_id = (
-                session.query(product_table).filter_by(code=item["code"]).first().id
+                session.query(product_table).filter_by(code=item.code).first().id
             )
         except Exception:
-            print(f"Could not find product: {item['code']}\t {item['name']}")
+            print(f"Could not find product: {item.code}\t {item.product_name}")
             session.close()
 
-        price_object.time_stamp = datetime.now().isoformat(timespec="seconds")
-        price_object.retail_price = item["retail_price"]
-        price_object.on_sale = item["on_sale"]
-        price_object.current_price = item["current_price"]
-        price_object.in_stock = item["in_stock"]
+        current_dtime = datetime.now()
+        price_object.time_stamp = current_dtime.isoformat(timespec="seconds")
+        price_object.retail_price = item.retail_price
+        price_object.on_sale = item.on_sale
+        price_object.current_price = item.current_price
+        price_object.in_stock = item.in_stock
 
         # check whether the price exists in current price table
         existing_price_obj = (
@@ -301,11 +301,14 @@ class StorePricesPipeline(object):
             .filter_by(product_id=price_object.product_id)
             .first()
         )
+
+        # price exists
         if existing_price_obj is not None:
-            # Check if current price is over 24hours old
+            # Check if current price is at least 24hours old
             # insertion_date = datetime.fromisoformat(existing_price_obj.time_stamp)
-            time_between_insertion = datetime.now() - existing_price_obj.time_stamp
-            if time_between_insertion.days > 1:
+            time_between_insertion = current_dtime - existing_price_obj.time_stamp
+            if time_between_insertion.days >= 1:
+                # if time_between_insertion.total_seconds() >= 86400:
                 historical_price = (
                     NLHistoricalPrice()
                     if spider.name == "nl_products"
@@ -350,6 +353,7 @@ class StorePricesPipeline(object):
                     session.commit()
 
                 except Exception:
+                    print("Failed")
                     session.rollback()
                     raise
 
@@ -361,6 +365,9 @@ class StorePricesPipeline(object):
                 #     logging.INFO,
                 #     f"Update for product_id {price_object.product_id} less than 24hours old, no update was made.",
                 # )
+                # print(
+                #     f"Update for product_id {price_object.product_id} less than 24hours old, no update was made."
+                # )
                 session.close()
 
         else:
@@ -369,6 +376,7 @@ class StorePricesPipeline(object):
                 session.commit()
 
             except Exception:
+                print("Failed")
                 session.rollback()
                 raise
 
@@ -411,47 +419,50 @@ class StoreRankedProductsPipeline(object):
     ) -> RankedProductItem:
         """Save ranked products (best selling, highest rated) in the database
         This method is called for every RankedProduct Item pipeline component
-        List of best selling and highest rated are updated if > 24 hours since last update (timestamp), old items still kept in table
+        List of best selling and highest rated are updated if at least 24 hours since last update (timestamp), old items still kept in table
         Highest Rated Items have the additional fields of 'rating' and 'review_count'
         """
 
         session = self.Session()
 
-        filter = item["filter"]
+        filter = item.filter
 
         ranked_product_table, product_table = self.cases[(spider.name, filter)]
         ranked_product = ranked_product_table()
 
-        ranked_product.category = item["category"]
-        ranked_product.ranking = item["ranking"]
-        ranked_product.time_stamp = datetime.now().isoformat(timespec="seconds")
+        ranked_product.category = item.category
+        ranked_product.ranking = item.ranking
+
+        current_dtime = datetime.now()
+        ranked_product.time_stamp = current_dtime.isoformat(timespec="seconds")
 
         if filter == "highest_rated":
-            ranked_product.rating = item["rating"]
-            ranked_product.review_count = item["review_count"]
+            ranked_product.rating = item.rating
+            ranked_product.review_count = item.review_count
 
         try:
             ranked_product.product_id = (
-                session.query(product_table).filter_by(code=item["code"]).first().id
+                session.query(product_table).filter_by(code=item.code).first().id
             )
         except Exception:
             print(
-                f"Could not find ranked product: {item['code']}, {item['name']}, {item['category']}"
+                f"Could not find ranked product: {item.code}, {item.name}, {item.category}"
             )
             session.close()
 
         # Get latest product with same ranking and category to check if last date within 24hrs
         latest_equivalent = (
             session.query(ranked_product_table)
-            .filter_by(category=item["category"], ranking=item["ranking"])
+            .filter_by(category=item.category, ranking=item.ranking)
             .order_by(desc("time_stamp"))
             .first()
         )
-        if latest_equivalent is not null:
-            # Check if current ranking is over 24hours old
-            latest_date = latest_equivalent.time_stamp
-            time_between_insertion = datetime.now() - latest_date
-            if time_between_insertion.days < 1:
+        if latest_equivalent is not None:
+            # Check if current ranking is within 24 hours old
+            latest_dtime = latest_equivalent.time_stamp
+            time_between_insertion = current_dtime - latest_dtime
+            if time_between_insertion.days <= 1:
+                # if time_between_insertion.total_seconds() <= 86400:
                 session.close()
                 return item
 
@@ -467,6 +478,7 @@ class StoreRankedProductsPipeline(object):
             session.close()
 
         return item
+
         # # check whether the product already exists in db
         # existing_product = (
         #     session.query(ranked_product_table)

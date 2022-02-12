@@ -76,32 +76,32 @@ def file_parser(
         # These may be used in future
         on_sale = False
         in_stock = True
-        variant = ""
-        product_url = ""
+        variant = None
+        product_url = None
 
         brands_set.add(brand)
 
-        product = ProductItem()
+        product = ProductItem(
+            code=code,
+            brand=brand,
+            product_name=product_name,
+            variant=variant,
+            retail_price=retail_price,
+            on_sale=on_sale,
+            current_price=wm_price,
+            in_stock=in_stock,
+            product_url=product_url,
+        )
 
-        # product.id = code
-        # product.brand = brand
-        # product.product_name = product_name
-        # product.variant = variant
-        # product.retail_price = retail_price
-        # product.on_sale = on_sale
-        # product.current_price = wm_price
-        # product.in_stock = in_stock
-        # product.product_url = product_url
-
-        product["code"] = code
-        product["brand"] = brand
-        product["product_name"] = product_name
-        product["variant"] = variant
-        product["retail_price"] = retail_price
-        product["on_sale"] = on_sale
-        product["current_price"] = wm_price
-        product["in_stock"] = in_stock
-        product["product_url"] = product_url
+        # product["code"] = code
+        # product["brand"] = brand
+        # product["product_name"] = product_name
+        # product["variant"] = variant
+        # product["retail_price"] = retail_price
+        # product["on_sale"] = on_sale
+        # product["current_price"] = wm_price
+        # product["in_stock"] = in_stock
+        # product["product_url"] = product_url
 
         product_list.append(product)
 

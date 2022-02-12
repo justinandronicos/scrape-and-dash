@@ -11,7 +11,7 @@ from scrapy.loader import ItemLoader
 
 from models_items.items import RankedProductItem
 from utilities import best_selling_url_builder, highest_rated_url_builder
-
+from dataclasses import asdict
 import logging
 from scrapy.utils.log import configure_logging
 from scrapy.crawler import CrawlerProcess
@@ -83,36 +83,32 @@ class NLCategorySpider(Spider):
             del results[-1]
 
         for index, product_result in enumerate(results):
-            uid = product_result["uid"]
+            code = product_result["uid"] + "/" + str(1)  # Will match first variant only
             name = product_result["name"].replace("&amp;", "&")
-            category = category
             ranking = index + 1
             # brand = product_result["brand"]
             # product_name = product_result["name"].replace("&amp;", "&")
 
-            ranked_product = RankedProductItem()
+            rating = float(product_result.get("rating", 0))  # 5 star rating (float)
+            review_count = int(product_result.get("ratingCount", 0))
 
-            ranked_product["code"] = uid + "/" + str(1)  # Will match first variant only
-
-            ranked_product["category"] = category
-            ranked_product["ranking"] = ranking
-            ranked_product["filter"] = filter
-            ranked_product["name"] = name
+            ranked_product = RankedProductItem(
+                code=code,
+                category=category,
+                ranking=ranking,
+                filter=filter,
+                name=name,
+                rating=rating,
+                review_count=review_count,
+            )
 
             if filter == "best_selling":
-                # > best_selling_pipeline
+                # to best_selling_pipeline
                 if category not in selling_list.keys():
                     selling_list[category] = [ranked_product]
-
                 else:
                     selling_list[category].append(ranked_product)
-
             elif filter == "highest_rated":
-                rating = float(product_result["rating"])  # 5 star rating (float)
-                review_count = product_result["ratingCount"]
-                ranked_product["rating"] = rating
-                ranked_product["review_count"] = review_count
-
                 # > highest_rated_pipeline
                 if category not in rated_list.keys():
                     rated_list[category] = [ranked_product]

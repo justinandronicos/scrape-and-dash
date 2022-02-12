@@ -1,25 +1,22 @@
-from sqlalchemy.engine import interfaces
-from sqlalchemy import create_engine, Column, ForeignKey, MetaData, Table
-from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import (
-    Integer,
-    String,
-    Numeric,
-    DateTime,
-    Boolean,
-    Float,
-    Date,
-    Sequence,
-    LargeBinary,
-    JSON,
-)
-from sqlalchemy.sql.expression import null, true
-from sqlalchemy.sql.schema import PrimaryKeyConstraint
+import yaml
 from flask_login import UserMixin
-from yaml import safe_load
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    Numeric,
+    String,
+    create_engine,
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
 
-cfg = safe_load(open("config.yaml"))
+cfg = yaml.safe_load(open("config.yaml"))
 
 Base = declarative_base()
 

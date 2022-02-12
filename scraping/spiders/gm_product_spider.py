@@ -116,9 +116,9 @@ class GMProductSpider(Spider):
 
         prod_list.append(json_data)
 
-        brand_item = BrandItem()
-        brand_item["name"] = brand
-        brand_item["url"] = brand_url
+        brand_item = BrandItem(name=brand, url=brand_url)
+        # brand_item["name"] = brand
+        # brand_item["url"] = brand_url
 
         yield brand_item
 
@@ -142,7 +142,9 @@ class GMProductSpider(Spider):
                     )
 
                     variant_size = product_variant["grams"]
-                    variant_label = str(variant_size) + "g" if variant_size > 0 else ""
+                    variant_label = (
+                        str(variant_size) + "g" if variant_size > 0 else None
+                    )
 
                     retail_price = Decimal(product_variant["price"])
                     current_price = Decimal(product_variant["price"])
@@ -159,18 +161,29 @@ class GMProductSpider(Spider):
                     print(product_result)
 
                 variant_count += 1
+                product_url = None
 
-                product = ProductItem()
+                product = ProductItem(
+                    code=id,
+                    brand=brand,
+                    product_name=product_name,
+                    variant=variant_label,
+                    retail_price=retail_price,
+                    on_sale=on_sale,
+                    current_price=current_price,
+                    in_stock=in_stock,
+                    product_url=product_url,
+                )
 
-                product["code"] = id
-                product["brand"] = brand
-                product["product_name"] = product_name
-                product["variant"] = variant_label
-                product["retail_price"] = retail_price
-                product["on_sale"] = on_sale
-                product["current_price"] = current_price
-                product["in_stock"] = in_stock
-                product["product_url"] = ""
+                # product["code"] = id
+                # product["brand"] = brand
+                # product["product_name"] = product_name
+                # product["variant"] = variant_label
+                # product["retail_price"] = retail_price
+                # product["on_sale"] = on_sale
+                # product["current_price"] = current_price
+                # product["in_stock"] = in_stock
+                # product["product_url"] = ""
 
                 product_list.append(product)
 

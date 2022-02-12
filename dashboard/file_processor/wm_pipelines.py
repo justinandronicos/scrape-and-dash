@@ -68,10 +68,10 @@ def wm_products_pipeline(product_list: list[ProductItem], session: Session) -> N
     product_table = WMProduct
     for product in product_list:
         product_obj = WMProduct()
-        product_obj.code = product["code"]
-        product_obj.name = product["product_name"]
+        product_obj.code = product.code
+        product_obj.name = product.product_name
         product_obj.brand_id = (
-            session.query(WMBrand).filter_by(name=product["brand"]).first().id
+            session.query(WMBrand).filter_by(name=product.brand).first().id
         )
         product_obj.variant = None
         # product_obj.retail_price = product_dict["retail_price"]
@@ -87,7 +87,7 @@ def wm_products_pipeline(product_list: list[ProductItem], session: Session) -> N
         if existing_product is not None:  # the current product exists
             logging.log(
                 logging.INFO,
-                f"Duplicate product item found: {product['product_name']},\t code: {product['code']}",
+                f"Duplicate product item found: {product.product_name},\t code: {product.code}",
             )
             session.close()
 
@@ -107,7 +107,7 @@ def wm_products_pipeline(product_list: list[ProductItem], session: Session) -> N
 def wm_price_pipeline(product_list: list[ProductItem], session: Session) -> None:
     """Save wm prices in the database
     - If product does not exist yet in current price > saves in current price table
-    - Else if exists and current price timestamp past threshold (>1day?) then update current price table and move old current price to historical prices table
+    - Else if exists and current price timestamp past threshold (>=24hrs) then update current price table and move old current price to historical prices table
     Args:
         products_list (List): List of ProductItems parsed from wm product csv
         session(Session): Session object for database
@@ -128,16 +128,17 @@ def wm_price_pipeline(product_list: list[ProductItem], session: Session) -> None
         price_object = WMCurrentPrice()
         try:
             price_object.product_id = (
-                session.query(product_table).filter_by(code=product["code"]).first().id
+                session.query(product_table).filter_by(code=product.code).first().id
             )
         except Exception:
-            print(f"Could not find product: {product['code']}\t {product['name']}")
+            print(f"Could not find product: {product.code}\t {product.product_name}")
 
-        price_object.time_stamp = datetime.now().isoformat(timespec="seconds")
-        price_object.retail_price = product["retail_price"]
-        price_object.on_sale = product["on_sale"]
-        price_object.current_price = product["current_price"]
-        price_object.in_stock = product["in_stock"]
+        current_dtime = datetime.now()
+        price_object.time_stamp = current_dtime.isoformat(timespec="seconds")
+        price_object.retail_price = product.retail_price
+        price_object.on_sale = product.on_sale
+        price_object.current_price = product.current_price
+        price_object.in_stock = product.in_stock
 
         # check whether the price exists in current price table
         existing_price_obj = (
@@ -146,10 +147,11 @@ def wm_price_pipeline(product_list: list[ProductItem], session: Session) -> None
             .first()
         )
         if existing_price_obj is not None:
-            # Check if current price is over 24hours old
+            # Check if current price is at least 24hours old
             # insertion_date = datetime.fromisoformat(existing_price_obj.time_stamp)
-            time_between_insertion = datetime.now() - existing_price_obj.time_stamp
-            if time_between_insertion.days > 1:
+            time_between_insertion = current_dtime - existing_price_obj.time_stamp
+            if time_between_insertion.days >= 1:
+                # if time_between_insertion.total_seconds() >= 86400:
                 historical_price = WMHistoricalPrice()
 
                 # for historical, existing in zip(historical_price, existing_price_obj):
