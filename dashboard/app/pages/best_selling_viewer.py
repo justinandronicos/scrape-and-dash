@@ -2,7 +2,6 @@ import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 import pandas as pd
-import yaml
 from sqlalchemy import Date
 from datetime import date
 
@@ -23,9 +22,9 @@ from models_items.models import (
     NLBrand,
     NLProduct,
 )
-from app import app, session, engine
+from app import app, session, engine, cfg
 
-cfg = yaml.safe_load(open("config.yaml"))
+# cfg = yaml.safe_load(open("config.yaml"))
 # engine = create_engine(cfg["db_connection_string"], echo=True)
 
 website_names = cfg["website_names"]

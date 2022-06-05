@@ -21,7 +21,7 @@ This repository is a mirror of the project's private repository that has been **
   
 ## Overview
 
-Scrape & Dash is a Python project that combines 3 distinct components into an automated e-commerce competitor tracking solution. It is comprised of a scraping service using [Scrapy](https://github.com/scrapy/scrapy), a dashboard web app using [Dash](https://github.com/plotly/dash) and [Flask](https://github.com/pallets/flask), and a machine learning-based product matching service using [dedupe](https://github.com/dedupeio/dedupe). These all share the same relational database as loosely coupled microservices for independent resource scaling is not needed for the applied use case.
+Scrape & Dash is a Python project that combines 3 distinct components into an automated e-commerce competitor tracking solution. It is comprised of a scraping service using [Scrapy](https://github.com/scrapy/scrapy), a dashboard web app using [Dash](https://github.com/plotly/dash) and [Flask](https://github.com/pallets/flask), and a machine learning-based product matching service using [Dedupe](https://github.com/dedupeio/dedupe). These all share the same PostgreSQL relational database, as loosely coupled microservices for independent resource scaling is not needed for the applied use case.
 
 ## Features
 
@@ -89,11 +89,11 @@ This approach allows 24/7 uptime and responsiveness for the web app while taking
 
 - [x] Further reduce requests from spiders to minimise load on websites
 - [x] Typed dataclasses with data validation for scraper Items
-- [ ] Convert models schema file and items file to a PyPI package due to shared schema
+- [x] Convert models schema file and items file to a PyPI package due to shared schema
+- [ ] Reduce initial database calls in dashboard and implement caching to improve performance as database size scales
 - [ ] Batch queries for scraper pipelines
 - [ ] Database Indexing
 - [ ] Improve asynchronous running of spiders
-- [ ] Reduce initial database calls in dashboard and implement caching to improve performance as database size scales
 - [ ] Add tests & spider contracts
 
 ## Dependencies
@@ -103,10 +103,10 @@ This approach allows 24/7 uptime and responsiveness for the web app while taking
 - [Dedupe](https://github.com/dedupeio/dedupe)
 - [Flask-Login](https://github.com/maxcountryman/flask-login)
 - [NumPy](https://github.com/numpy/numpy)
+- [Models-Items](https://pypi.org/project/models-items/)
 - [Pandas](https://github.com/pandas-dev/pandas)
 - [Psycopg 2](https://github.com/psycopg/psycopg2)
 - [PyYAML](https://github.com/yaml/pyyaml)
-- [Requests](https://github.com/psf/requests)
 - [Scrapy](https://github.com/scrapy/scrapy)
 - [SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy)
 - [Werkzeug](https://github.com/pallets/werkzeug)

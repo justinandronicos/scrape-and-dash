@@ -8,7 +8,7 @@ from flask_login import logout_user, current_user
 from app import app
 
 # Import all pages in the app
-from apps import (
+from pages import (
     best_selling_viewer,
     brand_viewer,
     compare_by_brand,
@@ -109,7 +109,7 @@ app.layout = html.Div(
 # "Complete" layout
 app.validation_layout = html.Div(
     [
-        import_module("apps." + appname).layout
+        import_module("pages." + appname).layout
         for appname in [
             "best_selling_viewer",
             "brand_viewer",
@@ -194,4 +194,7 @@ def display_page(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    # Docker Local
+    # app.run_server(debug=True, host="0.0.0.0", port=8080)
+    # Local
+    app.run_server(debug=True, host="127.0.0.1", port=8050)

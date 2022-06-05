@@ -1,3 +1,5 @@
+# TODO: UNFINISHED
+
 from datetime import date
 import dash
 import numpy as np
@@ -8,13 +10,14 @@ import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
 import yaml
-from sqlalchemy import create_engine, Date
+from sqlalchemy import Date
 from collections import Counter
 
 import time
+import os, sys
 
-# dir = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(dir))
+dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(dir))
 
 # from utilities import get_session
 from models_items.models import (
@@ -171,71 +174,6 @@ brand_dict = {
     "wm": dict.fromkeys(np.sort(wm_df["brand_name"].unique())),
 }
 
-# dates_dict = {
-#     "nl": [
-#         np.append(nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique())
-#     ],
-#     "ff": [
-#         np.append(ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique())
-#     ],
-#     "gm": [
-#         np.append(gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique())
-#     ],
-#     "wm": [
-#         np.append(wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique())
-#     ],
-# }
-
-# date_array = np.intersect1d(
-#     dates_dict["nl"], dates_dict["ff"], dates_dict["gm"], dates_dict["wm"]
-# )
-
-# start = time.time()
-# date_list = []
-# date_list.append(
-#     nl_df["historical_time_stamp"].unique().tolist() + nl_df["time_stamp"].to_list()
-# )
-# date_list.append(
-#     ff_df["historical_time_stamp"].unique().tolist() + ff_df["time_stamp"].to_list()
-# )
-# date_list.append(
-#     gm_df["historical_time_stamp"].unique().tolist() + gm_df["time_stamp"].to_list()
-# )
-# date_list.append(
-#     wm_df["historical_time_stamp"].unique().tolist() + wm_df["time_stamp"].to_list()
-# )
-
-# end = time.time()
-# print(f"\n\n full list Time: {end - start}")
-
-
-# start = time.time()
-# date_array = np.concatenate(
-#     (
-#         np.unique(
-#             np.append(
-#                 nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
-#             )
-#         ),
-#         np.unique(
-#             np.append(
-#                 ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
-#             )
-#         ),
-#         np.unique(
-#             np.append(
-#                 gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
-#             )
-#         ),
-#         np.unique(
-#             np.append(
-#                 wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
-#             )
-#         ),
-#     )
-# )
-# date_array[::-1].sort()
-
 date_dict = {
     "nl": dict.fromkeys(
         sorted(
@@ -283,74 +221,32 @@ date_dict = {
     ),
 }
 
-# date_dict = {
-#     "nl": sorted(
-#         np.unique(
-#             np.append(
-#                 nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()
-#             )
-#         ),
-#         reverse=True,
-#     ),
-#     "ff": sorted(
-#         np.unique(
-#             np.append(
-#                 ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()
-#             )
-#         ),
-#         reverse=True,
-#     ),
-#     "gm": sorted(
-#         np.unique(
-#             np.append(
-#                 gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()
-#             )
-#         ),
-#         reverse=True,
-#     ),
-#     "wm": sorted(
-#         np.unique(
-#             np.append(
-#                 wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
-#             )
-#         ),
-#         reverse=True,
-#     ),
-# }
-
-
-# end = time.time()
-# print(f"\n\n arr Time: {end - start}")
-
-# np.append(nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique()).tolist(),
-# np.append(ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique()),
-# np.append(gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique()),
-# np.append(wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()),
-
-# start = time.time()
-
-# end = time.time()
-# print(f"\n\n arr Time: {end - start}")
-
-# start = time.time()
-# date_list.sort()
-# end = time.time()
-# print(f"\n\n List Time: {end - start}")
-
 table_style = {"display": "inline-block", "margin-right": "10px"}
 
 # TODO: Fix table layout to be horizontally aligned correctly
-layout = html.Div(
+app.layout = html.Div(
     [
         html.Div(html.H2("Websites by Brand"), style={"textAlign": "center"}),
         html.Div(
-            className="cb-filters-row",
+            className="ps-filters-row",
             children=[
+                html.Div(
+                    [
+                        html.B("Product Search"),
+                        dcc.Input(
+                            id="product-search-input",
+                            placeholder="Enter Product Name...",
+                            debounce=True,
+                        ),
+                        # html.Div(id="brand-dd-output-container"),
+                    ],
+                    style={"width": "20%", "textAlign": "center"},
+                ),
                 html.Div(
                     [
                         html.B("Select Websites"),
                         dcc.Checklist(
-                            id="cb-website-checklist",
+                            id="ps-website-checklist",
                             options=[
                                 {"label": website_names["nl"], "value": "nl"},
                                 {"label": website_names["ff"], "value": "ff"},
@@ -360,7 +256,7 @@ layout = html.Div(
                             value=["nl", "ff", "gm", "wm"],
                             labelStyle={"display": "inline-block"},
                         ),
-                        html.Div(id="cb-website-cl-output-container"),
+                        html.Div(id="ps-website-cl-output-container"),
                     ],
                     style={"width": "20%", "textAlign": "center"},
                 ),
@@ -368,31 +264,31 @@ layout = html.Div(
                     [
                         html.B("Brand"),
                         dcc.Dropdown(
-                            id="cb-brand-dropdown",
+                            id="ps-brand-dropdown",
                             placeholder="Select Brand...",
                         ),
-                        html.Div(id="cb-brand-dd-output-container"),
+                        html.Div(id="ps-brand-dd-output-container"),
                     ],
-                    style={"width": "25%", "textAlign": "center"},
+                    style={"width": "20%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
                         html.B("Date"),
                         dcc.Dropdown(
-                            id="cb-date-dropdown",
+                            id="ps-date-dropdown",
                             # options=[{"label": i, "value": i} for i in date_array],
                             # value="latest",
                             # value=date_array[0],
                             clearable=False,
                         ),
-                        html.Div(id="cb-date-dd-output-container"),
+                        html.Div(id="ps-date-dd-output-container"),
                     ],
                     style={"width": "25%", "textAlign": "center"},
                 ),
                 html.Div(
                     [
-                        html.Button("Download CSV", id="cb-btn-csv"),
-                        dcc.Download(id="cb-download-datatable-csv"),
+                        html.Button("Download CSV", id="ps-btn-csv"),
+                        dcc.Download(id="ps-download-datatable-csv"),
                     ],
                     style={"width": "10%", "vertical-align": "top"},
                 ),
@@ -404,17 +300,17 @@ layout = html.Div(
             },
         ),
         html.Div(
-            className="cb-tables-container",
+            className="ps-tables-container",
             children=[
                 html.Div(
-                    id="cb-nl-table-container",
+                    id="ps-nl-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["nl"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="cb-nl-table",
+                            id="ps-nl-table",
                             # columns=[{"name": i, "id": i} for i in nl_df.columns],
                             # data=nl_df.to_dict("records"),
                         ),
@@ -422,14 +318,14 @@ layout = html.Div(
                     style=table_style,
                 ),
                 html.Div(
-                    id="cb-ff-table-container",
+                    id="ps-ff-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["ff"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="cb-ff-table",
+                            id="ps-ff-table",
                             # columns=[{"name": i, "id": i} for i in ff_df.columns],
                             # data=ff_df.to_dict("records"),
                         ),
@@ -437,14 +333,14 @@ layout = html.Div(
                     style=table_style,
                 ),
                 html.Div(
-                    id="cb-gm-table-container",
+                    id="ps-gm-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["gm"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="cb-gm-table",
+                            id="ps-gm-table",
                             # columns=[{"name": i, "id": i} for i in gm_df.columns],
                             # data=gm_df.to_dict("records"),
                         ),
@@ -452,38 +348,20 @@ layout = html.Div(
                     style=table_style,
                 ),
                 html.Div(
-                    id="cb-wm-table-container",
+                    id="ps-wm-table-container",
                     children=[
                         html.Div(
                             html.B(cfg["website_names"]["wm"]),
                             style={"textAlign": "center"},
                         ),
                         dash_table.DataTable(
-                            id="cb-wm-table",
+                            id="ps-wm-table",
                             # columns=[{"name": i, "id": i} for i in wm_df.columns],
                             # data=wm_df.to_dict("records"),
                         ),
                     ],
                     style=table_style,
                 ),
-                # html.Div(
-                #     # html.Div(html.B(cfg["website_names"]["wm"])),
-                #     id="wm-table-container",
-                #     children=[
-                #         html.Div(
-                #             [
-                #                 dash_table.DataTable(
-                #                     id="wm-table",
-                #                     columns=[
-                #                         {"name": i, "id": i} for i in wm_df.columns
-                #                     ],
-                #                     data=wm_df.to_dict("records"),
-                #                 )
-                #             ]
-                #         )
-                #     ],
-                #     style={"display": "inline-block"},
-                # ),
             ],
             style={"display": "inline-block"},
         ),
@@ -492,9 +370,9 @@ layout = html.Div(
 
 
 @app.callback(
-    Output("cb-date-dropdown", "options"),
-    Output("cb-date-dropdown", "value"),
-    Input("cb-website-checklist", "value"),
+    Output("ps-date-dropdown", "options"),
+    Output("ps-date-dropdown", "value"),
+    Input("ps-website-checklist", "value"),
 )
 def update_date_options(selected_websites):
     """Updates date options based on selected websites and selects latest available date as default
@@ -517,8 +395,8 @@ def update_date_options(selected_websites):
 
 
 @app.callback(
-    Output("cb-brand-dropdown", "options"),
-    Input("cb-website-checklist", "value"),
+    Output("ps-brand-dropdown", "options"),
+    Input("ps-website-checklist", "value"),
 )
 def update_brand_options(selected_websites):
     filtered_brands = []
@@ -536,44 +414,6 @@ def update_brand_options(selected_websites):
 
     return [{"label": i, "value": i} for i in filtered_brands]
 
-    # start = time.time()
-    # arr_list = []
-    # first_website = selected_websites[0]
-    # for website in selected_websites[1:]:  # Skip first
-    #     arr_list.append(brand_dict[website])
-    # [np.intersect1d(first_website, A_i) for A_i in arr_list]
-    # for idx, website in enumerate(selected_websites):
-    #     next_website = selected_websites[idx + 1]
-    #     arr_list[idx] = np.intersect1d(brand_dict[website], brand_dict[next_website])
-
-    # for website in selected_websites:
-    #     brands_list.append(brand_dict[website].copy())
-    # # brands_list.append(*selected_websites.copy())
-    # cnt = Counter(brands_list)
-    # new_list = [k for k, v in cnt.items() if v > 1]
-
-    # end = time.time()
-    # print(f"\n\n List Time: {end - start}")
-
-    # start = time.time()
-    # brands_array = np.concatenate(*selected_websites)
-    # # creates an array of indices, sorted by unique element
-    # idx_sort = np.argsort(brands_array)
-    # # sorts records array so all unique elements are together
-    # sorted_records_array = brands_array[idx_sort]
-    # # returns the unique values, the index of the first occurrence of a value, and the count for each element
-    # vals, idx_start, count = np.unique(
-    #     sorted_records_array, return_counts=True, return_index=True
-    # )
-    # # creates an array of indices, sorted by unique element
-    # res = np.split(idx_sort, idx_start[1:])
-    # # filter them with respect to their size, keeping only items occurring more than once
-    # vals = vals[count > 1]
-    # res = filter(lambda x: x.size > 1, res)
-
-    # end = time.time()
-    # print(f"\n\n Arr Time: {end - start}")
-
 
 def filter_table_by_brand(df, selected_brand):
     filtered_df = df.loc[df["brand_name"] == selected_brand]
@@ -582,29 +422,12 @@ def filter_table_by_brand(df, selected_brand):
 
 def filter_table_by_date(website_df, selected_date, date_options):
     dates = [x["value"] for x in date_options]
-    # print(f"\n\n Sorted: {dates}")
-    # print(f"\n\n Selected: {selected_date}")
-    # print(f"\n\n df: {website_df}")
-    # formatted_date = date.fromisoformat(selected_date)
-    # print(f"DATE: {str(formatted_date)}")
-    # print(f"DATE: {dates[0]}")
     if selected_date == dates[0]:
         filtered_df = website_df[
             website_df.columns.difference(
                 ["historical_time_stamp", "historical_current_price"]
             )
         ]
-        #                          (
-        #     [
-        #         # "historical_retail_price",
-        #         "historical_time_stamp",
-        #         # "historical_on_sale",
-        #         "historical_current_price",
-        #         # "historical_in_stock",
-        #     ],
-        #     axis=1,
-        #     inplace=False,
-        # )
         filtered_df = filtered_df.drop_duplicates()
     else:
         filtered_df = website_df[
@@ -612,27 +435,20 @@ def filter_table_by_date(website_df, selected_date, date_options):
                 ["retail_price", "time_stamp", "on_sale", "current_price", "in_stock"]
             )
         ]
-        # filtered_df = website_df.drop(
-        #     ["retail_price", "time_stamp", "on_sale", "current_price", "in_stock"],
-        #     axis=1,
-        #     inplace=False,
-        # )
-        # print(f"\n\n filtered df: {filtered_df}")
         filtered_df = filtered_df.loc[
             filtered_df["historical_time_stamp"] == date.fromisoformat(selected_date)
         ]
-        # print(f"\n\n refiltered df: {filtered_df}")
     return filtered_df
 
 
 @app.callback(
-    Output(component_id="cb-nl-table-container", component_property="style"),
-    Output(component_id="cb-ff-table-container", component_property="style"),
-    Output(component_id="cb-gm-table-container", component_property="style"),
-    Output(component_id="cb-wm-table-container", component_property="style"),
-    Input(component_id="cb-website-checklist", component_property="value"),
-    Input(component_id="cb-brand-dropdown", component_property="value"),
-    Input(component_id="cb-date-dropdown", component_property="value"),
+    Output(component_id="ps-nl-table-container", component_property="style"),
+    Output(component_id="ps-ff-table-container", component_property="style"),
+    Output(component_id="ps-gm-table-container", component_property="style"),
+    Output(component_id="ps-wm-table-container", component_property="style"),
+    Input(component_id="ps-website-checklist", component_property="value"),
+    Input(component_id="ps-brand-dropdown", component_property="value"),
+    Input(component_id="ps-date-dropdown", component_property="value"),
 )
 def show_hide_tables(selected_websites, selected_brand, selected_date):
     """Dynamically shows or hides website table container based on:
@@ -640,9 +456,7 @@ def show_hide_tables(selected_websites, selected_brand, selected_date):
     - whether the brand exists on website"""
     hidden = {"display": "none"}
     state_dict = {"nl": hidden, "ff": hidden, "gm": hidden, "wm": hidden}
-    # print(f"DATE SELECTED: {selected_date}")
     for website in selected_websites:
-        # print(f"Dict for {website}: {date_dict[website]}     ")
         if (
             selected_brand in brand_dict[website]
             and date.fromisoformat(selected_date) in date_dict[website]
@@ -652,14 +466,14 @@ def show_hide_tables(selected_websites, selected_brand, selected_date):
 
 
 @app.callback(
-    [Output("cb-nl-table", "data"), Output("cb-nl-table", "columns")],
-    [Output("cb-ff-table", "data"), Output("cb-ff-table", "columns")],
-    [Output("cb-gm-table", "data"), Output("cb-gm-table", "columns")],
-    [Output("cb-wm-table", "data"), Output("cb-wm-table", "columns")],
-    Input("cb-website-checklist", "value"),
-    Input("cb-date-dropdown", "value"),
-    Input("cb-date-dropdown", "options"),
-    Input("cb-brand-dropdown", "value"),
+    [Output("ps-nl-table", "data"), Output("ps-nl-table", "columns")],
+    [Output("ps-ff-table", "data"), Output("ps-ff-table", "columns")],
+    [Output("ps-gm-table", "data"), Output("ps-gm-table", "columns")],
+    [Output("ps-wm-table", "data"), Output("ps-wm-table", "columns")],
+    Input("ps-website-checklist", "value"),
+    Input("ps-date-dropdown", "value"),
+    Input("ps-date-dropdown", "options"),
+    Input("ps-brand-dropdown", "value"),
 )
 def update_tables(selected_websites, selected_date, date_options, selected_brand):
     tables_dict = dict.fromkeys(df_dict.keys())
@@ -670,10 +484,8 @@ def update_tables(selected_websites, selected_date, date_options, selected_brand
         if date.fromisoformat(selected_date) in date_dict[website]
         and selected_brand in brand_dict[website]
     ]
-    # print(f"\n\nUpdating: {websites_to_update}")
     for website in websites_to_update:
         df = df_dict[website]
-        # for website, df in df_dict.items():
         filtered_df = filter_table_by_date(df, selected_date, date_options)
         # if selected_brand is not None:
         filtered_df = filter_table_by_brand(filtered_df, selected_brand)
@@ -691,38 +503,19 @@ def update_tables(selected_websites, selected_date, date_options, selected_brand
         cols_dict["wm"],
     )
 
-    # for website in selected_websites:
-    #     filtered_df = filter_table_by_date(
-    #         df_dict[website], selected_date, date_options
-    #     )
-    #     if selected_brand is not None:
-    #         filtered_df = filter_table_by_brand(filtered_df, selected_brand)
-    #     table_dict[website] = filtered_df
-
-    # ids = website_df.loc[website_df["code"] == "2597686/1"]
-    # print(f"\n\n IDs: {ids['time_stamp']} , {ids['historical_time_stamp']}")
-
-    # filtered_df = filter_table_by_date(website_df, selected_date, date_options)
-
-    # if selected_brand is not None:
-    #     filtered_df = filter_table_by_brand(filtered_df, selected_brand)
-
-    # columns = [{"name": i, "id": i} for i in filtered_df.columns]
-    # return table_dict["nl"].to_dict("records"), columns
-
 
 @app.callback(
-    Output("cb-download-datatable-csv", "data"),
-    Input("cb-btn-csv", "n_clicks"),
+    Output("ps-download-datatable-csv", "data"),
+    Input("ps-btn-csv", "n_clicks"),
     [
-        State("cb-nl-table", "data"),
-        State("cb-ff-table", "data"),
-        State("cb-gm-table", "data"),
-        State("cb-wm-table", "data"),
+        State("ps-nl-table", "data"),
+        State("ps-ff-table", "data"),
+        State("ps-gm-table", "data"),
+        State("ps-wm-table", "data"),
     ],
     # State("website-checklist", "value"),
-    State("cb-date-dropdown", "value"),
-    State("cb-brand-dropdown", "value"),
+    State("ps-date-dropdown", "value"),
+    State("ps-brand-dropdown", "value"),
     prevent_initial_call=True,
 )
 def download_table(
@@ -748,5 +541,5 @@ def download_table(
     )
 
 
-# if __name__ == "__main__":
-#     app.run_server(debug=True)
+if __name__ == "__main__":
+    app.run_server(debug=True)

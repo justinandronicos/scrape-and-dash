@@ -1,20 +1,18 @@
 [tool.poetry]
-name = "scrape_and_dash"
+name = "scrape_and_dash-dashboard"
 version = "0.1.0"
-description = "An e-commerce product analytics dashboard app that scrapes and matches product and pricing data from multiple websites."
+description = "An e-commerce product analytics dashboard app that displays product data scraped and matched from multiple websites."
 authors = ["Justin Andronicos"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 dash = "^2.1.0"
 dash-bootstrap-components = "^1.0.2"
-dedupe = "^2.0.13"
 Flask-Login = "0.6.1"
 numpy = "^1.22.2"
 pandas = "^1.4.0"
 psycopg2 = "^2.9.3"
 PyYAML = "^6.0"
-Scrapy = "^2.5.1"
 SQLAlchemy = "^1.4.31"
 Werkzeug = "^2.0.2"
 models-items = "^0.1.0"

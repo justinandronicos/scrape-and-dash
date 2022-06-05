@@ -4,17 +4,13 @@ from typing import Union
 from dash.dependencies import Input, Output, State
 from dash import dcc, html, dash_table
 import pandas as pd
-from sqlalchemy.sql.sqltypes import Boolean, String
-import yaml
 import dash_bootstrap_components as dbc
 from file_processor import wm_processor
 from models_items.models import WMPriceFileInfo
 
 # external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
-from app import session, engine, app
-
-cfg = yaml.safe_load(open("config.yaml"))
+from app import session, app
 
 layout = html.Div(
     [

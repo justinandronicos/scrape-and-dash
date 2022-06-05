@@ -5,8 +5,6 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
-import yaml
-
 from sqlalchemy import func
 
 # import os
@@ -25,9 +23,9 @@ from models_items.models import (
     NLProduct,
     WMProduct,
 )
-from app import session, engine, app
+from app import app, session, engine, cfg
 
-cfg = yaml.safe_load(open("config.yaml"))
+# cfg = yaml.safe_load(open("config.yaml"))
 
 # session = get_session()
 # engine = session.get_bind()

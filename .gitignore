@@ -152,3 +152,6 @@ cython_debug/
 
 # Dedupe data matching
 data_matching_*
+
+# database dump
+*.dump

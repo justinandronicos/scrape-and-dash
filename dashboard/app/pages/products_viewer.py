@@ -1,5 +1,4 @@
 from datetime import date
-import dash
 import numpy as np
 from dash import dcc
 from dash import html
@@ -7,8 +6,7 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 from dash import dash_table
 from sqlalchemy.orm import session
-import yaml
-from sqlalchemy import create_engine, select, join, cast, Date
+from sqlalchemy import join, cast, Date
 
 # dir = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.dirname(dir))
@@ -32,9 +30,7 @@ from models_items.models import (
     WMHistoricalPrice,
     WMProduct,
 )
-from app import session, engine, app
-
-cfg = yaml.safe_load(open("config.yaml"))
+from app import session, engine, app, cfg
 
 # engine = create_engine(cfg["db_connection_string"], echo=True)
 # connection = engine.connect()

@@ -1,6 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager
 import yaml
 import os
 import sys
@@ -47,10 +47,6 @@ login_manager.login_view = "/login"
 @login_manager.user_loader
 def load_user(user_id):
     return session.query(RegisteredUser).get(int(user_id))
-
-
-# class RegisteredUser(UserMixin, RegisteredUser):
-#     pass
 
 
 # if __name__ == "__main__":
