@@ -109,7 +109,7 @@ app.layout = html.Div(
 # "Complete" layout
 app.validation_layout = html.Div(
     [
-        import_module("pages." + appname).layout
+        import_module("pages." + appname).serve_layout()
         for appname in [
             "best_selling_viewer",
             "brand_viewer",
@@ -148,37 +148,36 @@ def display_page(pathname):
     """Handles layout display/routing with authentication check"""
     if current_user.is_authenticated:
         if pathname == "/products":
-            return products_viewer.layout
+            return products_viewer.serve_layout()
         elif pathname == "/brands":
-            return brand_viewer.layout
+            return brand_viewer.serve_layout()
         elif pathname == "/brand-comparison":
-            return compare_by_brand.layout
+            return compare_by_brand.serve_layout()
         elif pathname == "/best-selling":
-            return best_selling_viewer.layout
+            return best_selling_viewer.serve_layout()
         elif pathname == "/highest-rated":
-            return highest_rated_viewer.layout
+            return highest_rated_viewer.serve_layout()
         elif pathname == "/file-upload":
-            return file_upload.layout
+            return file_upload.serve_layout()
         elif pathname == "/file-upload":
-            return file_upload.layout
+            return file_upload.serve_layout()
         elif pathname == "/create-user":
-            return create_user.layout
+            return create_user.serve_layout()
         elif pathname == "/logout":
             logout_user()
-            return logout.layout
+            return logout.serve_layout()
         elif pathname == "/" or pathname == "/home":
-            return home.layout
+            return home.serve_layout()
         else:
             return "404"
     else:
-        return login.layout
+        return login.serve_layout()
 
-
-# else:
-# if pathname == "/create":
-#     return create_user.layout
-# else:
-# return login.layout
+    # else:
+    # if pathname == "/create":
+    #     return create_user.layout
+    # else:
+    # return login.layout
 
 
 # @app.callback(
@@ -194,7 +193,7 @@ def display_page(pathname):
 
 
 if __name__ == "__main__":
-    # Docker Local
+    ## Docker Local
     # app.run_server(debug=True, host="0.0.0.0", port=8080)
-    # Local
+    ## Local
     app.run_server(debug=True, host="127.0.0.1", port=8050)

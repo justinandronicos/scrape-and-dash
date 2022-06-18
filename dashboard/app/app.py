@@ -4,13 +4,13 @@ from flask_login import LoginManager
 import yaml
 import os
 import sys
+from models_items.models import get_session, RegisteredUser
 
 # load config file
 cfg = yaml.safe_load(open("config.yaml"))
 
-dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(dir))
-from models_items.models import get_session, RegisteredUser
+# dir = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(dir))
 
 session = get_session()
 engine = session.get_bind()
@@ -21,11 +21,7 @@ external_stylesheets = [dbc.themes.LUX]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-# app.config.suppress_callback_exceptions = True
-
-# from dash_app import app
-
-# app = dash.Dash(__name__)
+app.config.suppress_callback_exceptions = True
 
 server = app.server
 

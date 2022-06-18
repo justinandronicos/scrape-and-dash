@@ -1,21 +1,13 @@
 from datetime import date
-import dash
 import numpy as np
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output, State
 import pandas as pd
 from dash import dash_table
-from sqlalchemy.orm import session
-from sqlalchemy import Date
+from sqlalchemy import Date, select
 from collections import Counter
 
-# import time
-
-# dir = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(dir))
-
-# from utilities import get_session
 from models_items.models import (
     FFBrand,
     FFCurrentPrice,
@@ -36,15 +28,10 @@ from models_items.models import (
 )
 from app import session, engine, app, cfg
 
-# engine = create_engine(cfg["db_connection_string"], echo=True)
-
 website_names = cfg["website_names"]
 
-# app = dash.Dash(__name__)
-# from dash_app import app
-
 nl_stmt = (
-    session.query(
+    select(
         NLProduct.name,
         # NLProduct.variant,
         NLBrand.name.label("brand_name"),
@@ -66,13 +53,13 @@ nl_stmt = (
     .join(NLCurrentPrice, NLCurrentPrice.product_id == NLProduct.id)
     .join(NLHistoricalPrice, NLHistoricalPrice.product_id == NLProduct.id)
     .order_by(NLProduct.name)
-).statement
+)
 
 nl_df = pd.read_sql(nl_stmt, con=engine)
 
 
 ff_stmt = (
-    session.query(
+    select(
         FFProduct.name,
         # FFProduct.variant,
         FFBrand.name.label("brand_name"),
@@ -94,13 +81,13 @@ ff_stmt = (
     .join(FFCurrentPrice, FFCurrentPrice.product_id == FFProduct.id)
     .join(FFHistoricalPrice, FFHistoricalPrice.product_id == FFProduct.id)
     .order_by(FFProduct.name)
-).statement
+)
 
 ff_df = pd.read_sql(ff_stmt, con=engine)
 
 
 gm_stmt = (
-    session.query(
+    select(
         GMProduct.name,
         # GMProduct.variant,
         GMBrand.name.label("brand_name"),
@@ -122,13 +109,13 @@ gm_stmt = (
     .join(GMCurrentPrice, GMCurrentPrice.product_id == GMProduct.id)
     .join(GMHistoricalPrice, GMHistoricalPrice.product_id == GMProduct.id)
     .order_by(GMProduct.name)
-).statement
+)
 
 gm_df = pd.read_sql(gm_stmt, con=engine)
 
 
 wm_stmt = (
-    session.query(
+    select(
         WMProduct.name,
         # WMProduct.variant,
         WMBrand.name.label("brand_name"),
@@ -150,7 +137,7 @@ wm_stmt = (
     .join(WMCurrentPrice, WMCurrentPrice.product_id == WMProduct.id)
     .join(WMHistoricalPrice, WMHistoricalPrice.product_id == WMProduct.id)
     .order_by(WMProduct.name)
-).statement
+)
 
 wm_df = pd.read_sql(wm_stmt, con=engine)
 
@@ -336,156 +323,158 @@ date_dict = {
 
 table_style = {"display": "inline-block", "margin-right": "10px"}
 
+
 # TODO: Fix table layout to be horizontally aligned correctly
-layout = html.Div(
-    [
-        html.Div(html.H2("Websites by Brand"), style={"textAlign": "center"}),
-        html.Div(
-            className="cb-filters-row",
-            children=[
-                html.Div(
-                    [
-                        html.B("Select Websites"),
-                        dcc.Checklist(
-                            id="cb-website-checklist",
-                            options=[
-                                {"label": website_names["nl"], "value": "nl"},
-                                {"label": website_names["ff"], "value": "ff"},
-                                {"label": website_names["gm"], "value": "gm"},
-                                {"label": website_names["wm"], "value": "wm"},
-                            ],
-                            value=["nl", "ff", "gm", "wm"],
-                            labelStyle={"display": "inline-block"},
-                        ),
-                        html.Div(id="cb-website-cl-output-container"),
-                    ],
-                    style={"width": "20%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Brand"),
-                        dcc.Dropdown(
-                            id="cb-brand-dropdown",
-                            placeholder="Select Brand...",
-                        ),
-                        html.Div(id="cb-brand-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Date"),
-                        dcc.Dropdown(
-                            id="cb-date-dropdown",
-                            # options=[{"label": i, "value": i} for i in date_array],
-                            # value="latest",
-                            # value=date_array[0],
-                            clearable=False,
-                        ),
-                        html.Div(id="cb-date-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.Button("Download CSV", id="cb-btn-csv"),
-                        dcc.Download(id="cb-download-datatable-csv"),
-                    ],
-                    style={"width": "10%", "vertical-align": "top"},
-                ),
-            ],
-            style={
-                "display": "flex",
-                "horizontalAlign": "center",
-                "vertical-align": "top",
-            },
-        ),
-        html.Div(
-            className="cb-tables-container",
-            children=[
-                html.Div(
-                    id="cb-nl-table-container",
-                    children=[
-                        html.Div(
-                            html.B(cfg["website_names"]["nl"]),
-                            style={"textAlign": "center"},
-                        ),
-                        dash_table.DataTable(
-                            id="cb-nl-table",
-                            # columns=[{"name": i, "id": i} for i in nl_df.columns],
-                            # data=nl_df.to_dict("records"),
-                        ),
-                    ],
-                    style=table_style,
-                ),
-                html.Div(
-                    id="cb-ff-table-container",
-                    children=[
-                        html.Div(
-                            html.B(cfg["website_names"]["ff"]),
-                            style={"textAlign": "center"},
-                        ),
-                        dash_table.DataTable(
-                            id="cb-ff-table",
-                            # columns=[{"name": i, "id": i} for i in ff_df.columns],
-                            # data=ff_df.to_dict("records"),
-                        ),
-                    ],
-                    style=table_style,
-                ),
-                html.Div(
-                    id="cb-gm-table-container",
-                    children=[
-                        html.Div(
-                            html.B(cfg["website_names"]["gm"]),
-                            style={"textAlign": "center"},
-                        ),
-                        dash_table.DataTable(
-                            id="cb-gm-table",
-                            # columns=[{"name": i, "id": i} for i in gm_df.columns],
-                            # data=gm_df.to_dict("records"),
-                        ),
-                    ],
-                    style=table_style,
-                ),
-                html.Div(
-                    id="cb-wm-table-container",
-                    children=[
-                        html.Div(
-                            html.B(cfg["website_names"]["wm"]),
-                            style={"textAlign": "center"},
-                        ),
-                        dash_table.DataTable(
-                            id="cb-wm-table",
-                            # columns=[{"name": i, "id": i} for i in wm_df.columns],
-                            # data=wm_df.to_dict("records"),
-                        ),
-                    ],
-                    style=table_style,
-                ),
-                # html.Div(
-                #     # html.Div(html.B(cfg["website_names"]["wm"])),
-                #     id="wm-table-container",
-                #     children=[
-                #         html.Div(
-                #             [
-                #                 dash_table.DataTable(
-                #                     id="wm-table",
-                #                     columns=[
-                #                         {"name": i, "id": i} for i in wm_df.columns
-                #                     ],
-                #                     data=wm_df.to_dict("records"),
-                #                 )
-                #             ]
-                #         )
-                #     ],
-                #     style={"display": "inline-block"},
-                # ),
-            ],
-            style={"display": "inline-block"},
-        ),
-    ],
-)
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            html.Div(html.H2("Websites by Brand"), style={"textAlign": "center"}),
+            html.Div(
+                className="cb-filters-row",
+                children=[
+                    html.Div(
+                        [
+                            html.B("Select Websites"),
+                            dcc.Checklist(
+                                id="cb-website-checklist",
+                                options=[
+                                    {"label": website_names["nl"], "value": "nl"},
+                                    {"label": website_names["ff"], "value": "ff"},
+                                    {"label": website_names["gm"], "value": "gm"},
+                                    {"label": website_names["wm"], "value": "wm"},
+                                ],
+                                value=["nl", "ff", "gm", "wm"],
+                                labelStyle={"display": "inline-block"},
+                            ),
+                            html.Div(id="cb-website-cl-output-container"),
+                        ],
+                        style={"width": "20%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Brand"),
+                            dcc.Dropdown(
+                                id="cb-brand-dropdown",
+                                placeholder="Select Brand...",
+                            ),
+                            html.Div(id="cb-brand-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Date"),
+                            dcc.Dropdown(
+                                id="cb-date-dropdown",
+                                # options=[{"label": i, "value": i} for i in date_array],
+                                # value="latest",
+                                # value=date_array[0],
+                                clearable=False,
+                            ),
+                            html.Div(id="cb-date-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.Button("Download CSV", id="cb-btn-csv"),
+                            dcc.Download(id="cb-download-datatable-csv"),
+                        ],
+                        style={"width": "10%", "vertical-align": "top"},
+                    ),
+                ],
+                style={
+                    "display": "flex",
+                    "horizontalAlign": "center",
+                    "vertical-align": "top",
+                },
+            ),
+            html.Div(
+                className="cb-tables-container",
+                children=[
+                    html.Div(
+                        id="cb-nl-table-container",
+                        children=[
+                            html.Div(
+                                html.B(cfg["website_names"]["nl"]),
+                                style={"textAlign": "center"},
+                            ),
+                            dash_table.DataTable(
+                                id="cb-nl-table",
+                                # columns=[{"name": i, "id": i} for i in nl_df.columns],
+                                # data=nl_df.to_dict("records"),
+                            ),
+                        ],
+                        style=table_style,
+                    ),
+                    html.Div(
+                        id="cb-ff-table-container",
+                        children=[
+                            html.Div(
+                                html.B(cfg["website_names"]["ff"]),
+                                style={"textAlign": "center"},
+                            ),
+                            dash_table.DataTable(
+                                id="cb-ff-table",
+                                # columns=[{"name": i, "id": i} for i in ff_df.columns],
+                                # data=ff_df.to_dict("records"),
+                            ),
+                        ],
+                        style=table_style,
+                    ),
+                    html.Div(
+                        id="cb-gm-table-container",
+                        children=[
+                            html.Div(
+                                html.B(cfg["website_names"]["gm"]),
+                                style={"textAlign": "center"},
+                            ),
+                            dash_table.DataTable(
+                                id="cb-gm-table",
+                                # columns=[{"name": i, "id": i} for i in gm_df.columns],
+                                # data=gm_df.to_dict("records"),
+                            ),
+                        ],
+                        style=table_style,
+                    ),
+                    html.Div(
+                        id="cb-wm-table-container",
+                        children=[
+                            html.Div(
+                                html.B(cfg["website_names"]["wm"]),
+                                style={"textAlign": "center"},
+                            ),
+                            dash_table.DataTable(
+                                id="cb-wm-table",
+                                # columns=[{"name": i, "id": i} for i in wm_df.columns],
+                                # data=wm_df.to_dict("records"),
+                            ),
+                        ],
+                        style=table_style,
+                    ),
+                    # html.Div(
+                    #     # html.Div(html.B(cfg["website_names"]["wm"])),
+                    #     id="wm-table-container",
+                    #     children=[
+                    #         html.Div(
+                    #             [
+                    #                 dash_table.DataTable(
+                    #                     id="wm-table",
+                    #                     columns=[
+                    #                         {"name": i, "id": i} for i in wm_df.columns
+                    #                     ],
+                    #                     data=wm_df.to_dict("records"),
+                    #                 )
+                    #             ]
+                    #         )
+                    #     ],
+                    #     style={"display": "inline-block"},
+                    # ),
+                ],
+                style={"display": "inline-block"},
+            ),
+        ],
+    )
 
 
 @app.callback(
@@ -743,7 +732,3 @@ def download_table(
         filename=filename,
         index=False,
     )
-
-
-# if __name__ == "__main__":
-#     app.run_server(debug=True)

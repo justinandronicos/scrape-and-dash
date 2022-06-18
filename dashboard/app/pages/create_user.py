@@ -4,17 +4,21 @@ from models_items.models import RegisteredUser
 from werkzeug.security import generate_password_hash
 from app import session, app
 
-layout = html.Div(
-    [
-        html.H1("Create User Account"),
-        dcc.Location(id="create_user", refresh=True),
-        dcc.Input(id="username", type="text", placeholder="user name", maxLength=15),
-        dcc.Input(id="password", type="password", placeholder="password"),
-        html.Button("Create User", id="submit-val", n_clicks=0),
-        html.Div(children="", id="container-button-basic"),
-    ],
-    style={"display": "flex", "justifyContent": "center"},
-)
+
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            html.H1("Create User Account"),
+            dcc.Location(id="create_user", refresh=True),
+            dcc.Input(
+                id="username", type="text", placeholder="user name", maxLength=15
+            ),
+            dcc.Input(id="password", type="password", placeholder="password"),
+            html.Button("Create User", id="submit-val", n_clicks=0),
+            html.Div(children="", id="container-button-basic"),
+        ],
+        style={"display": "flex", "justifyContent": "center"},
+    )
 
 
 @app.callback(

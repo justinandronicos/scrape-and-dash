@@ -4,14 +4,7 @@ from dash import html
 from dash.dependencies import Input, Output, State
 import pandas as pd
 from dash import dash_table
-from sqlalchemy.orm import session
-from sqlalchemy import func
-
-# import os
-# import sys
-
-# dir = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(dir))
+from sqlalchemy import func, select
 
 from models_items.models import (
     FFBrand,
@@ -25,138 +18,131 @@ from models_items.models import (
 )
 from app import app, session, engine, cfg
 
-# cfg = yaml.safe_load(open("config.yaml"))
-
-# session = get_session()
-# engine = session.get_bind()
-# engine = create_engine(cfg["db_connection_string"], echo=True)
-
 website_names = cfg["website_names"]
 
-# app = dash.Dash(__name__)
-# from dash_app import app
-
 nl_stmt = (
-    session.query(
+    select(
         NLBrand.name.label("brand_name"),
         func.count(NLProduct.brand_id).label("product_count"),
         NLBrand.url.label("url"),
     )
     .join(NLBrand, NLBrand.id == NLProduct.brand_id)
     .group_by(NLBrand.name, NLBrand.url)
-).statement
+)
 nl_df = pd.read_sql(nl_stmt, con=engine)
 
 
 ff_stmt = (
-    session.query(
+    select(
         FFBrand.name.label("brand_name"),
         func.count(FFProduct.brand_id).label("product_count"),
         FFBrand.url.label("url"),
     )
     .join(FFBrand, FFBrand.id == FFProduct.brand_id)
     .group_by(FFBrand.name, FFBrand.url)
-).statement
+)
 ff_df = pd.read_sql(ff_stmt, con=engine)
 
 gm_stmt = (
-    session.query(
+    select(
         GMBrand.name.label("brand_name"),
         func.count(GMProduct.brand_id).label("product_count"),
         GMBrand.url.label("url"),
     )
     .join(GMBrand, GMBrand.id == GMProduct.brand_id)
     .group_by(GMBrand.name, GMBrand.url)
-).statement
+)
 gm_df = pd.read_sql(gm_stmt, con=engine)
 
 
 wm_stmt = (
-    session.query(
+    select(
         WMBrand.name.label("brand_name"),
         func.count(WMProduct.brand_id).label("product_count"),
         WMBrand.url.label("url"),
     )
     .join(WMBrand, WMBrand.id == WMProduct.brand_id)
     .group_by(WMBrand.name, WMBrand.url)
-).statement
+)
 wm_df = pd.read_sql(wm_stmt, con=engine)
 
-layout = html.Div(
-    [
-        html.Div(html.H2("Brands Viewer"), style={"textAlign": "center"}),
-        html.Div(
-            className="bv-filters-row",
-            children=[
-                html.Div(
-                    [
-                        html.B("Website"),
-                        dcc.Dropdown(
-                            id="bv-website-dropdown",
-                            options=[
-                                {"label": website_names["nl"], "value": "nl"},
-                                {"label": website_names["ff"], "value": "ff"},
-                                {"label": website_names["gm"], "value": "gm"},
-                                {"label": website_names["wm"], "value": "wm"},
-                            ],
-                            value="nl",
-                            clearable=False,
-                        ),
-                        # html.Div(id="website-dd-output-container"),
-                    ],
-                    style={"width": "30%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Sort By"),
-                        dcc.Dropdown(
-                            id="bv-sort-dropdown",
-                            options=[
-                                {"label": "Brand Name", "value": "brand_name"},
-                                {"label": "Product Count", "value": "prod_count"},
-                            ],
-                            value="brand_name",
-                            clearable=False,
-                        ),
-                        # html.Div(id="sort-dd-output-container"),
-                    ],
-                    style={"width": "30%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        "Number of Brands: ",
-                        dash.html.Output(
-                            id="bv-brand-count-output", children=str(len(nl_df))
-                        ),
-                        # html.Div(id="brand-count-output-container"),
-                    ],
-                    style={
-                        "width": "20%",
-                        "textAlign": "center",
-                    },
-                ),
-                html.Div(
-                    [
-                        html.Button("Download CSV", id="bv-btn-csv"),
-                        dcc.Download(id="bv-download-datatable-csv"),
-                        # html.Div(id="download-btn-container"),
-                    ],
-                    style={"width": "20%"},
-                ),
-            ],
-            style={"display": "flex", "horizontalAlign": "center"},
-        ),
-        html.Div(
-            [
-                dash_table.DataTable(
-                    id="bv-table",
-                    columns=[{"name": i, "id": i} for i in nl_df.columns],
-                    data=nl_df.to_dict("records"),
-                )
-            ]
-        ),
-    ]
-)
+
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            html.Div(html.H2("Brands Viewer"), style={"textAlign": "center"}),
+            html.Div(
+                className="bv-filters-row",
+                children=[
+                    html.Div(
+                        [
+                            html.B("Website"),
+                            dcc.Dropdown(
+                                id="bv-website-dropdown",
+                                options=[
+                                    {"label": website_names["nl"], "value": "nl"},
+                                    {"label": website_names["ff"], "value": "ff"},
+                                    {"label": website_names["gm"], "value": "gm"},
+                                    {"label": website_names["wm"], "value": "wm"},
+                                ],
+                                value="nl",
+                                clearable=False,
+                            ),
+                            # html.Div(id="website-dd-output-container"),
+                        ],
+                        style={"width": "30%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Sort By"),
+                            dcc.Dropdown(
+                                id="bv-sort-dropdown",
+                                options=[
+                                    {"label": "Brand Name", "value": "brand_name"},
+                                    {"label": "Product Count", "value": "prod_count"},
+                                ],
+                                value="brand_name",
+                                clearable=False,
+                            ),
+                            # html.Div(id="sort-dd-output-container"),
+                        ],
+                        style={"width": "30%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            "Number of Brands: ",
+                            dash.html.Output(
+                                id="bv-brand-count-output", children=str(len(nl_df))
+                            ),
+                            # html.Div(id="brand-count-output-container"),
+                        ],
+                        style={
+                            "width": "20%",
+                            "textAlign": "center",
+                        },
+                    ),
+                    html.Div(
+                        [
+                            html.Button("Download CSV", id="bv-btn-csv"),
+                            dcc.Download(id="bv-download-datatable-csv"),
+                            # html.Div(id="download-btn-container"),
+                        ],
+                        style={"width": "20%"},
+                    ),
+                ],
+                style={"display": "flex", "horizontalAlign": "center"},
+            ),
+            html.Div(
+                [
+                    dash_table.DataTable(
+                        id="bv-table",
+                        columns=[{"name": i, "id": i} for i in nl_df.columns],
+                        data=nl_df.to_dict("records"),
+                    )
+                ]
+            ),
+        ]
+    )
 
 
 @app.callback(
@@ -220,7 +206,3 @@ def download_table(n_clicks, data, selected_website):
         filename=filename,
         index=False,
     )
-
-
-# if __name__ == "__main__":
-#     app.run_server(debug=True)

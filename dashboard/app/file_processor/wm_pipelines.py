@@ -187,7 +187,7 @@ def wm_price_pipeline(product_list: list[ProductItem], session: Session) -> None
                     session.add(historical_price)
                     session.commit()
 
-                except:
+                except Exception:
                     session.rollback()
                     raise
 
@@ -205,7 +205,7 @@ def wm_price_pipeline(product_list: list[ProductItem], session: Session) -> None
                 session.add(price_object)
                 session.commit()
 
-            except:
+            except Exception:
                 session.rollback()
                 raise
 

@@ -6,17 +6,19 @@ from werkzeug.security import check_password_hash
 from app import RegisteredUser
 from app import session, app
 
-layout = html.Div(
-    [
-        dcc.Location(id="url_login", refresh=True),
-        html.H2("""Please log in to continue:""", id="h1"),
-        dcc.Input(placeholder="Enter your username", type="text", id="uname-box"),
-        dcc.Input(placeholder="Enter your password", type="password", id="pwd-box"),
-        html.Button(children="Login", n_clicks=0, type="submit", id="login-button"),
-        html.Div(children="", id="output-state"),
-    ],
-    style={"display": "flex", "justifyContent": "center"},
-)
+
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            dcc.Location(id="url_login", refresh=True),
+            html.H2("""Please log in to continue:""", id="h1"),
+            dcc.Input(placeholder="Enter your username", type="text", id="uname-box"),
+            dcc.Input(placeholder="Enter your password", type="password", id="pwd-box"),
+            html.Button(children="Login", n_clicks=0, type="submit", id="login-button"),
+            html.Div(children="", id="output-state"),
+        ],
+        style={"display": "flex", "justifyContent": "center"},
+    )
 
 
 @app.callback(

@@ -2,18 +2,9 @@ import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 import pandas as pd
-from sqlalchemy import Date
+from sqlalchemy import Date, select
 from datetime import date
 
-# import os
-# import sys
-
-# dir = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(dir))
-
-# from dash_app import session, engine, app
-
-# from utilities import get_session
 from models_items.models import (
     FFBestSelling,
     FFBrand,
@@ -24,16 +15,10 @@ from models_items.models import (
 )
 from app import app, session, engine, cfg
 
-# cfg = yaml.safe_load(open("config.yaml"))
-# engine = create_engine(cfg["db_connection_string"], echo=True)
-
 website_names = cfg["website_names"]
 
-# app = dash.Dash(__name__)
-# from dash_app import app
-
 nl_stmt = (
-    session.query(
+    select(
         NLBestSelling.ranking,
         NLProduct.name,
         NLBrand.name.label("brand_name"),
@@ -44,12 +29,12 @@ nl_stmt = (
     .join(NLProduct, NLProduct.id == NLBestSelling.product_id)
     .join(NLBrand, NLBrand.id == NLProduct.brand_id)
     .order_by(NLBestSelling.ranking)
-).statement
+)
 
 nl_df = pd.read_sql(nl_stmt, con=engine)
 
 ff_stmt = (
-    session.query(
+    select(
         FFBestSelling.ranking,
         FFProduct.name,
         FFBrand.name.label("brand_name"),
@@ -60,7 +45,7 @@ ff_stmt = (
     .join(FFProduct, FFProduct.id == FFBestSelling.product_id)
     .join(FFBrand, FFBrand.id == FFProduct.brand_id)
     .order_by(FFBestSelling.ranking)
-).statement
+)
 
 ff_df = pd.read_sql(ff_stmt, con=engine)
 
@@ -69,72 +54,74 @@ ff_df = pd.read_sql(ff_stmt, con=engine)
 #     "ff": ff_df["time_stamp"].unique(),
 # }
 
-layout = html.Div(
-    [
-        html.Div(html.H2("Best Selling Products"), style={"textAlign": "center"}),
-        html.Div(
-            className="bs-filters-row",
-            children=[
-                html.Div(
-                    [
-                        html.B("Website"),
-                        dcc.Dropdown(
-                            id="bs-website-dropdown",
-                            options=[
-                                {"label": website_names["nl"], "value": "nl"},
-                                {"label": website_names["ff"], "value": "ff"},
-                            ],
-                            value="nl",
-                            clearable=False,
-                        ),
-                        # html.Div(id="website-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Date"),
-                        dcc.Dropdown(
-                            id="bs-date-dropdown",
-                            value="latest",
-                            clearable=False,
-                        ),
-                        # html.Div(id="date-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Category"),
-                        dcc.Dropdown(
-                            id="bs-category-dropdown",
-                        ),
-                        # html.Div(id="date-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.Button("Download CSV", id="bs-btn-csv"),
-                        dcc.Download(id="bs-download-datatable-csv"),
-                    ],
-                    style={"width": "10%"},
-                ),
-            ],
-            style={"display": "flex", "horizontalAlign": "center"},
-        ),
-        html.Div(
-            [
-                dash_table.DataTable(
-                    id="bs-table",
-                    columns=[{"name": i, "id": i} for i in nl_df.columns],
-                    data=nl_df.to_dict("records"),
-                    page_size=50,
-                )
-            ]
-        ),
-    ]
-)
+
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            html.Div(html.H2("Best Selling Products"), style={"textAlign": "center"}),
+            html.Div(
+                className="bs-filters-row",
+                children=[
+                    html.Div(
+                        [
+                            html.B("Website"),
+                            dcc.Dropdown(
+                                id="bs-website-dropdown",
+                                options=[
+                                    {"label": website_names["nl"], "value": "nl"},
+                                    {"label": website_names["ff"], "value": "ff"},
+                                ],
+                                value="nl",
+                                clearable=False,
+                            ),
+                            # html.Div(id="website-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Date"),
+                            dcc.Dropdown(
+                                id="bs-date-dropdown",
+                                value="latest",
+                                clearable=False,
+                            ),
+                            # html.Div(id="date-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Category"),
+                            dcc.Dropdown(
+                                id="bs-category-dropdown",
+                            ),
+                            # html.Div(id="date-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.Button("Download CSV", id="bs-btn-csv"),
+                            dcc.Download(id="bs-download-datatable-csv"),
+                        ],
+                        style={"width": "10%"},
+                    ),
+                ],
+                style={"display": "flex", "horizontalAlign": "center"},
+            ),
+            html.Div(
+                [
+                    dash_table.DataTable(
+                        id="bs-table",
+                        columns=[{"name": i, "id": i} for i in nl_df.columns],
+                        data=nl_df.to_dict("records"),
+                        page_size=50,
+                    )
+                ]
+            ),
+        ]
+    )
 
 
 @app.callback(
@@ -255,7 +242,3 @@ def download_table(n_clicks, data, selected_website, selected_date, selected_cat
         filename=filename,
         index=False,
     )
-
-
-# if __name__ == "__main__":
-#     app.run_server(debug=True)

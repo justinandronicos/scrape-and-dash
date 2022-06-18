@@ -5,13 +5,8 @@ from dash import html
 from dash.dependencies import Input, Output, State
 import pandas as pd
 from dash import dash_table
-from sqlalchemy.orm import session
-from sqlalchemy import join, cast, Date
+from sqlalchemy import join, cast, Date, select
 
-# dir = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(dir))
-
-# from utilities import get_session
 from models_items.models import (
     FFBrand,
     FFCurrentPrice,
@@ -32,13 +27,7 @@ from models_items.models import (
 )
 from app import session, engine, app, cfg
 
-# engine = create_engine(cfg["db_connection_string"], echo=True)
-# connection = engine.connect()
-
 website_names = cfg["website_names"]
-
-# app = dash.Dash(__name__)
-# from dash_app import app
 
 # website_tables = {
 #     "nl": (NLProduct, NLBrand, NLCurrentPrice, NLHistoricalPrice),
@@ -50,7 +39,7 @@ website_names = cfg["website_names"]
 # websites_dict = cfg["website_names"]
 
 nl_stmt = (
-    session.query(
+    select(
         NLProduct.code,
         NLProduct.name,
         # NLProduct.variant,
@@ -73,13 +62,13 @@ nl_stmt = (
     .join(NLCurrentPrice, NLCurrentPrice.product_id == NLProduct.id)
     .join(NLHistoricalPrice, NLHistoricalPrice.product_id == NLProduct.id)
     .order_by(NLProduct.name)
-).statement
+)
 
 nl_df = pd.read_sql(nl_stmt, con=engine)
 
 
 ff_stmt = (
-    session.query(
+    select(
         FFProduct.code,
         FFProduct.name,
         # FFProduct.variant,
@@ -102,13 +91,13 @@ ff_stmt = (
     .join(FFCurrentPrice, FFCurrentPrice.product_id == FFProduct.id)
     .join(FFHistoricalPrice, FFHistoricalPrice.product_id == FFProduct.id)
     .order_by(FFProduct.name)
-).statement
+)
 
 ff_df = pd.read_sql(ff_stmt, con=engine)
 
 
 gm_stmt = (
-    session.query(
+    select(
         GMProduct.code,
         GMProduct.name,
         # GMProduct.variant,
@@ -131,13 +120,13 @@ gm_stmt = (
     .join(GMCurrentPrice, GMCurrentPrice.product_id == GMProduct.id)
     .join(GMHistoricalPrice, GMHistoricalPrice.product_id == GMProduct.id)
     .order_by(GMProduct.name)
-).statement
+)
 
 gm_df = pd.read_sql(gm_stmt, con=engine)
 
 
 wm_stmt = (
-    session.query(
+    select(
         WMProduct.code,
         WMProduct.name,
         # WMProduct.variant,
@@ -160,17 +149,132 @@ wm_stmt = (
     .join(WMCurrentPrice, WMCurrentPrice.product_id == WMProduct.id)
     .join(WMHistoricalPrice, WMHistoricalPrice.product_id == WMProduct.id)
     .order_by(WMProduct.name)
-).statement
-
+)
 wm_df = pd.read_sql(wm_stmt, con=engine)
 
+nl_brands_list = [
+    r
+    for r, in session.execute(
+        select(NLBrand.name).order_by(NLBrand.name).filter(NLBrand.name.isnot(None))
+    )
+]
+ff_brands_list = [
+    r
+    for r, in session.execute(
+        select(FFBrand.name).order_by(FFBrand.name).filter(FFBrand.name.isnot(None))
+    )
+]
+gm_brands_list = [
+    r
+    for r, in session.execute(
+        select(GMBrand.name).order_by(GMBrand.name).filter(GMBrand.name.isnot(None))
+    )
+]
+wm_brands_list = [
+    r
+    for r, in session.execute(
+        select(WMBrand.name).order_by(WMBrand.name).filter(WMBrand.name.isnot(None))
+    )
+]
 
 brand_dict = {
-    "nl": sorted(nl_df["brand_name"].unique()),
-    "ff": sorted(ff_df["brand_name"].unique()),
-    "gm": sorted(gm_df["brand_name"].unique()),
-    "wm": sorted(wm_df["brand_name"].unique()),
+    "nl": nl_brands_list,
+    "ff": ff_brands_list,
+    "gm": gm_brands_list,
+    "wm": wm_brands_list,
 }
+
+
+nl_dt_stmt = (
+    select(
+        NLCurrentPrice.time_stamp.cast(Date),
+        NLHistoricalPrice.time_stamp.label("historical_time_stamp").cast(Date),
+    )
+    .join(NLHistoricalPrice, NLCurrentPrice.product_id == NLHistoricalPrice.product_id)
+    .distinct()
+)
+# nl_dates_list = [r for r, in session.execute(nl_dt_stmt)]
+nl_dt_df = pd.read_sql(nl_dt_stmt, con=engine)
+
+ff_dt_stmt = (
+    select(
+        FFCurrentPrice.time_stamp.cast(Date),
+        FFHistoricalPrice.time_stamp.label("historical_time_stamp").cast(Date),
+    )
+    .join(FFHistoricalPrice, FFCurrentPrice.product_id == FFHistoricalPrice.product_id)
+    .distinct()
+)
+ff_dt_df = pd.read_sql(ff_dt_stmt, con=engine)
+
+gm_dt_stmt = (
+    select(
+        GMCurrentPrice.time_stamp.cast(Date),
+        GMHistoricalPrice.time_stamp.label("historical_time_stamp").cast(Date),
+    )
+    .join(GMHistoricalPrice, GMCurrentPrice.product_id == GMHistoricalPrice.product_id)
+    .distinct()
+)
+gm_dt_df = pd.read_sql(gm_dt_stmt, con=engine)
+
+wm_dt_stmt = (
+    select(
+        WMCurrentPrice.time_stamp.cast(Date),
+        WMHistoricalPrice.time_stamp.label("historical_time_stamp").cast(Date),
+    )
+    .join(WMHistoricalPrice, WMCurrentPrice.product_id == WMHistoricalPrice.product_id)
+    .distinct()
+)
+wm_dt_df = pd.read_sql(wm_dt_stmt, con=engine)
+
+
+dates_dict = {
+    "nl": np.unique(
+        np.append(
+            nl_dt_df["historical_time_stamp"].unique(), nl_dt_df["time_stamp"].unique()
+        )
+    ),
+    "ff": np.unique(
+        np.append(
+            ff_dt_df["historical_time_stamp"].unique(), ff_dt_df["time_stamp"].unique()
+        )
+    ),
+    "gm": np.unique(
+        np.append(
+            gm_dt_df["historical_time_stamp"].unique(), gm_dt_df["time_stamp"].unique()
+        )
+    ),
+    "wm": np.unique(
+        np.append(
+            wm_dt_df["historical_time_stamp"].unique(), wm_dt_df["time_stamp"].unique()
+        )
+    ),
+}
+
+
+# nl_brands_df = pd.read_sql(
+#     (session.query(NLBrand.name).order_by(NLBrand.name)).statement,
+#     con=engine,
+# )
+# ff_brands_df = pd.read_sql(
+#     (session.query(FFBrand.name).order_by(FFBrand.name)).statement,
+#     con=engine,
+# )
+# gm_brands_df = pd.read_sql(
+#     (session.query(GMBrand.name).order_by(GMBrand.name)).statement,
+#     con=engine,
+# )
+# wm_brands_df = pd.read_sql(
+#     (session.query(WMBrand.name).order_by(WMBrand.name)).statement,
+#     con=engine,
+# )
+
+# brand_dict = {
+#     "nl": sorted(nl_df["brand_name"].unique()),
+#     "ff": sorted(ff_df["brand_name"].unique()),
+#     "gm": sorted(gm_df["brand_name"].unique()),
+#     "wm": sorted(wm_df["brand_name"].unique()),
+# }
+
 
 # dates_dict = {
 #     "nl": [
@@ -213,21 +317,62 @@ brand_dict = {
 #     wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique()
 # )
 
+# nl_dates_df = pd.read_sql(
+#     session.query(
+#         NLCurrentPrice.time_stamp.cast(Date), NLHistoricalPrice.time_stamp.cast(Date)
+#     )
+#     .join(NLCurrentPrice, NLCurrentPrice.product_id == NLHistoricalPrice.product_id)
+#     .distinct()
+#     # .order_by(NLCurrentPrice.time_stamp, NLHistoricalPrice.time_stamp)
+#     .statement,
+#     con=engine,
+# )
+# ff_dates_df = pd.read_sql(
+#     session.query(
+#         FFCurrentPrice.time_stamp.cast(Date), FFHistoricalPrice.time_stamp.cast(Date)
+#     )
+#     .join(FFCurrentPrice, FFCurrentPrice.product_id == FFHistoricalPrice.product_id)
+#     .distinct()
+#     # .order_by(FFCurrentPrice.time_stamp, FFHistoricalPrice.time_stamp)
+#     .statement,
+#     con=engine,
+# )
+# gm_dates_df = pd.read_sql(
+#     session.query(
+#         GMCurrentPrice.time_stamp.cast(Date), GMHistoricalPrice.time_stamp.cast(Date)
+#     )
+#     .join(GMCurrentPrice, GMCurrentPrice.product_id == GMHistoricalPrice.product_id)
+#     .distinct()
+#     # .order_by(GMCurrentPrice.time_stamp, GMHistoricalPrice.time_stamp)
+#     .statement,
+#     con=engine,
+# )
+# wm_dates_df = pd.read_sql(
+#     session.query(
+#         WMCurrentPrice.time_stamp.cast(Date), WMHistoricalPrice.time_stamp.cast(Date)
+#     )
+#     .join(WMCurrentPrice, WMCurrentPrice.product_id == WMHistoricalPrice.product_id)
+#     .distinct()
+#     # .order_by(WMCurrentPrice.time_stamp, WMHistoricalPrice.time_stamp)
+#     .statement,
+#     con=engine,
+# )
 
-dates_dict = {
-    "nl": [
-        np.append(nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique())
-    ],
-    "ff": [
-        np.append(ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique())
-    ],
-    "gm": [
-        np.append(gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique())
-    ],
-    "wm": [
-        np.append(wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique())
-    ],
-}
+
+# dates_dict = {
+#     "nl": [
+#         np.append(nl_df["historical_time_stamp"].unique(), nl_df["time_stamp"].unique())
+#     ],
+#     "ff": [
+#         np.append(ff_df["historical_time_stamp"].unique(), ff_df["time_stamp"].unique())
+#     ],
+#     "gm": [
+#         np.append(gm_df["historical_time_stamp"].unique(), gm_df["time_stamp"].unique())
+#     ],
+#     "wm": [
+#         np.append(wm_df["historical_time_stamp"].unique(), wm_df["time_stamp"].unique())
+#     ],
+# }
 
 
 # dates_dict = {
@@ -262,74 +407,77 @@ dates_dict = {
 
 # print(f"\n\n WM DF : {wm_df}")
 
-layout = html.Div(
-    [
-        html.Div(html.H2("Products Viewer"), style={"textAlign": "center"}),
-        html.Div(
-            className="pv-filters_row",
-            children=[
-                html.Div(
-                    [
-                        html.B("Website"),
-                        dcc.Dropdown(
-                            id="pv-website-dropdown",
-                            options=[
-                                {"label": website_names["nl"], "value": "nl"},
-                                {"label": website_names["ff"], "value": "ff"},
-                                {"label": website_names["gm"], "value": "gm"},
-                                {"label": website_names["wm"], "value": "wm"},
-                            ],
-                            value="nl",
-                            clearable=False,
-                        ),
-                        # html.Div(id="website-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Date"),
-                        dcc.Dropdown(
-                            id="pv-date-dropdown",
-                            # value="latest",
-                            clearable=False,
-                        ),
-                        # html.Div(id="date-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.B("Brand"),
-                        dcc.Dropdown(
-                            id="pv-brand-dropdown",
-                            placeholder="Select Brand...",
-                        ),
-                        # html.Div(id="brand-dd-output-container"),
-                    ],
-                    style={"width": "25%", "textAlign": "center"},
-                ),
-                html.Div(
-                    [
-                        html.Button("Download CSV", id="pv-btn-csv"),
-                        dcc.Download(id="pv-download-datatable-csv"),
-                    ],
-                    style={"width": "10%"},
-                ),
-            ],
-            style={"display": "flex", "horizontalAlign": "center"},
-        ),
-        html.Div(
-            [
-                dash_table.DataTable(
-                    id="pv-table",
-                    columns=[{"name": i, "id": i} for i in nl_df.columns],
-                    data=nl_df.to_dict("records"),
-                )
-            ]
-        ),
-    ]
-)
+
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            html.Div(html.H2("Products Viewer"), style={"textAlign": "center"}),
+            html.Div(
+                className="pv-filters_row",
+                children=[
+                    html.Div(
+                        [
+                            html.B("Website"),
+                            dcc.Dropdown(
+                                id="pv-website-dropdown",
+                                options=[
+                                    {"label": website_names["nl"], "value": "nl"},
+                                    {"label": website_names["ff"], "value": "ff"},
+                                    {"label": website_names["gm"], "value": "gm"},
+                                    {"label": website_names["wm"], "value": "wm"},
+                                ],
+                                value="nl",
+                                clearable=False,
+                            ),
+                            # html.Div(id="website-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Date"),
+                            dcc.Dropdown(
+                                id="pv-date-dropdown",
+                                # value="latest",
+                                clearable=False,
+                            ),
+                            # html.Div(id="date-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.B("Brand"),
+                            dcc.Dropdown(
+                                id="pv-brand-dropdown",
+                                placeholder="Select Brand...",
+                            ),
+                            # html.Div(id="brand-dd-output-container"),
+                        ],
+                        style={"width": "25%", "textAlign": "center"},
+                    ),
+                    html.Div(
+                        [
+                            html.Button("Download CSV", id="pv-btn-csv"),
+                            dcc.Download(id="pv-download-datatable-csv"),
+                        ],
+                        style={"width": "10%"},
+                    ),
+                ],
+                style={"display": "flex", "horizontalAlign": "center"},
+            ),
+            html.Div(
+                [
+                    dash_table.DataTable(
+                        # df=pd.read_sql(nl_stmt, con=engine),
+                        id="pv-table",
+                        # columns=[{"name": i, "id": i} for i in df.columns],
+                        # data=df.to_dict("records"),
+                    )
+                ]
+            ),
+        ]
+    )
 
 
 @app.callback(
@@ -339,8 +487,9 @@ layout = html.Div(
 )
 def update_date_options_value(selected_website):
     """Updates date options after website selected and sets selected date to latest available by default"""
-
-    date_array = np.unique(dates_dict[selected_website])
+    # date_list = dates_dict[selected_website]
+    # date_array = np.unique(dates_dict[selected_website])
+    date_array = dates_dict[selected_website]
     date_array[::-1].sort()  # Sort dates descending
     # print(date_array)
     # print(f"\n\n {[{'label': i, 'value': i} for i in date_array]}")
@@ -451,6 +600,17 @@ def filter_table_by_date(website_df, selected_date, date_options):
     Input("pv-brand-dropdown", "value"),
 )
 def update_table(selected_website, selected_date, date_options, selected_brand):
+    # website_df = (
+    #     pd.read_sql(nl_stmt, con=engine)
+    #     if selected_website == "nl"
+    #     else pd.read_sql(ff_stmt, con=engine)
+    #     if selected_website == "ff"
+    #     else pd.read_sql(gm_stmt, con=engine)
+    #     if selected_website == "gm"
+    #     else pd.read_sql(wm_stmt, con=engine)
+    #     if selected_website == "wm"
+    #     else None
+    # )
     website_df = (
         nl_df
         if selected_website == "nl"

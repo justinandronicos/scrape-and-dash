@@ -8,59 +8,59 @@ import dash_bootstrap_components as dbc
 from file_processor import wm_processor
 from models_items.models import WMPriceFileInfo
 
-# external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
-
 from app import session, app
 
-layout = html.Div(
-    [
-        dcc.ConfirmDialog(
-            id="confirm-upload-dialog",
-        ),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(dbc.ModalTitle("Upload Successful!")),
-                dbc.ModalBody([dbc.Label(id="success-modal-body")]),
-            ],
-            id="upload-success-modal",
-            is_open=False,
-        ),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(dbc.ModalTitle("File already uploaded")),
-                dbc.ModalBody(
-                    "This file has already been uploaded previously and no updates were found.\n Upload cancelled."
-                ),
-            ],
-            id="no-update-modal",
-            is_open=False,
-        ),
-        html.Div(html.H2("Upload Product File"), style={"textAlign": "center"}),
-        dcc.Upload(
-            id="file-upload",
-            children=html.Div(["Drag and Drop or ", html.A("Select File")]),
-            style={
-                "width": "100%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
-        ),
-        html.Div(
-            id="upload-table-container",
-            children=[
-                dash_table.DataTable(
-                    id="upload-table"
-                    # page_size=50,
-                ),
-            ],
-        ),
-    ]
-)
+
+def serve_layout() -> html.Div:
+    return html.Div(
+        [
+            dcc.ConfirmDialog(
+                id="confirm-upload-dialog",
+            ),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Upload Successful!")),
+                    dbc.ModalBody([dbc.Label(id="success-modal-body")]),
+                ],
+                id="upload-success-modal",
+                is_open=False,
+            ),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("File already uploaded")),
+                    dbc.ModalBody(
+                        "This file has already been uploaded previously and no updates were found.\n Upload cancelled."
+                    ),
+                ],
+                id="no-update-modal",
+                is_open=False,
+            ),
+            html.Div(html.H2("Upload Product File"), style={"textAlign": "center"}),
+            dcc.Upload(
+                id="file-upload",
+                children=html.Div(["Drag and Drop or ", html.A("Select File")]),
+                style={
+                    "width": "100%",
+                    "height": "60px",
+                    "lineHeight": "60px",
+                    "borderWidth": "1px",
+                    "borderStyle": "dashed",
+                    "borderRadius": "5px",
+                    "textAlign": "center",
+                    "margin": "10px",
+                },
+            ),
+            html.Div(
+                id="upload-table-container",
+                children=[
+                    dash_table.DataTable(
+                        id="upload-table"
+                        # page_size=50,
+                    ),
+                ],
+            ),
+        ]
+    )
 
 
 @app.callback(
@@ -180,7 +180,3 @@ def update_output(submit_n_clicks, contents, filename):
         )
 
     return [{}], []
-
-
-# if __name__ == "__main__":
-#     app.run_server(debug=True)
